@@ -1,0 +1,9 @@
+# Workflow: ci-lint.yml
+# Status: STUB — populated in Phase 8.
+name: ci-lint
+on: [push]
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Phase 8 - not yet implemented"

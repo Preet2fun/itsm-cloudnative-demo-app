@@ -1,0 +1,100 @@
+{{- if .Values.userService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.userService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.userService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.userService.name }}
+    app.kubernetes.io/part-of: itsm-app
+    environment: {{ .Values.global.env }}
+spec:
+  # Replicas managed by HPA — set to 1 as base; HPA overrides this
+  replicas: {{ .Values.userService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.userService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.userService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        # Istio sidecar injection is enabled at the namespace level.
+        # Explicitly confirm it here so the intent is visible.
+        sidecar.istio.io/inject: "true"
+        # Restart pod when the secret changes (checksum-based rollout trigger)
+        checksum/secret: {{ .Values.userService.secretName | sha256sum }}
+    spec:
+      # Spread replicas across nodes for HA
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.userService.name }}
+      containers:
+        - name: user-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.userService.image.repository }}:{{ .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.userService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.userService.port }}
+              protocol: TCP
+          env:
+            # ── From K8s Secret (never stored in values) ──────────────────────
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.userService.secretName }}
+                  key: database-url
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.userService.secretName }}
+                  key: jwt-secret
+            # ── From chart values ─────────────────────────────────────────────
+            - name: ENV
+              value: {{ .Values.global.env | quote }}
+            - name: USER_SERVICE_PORT
+              value: {{ .Values.userService.port | quote }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            {{- range $k, $v := .Values.userService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.userService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.userService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.userService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.userService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.userService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.userService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.userService.resources.requests.cpu }}
+              memory: {{ .Values.userService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.userService.resources.limits.cpu }}
+              memory: {{ .Values.userService.resources.limits.memory }}
+          # Read-only root filesystem — distroless image has no writable paths needed
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+{{- end }}

@@ -1,0 +1,10 @@
+# Namespace: itsm-qa
+# Hosts all application services for the qa environment.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: itsm-qa
+  labels:
+    env: qa
+    istio-injection: enabled

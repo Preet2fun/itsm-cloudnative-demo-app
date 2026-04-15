@@ -1,0 +1,51 @@
+# values.yaml — default values for ENV=dev
+# Override with values-qa.yaml for ENV=qa.
+# Secrets (DATABASE_URL, JWT_SECRET) are NEVER stored here — inject via K8s Secret.
+
+global:
+  env: dev
+  namespace: itsm-dev
+  imageRegistry: ""          # e.g. ghcr.io/your-org — set at deploy time
+  imageTag: latest
+  otelCollectorEndpoint: "otel-collector.itsm-dev:4317"
+
+# ── User Service ──────────────────────────────────────────────────────────────
+userService:
+  enabled: true
+  name: itsm-user-service
+  image:
+    repository: itsm/user-service
+    pullPolicy: IfNotPresent
+  port: 8080
+  replicas: 1
+
+  # K8s Secret that holds DATABASE_URL and JWT_SECRET.
+  # Create it manually before deploying — see Phase 3 deployment guide.
+  secretName: itsm-secrets
+
+  env:
+    JWT_EXPIRY_HOURS: "24"
+    OTEL_SERVICE_NAME: "user-service"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 70
+
+  readinessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  livenessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 15
+    periodSeconds: 20

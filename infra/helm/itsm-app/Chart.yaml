@@ -1,0 +1,6 @@
+apiVersion: v2
+name: itsm-app
+description: ITSM Cloud-Native Demo App — all application services
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,21 @@
+{{- if .Values.userService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.userService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.userService.name }}
+    app.kubernetes.io/name: {{ .Values.userService.name }}
+    app.kubernetes.io/part-of: itsm-app
+    environment: {{ .Values.global.env }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.userService.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+{{- end }}
