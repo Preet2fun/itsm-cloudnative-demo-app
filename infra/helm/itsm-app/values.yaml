@@ -5,7 +5,7 @@
 global:
   env: dev
   namespace: itsm-dev
-  imageRegistry: ""          # e.g. ghcr.io/your-org — set at deploy time
+  imageRegistry: "preet2fun/"   # Docker Hub username prefix
   imageTag: latest
   otelCollectorEndpoint: "otel-collector.itsm-dev:4317"
 
@@ -14,7 +14,7 @@ userService:
   enabled: true
   name: itsm-user-service
   image:
-    repository: itsm/user-service
+    repository: user-service    # full image = preet2fun/user-service:<tag>
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1

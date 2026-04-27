@@ -124,21 +124,21 @@ kill $SERVICE_PID
 cd services/user-service
 
 # Replace <registry> with your container registry (e.g. ghcr.io/your-org)
-docker build -t <registry>/itsm/user-service:latest .
+docker build -t preet2fun/user-service:latest .
 
 # Verify it runs
 docker run --rm \
-  -e DATABASE_URL="postgres://itsm:itsm@<machine-ip>:5432/itsm?sslmode=disable" \
+  -e DATABASE_URL="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
   -e JWT_SECRET="local-dev-test" \
   -e ENV=dev \
   -p 8080:8080 \
-  <registry>/itsm/user-service:latest &
+  preet2fun/user-service:latest &
 
 curl -s http://localhost:8080/api/v1/health
-docker stop $(docker ps -q --filter ancestor=<registry>/itsm/user-service:latest)
+docker stop $(docker ps -q --filter ancestor=preet2fun/user-service:latest)
 
 # Push to registry
-docker push <registry>/itsm/user-service:latest
+docker push preet2fun/user-service:latest
 ```
 
 ---
@@ -150,7 +150,7 @@ Secrets are **never stored in git**. Create them directly in the cluster:
 ```bash
 # Replace values with your actual DATABASE_URL and a strong JWT_SECRET
 kubectl create secret generic itsm-secrets \
-  --from-literal=database-url="postgres://itsm:itsm@<machine-ip>:5432/itsm?sslmode=disable" \
+  --from-literal=database-url="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
   --from-literal=jwt-secret="$(openssl rand -base64 48)" \
   -n itsm-dev
 
