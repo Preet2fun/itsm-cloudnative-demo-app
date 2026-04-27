@@ -196,22 +196,22 @@ helm upgrade --install itsm-app infra/helm/itsm-app \
 
 ```bash
 # Pod is Running
-kubectl get pods -n itsm-dev -l app=itsm-user-service
+kubectl get pods -n itsm-dev -l app=user-service
 # Expected: NAME                               READY   STATUS    RESTARTS   AGE
-#           itsm-user-service-<hash>           1/1     Running   0          Xs
+#           user-service-<hash>                1/1     Running   0          Xs
 
 # HPA is registered
 kubectl get hpa -n itsm-dev
-# Expected: itsm-user-service-hpa ... min:1 max:2
+# Expected: user-service-hpa ... min:1 max:2
 
 # Service is created
-kubectl get svc -n itsm-dev itsm-user-service
+kubectl get svc -n itsm-dev user-service
 
 # Live logs
-kubectl logs -n itsm-dev -l app=itsm-user-service --follow
+kubectl logs -n itsm-dev -l app=user-service --follow
 
 # Port-forward and test
-kubectl port-forward -n itsm-dev svc/itsm-user-service 8080:80 &
+kubectl port-forward -n itsm-dev svc/user-service 8080:80 &
 
 curl -s http://localhost:8080/api/v1/health
 # Expected: {"status":"ok","service":"user-service"}

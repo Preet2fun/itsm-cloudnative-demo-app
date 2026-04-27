@@ -107,8 +107,8 @@ approach when all services are in the same Git repository and deployed together.
 ├──────────────────────────────────────────────────────────────────────────┤
 │  DOCKER HUB  (container registry)                                        │
 ├──────────────────────────────────────────────────────────────────────────┤
-│  pratikpatel/itsm-user-service:latest                                    │
-│  pratikpatel/itsm-user-service:1.0.0                                     │
+│  pratikpatel/user-service:latest                                    │
+│  pratikpatel/user-service:1.0.0                                     │
 │  pratikpatel/itsm-asset-service:latest                                   │
 │  ...                                                                     │
 │                                                                          │
@@ -156,7 +156,7 @@ global:
 
 userService:
   enabled: true                # set to false to skip deploying this service
-  name: itsm-user-service
+  name: user-service
   image:
     repository: itsm/user-service   # combined with imageRegistry at deploy time
     pullPolicy: IfNotPresent
@@ -231,7 +231,7 @@ Key sections explained:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.userService.name }}          # itsm-user-service
+  name: {{ .Values.userService.name }}          # user-service
   namespace: {{ .Values.global.namespace }}     # itsm-dev or itsm-qa
   labels:
     app: {{ .Values.userService.name }}
@@ -256,7 +256,7 @@ spec:
       containers:
         - name: user-service
           # imageRegistry + repository + tag assembled at deploy time
-          # e.g.  docker.io/pratikpatel/itsm-user-service:abc123
+          # e.g.  docker.io/pratikpatel/user-service:abc123
           image: "{{ .Values.global.imageRegistry }}{{ .Values.userService.image.repository }}:{{ .Values.global.imageTag }}"
 
           env:
@@ -321,7 +321,7 @@ Other services and Istio use this name to route traffic.
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.userService.name }}         # itsm-user-service
+  name: {{ .Values.userService.name }}         # user-service
   namespace: {{ .Values.global.namespace }}
 spec:
   type: ClusterIP          # internal only — Istio IngressGateway is the external entry point
@@ -329,13 +329,13 @@ spec:
     app: {{ .Values.userService.name }}        # routes to pods with this label
   ports:
     - name: http
-      port: 80             # what callers use: http://itsm-user-service/...
+      port: 80             # what callers use: http://user-service/...
       targetPort: http     # maps to the container's port 8080
 {{- end }}
 ```
 
 After deploy, any pod in `itsm-dev` can reach the user service at:
-`http://itsm-user-service/api/v1/...`
+`http://user-service/api/v1/...`
 
 ---
 
@@ -404,8 +404,8 @@ Developer pushes code to Git
   CI pipeline runs
   ┌─────────────────────────────────────────────────┐
   │  1. git checkout                                 │
-  │  2. docker build -t pratikpatel/itsm-user-service:$GIT_SHA .  │
-  │  3. docker push pratikpatel/itsm-user-service:$GIT_SHA        │
+  │  2. docker build -t pratikpatel/user-service:$GIT_SHA .  │
+  │  3. docker push pratikpatel/user-service:$GIT_SHA        │
   └─────────────────────────────────────────────────┘
          │
          ▼
@@ -485,7 +485,7 @@ helm upgrade --install itsm-app ./infra/helm/itsm-app \
 helm list -n itsm-dev
 kubectl get pods -n itsm-dev
 kubectl get hpa -n itsm-dev
-kubectl logs -l app=itsm-user-service -n itsm-dev
+kubectl logs -l app=user-service -n itsm-dev
 ```
 
 ### Roll back if something breaks:
