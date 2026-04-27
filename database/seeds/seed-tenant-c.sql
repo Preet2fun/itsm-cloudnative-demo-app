@@ -14,15 +14,15 @@ ON CONFLICT (slug) DO NOTHING;
 -- ── Users ─────────────────────────────────────────────────────────────────────
 INSERT INTO tenant_c.users (id, email, password_hash, full_name, role) VALUES
   ('c1000001-0000-0000-0000-000000000001', 'wendy.admin@startupnest.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Wendy Admin',  'admin'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Wendy Admin',  'admin'),
   ('c1000001-0000-0000-0000-000000000002', 'xavier.agent@startupnest.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Xavier Agent', 'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Xavier Agent', 'agent'),
   ('c1000001-0000-0000-0000-000000000003', 'yuki.agent@startupnest.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Yuki Agent',   'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Yuki Agent',   'agent'),
   ('c1000001-0000-0000-0000-000000000004', 'zane.viewer@startupnest.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Zane Viewer',  'viewer'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Zane Viewer',  'viewer'),
   ('c1000001-0000-0000-0000-000000000005', 'anna.viewer@startupnest.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Anna Viewer',  'viewer');
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Anna Viewer',  'viewer');
 
 -- ── Assets ────────────────────────────────────────────────────────────────────
 INSERT INTO tenant_c.assets (id, name, asset_type, serial_number, status, location, assigned_to, purchased_at, warranty_until, metadata) VALUES

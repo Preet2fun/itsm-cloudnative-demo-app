@@ -14,25 +14,25 @@ ON CONFLICT (slug) DO NOTHING;
 -- password_hash = bcrypt("Password1!", cost=10)
 INSERT INTO tenant_a.users (id, email, password_hash, full_name, role) VALUES
   ('a1000001-0000-0000-0000-000000000001', 'alice.admin@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Alice Admin',   'admin'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Alice Admin',   'admin'),
   ('a1000001-0000-0000-0000-000000000002', 'bob.admin@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Bob Administrator', 'admin'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Bob Administrator', 'admin'),
   ('a1000001-0000-0000-0000-000000000003', 'carol.agent@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Carol Agent',   'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Carol Agent',   'agent'),
   ('a1000001-0000-0000-0000-000000000004', 'david.agent@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'David Agent',   'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'David Agent',   'agent'),
   ('a1000001-0000-0000-0000-000000000005', 'eve.agent@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Eve Agent',     'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Eve Agent',     'agent'),
   ('a1000001-0000-0000-0000-000000000006', 'frank.agent@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Frank Agent',   'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Frank Agent',   'agent'),
   ('a1000001-0000-0000-0000-000000000007', 'grace.agent@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Grace Agent',   'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Grace Agent',   'agent'),
   ('a1000001-0000-0000-0000-000000000008', 'henry.viewer@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Henry Viewer',  'viewer'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Henry Viewer',  'viewer'),
   ('a1000001-0000-0000-0000-000000000009', 'iris.viewer@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Iris Viewer',   'viewer'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Iris Viewer',   'viewer'),
   ('a1000001-0000-0000-0000-000000000010', 'james.viewer@globaltech.io',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'James Viewer',  'viewer');
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'James Viewer',  'viewer');
 
 -- ── Assets ────────────────────────────────────────────────────────────────────
 INSERT INTO tenant_a.assets (id, name, asset_type, serial_number, status, location, assigned_to, purchased_at, warranty_until, metadata) VALUES

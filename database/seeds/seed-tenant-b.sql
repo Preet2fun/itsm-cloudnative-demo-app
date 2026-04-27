@@ -13,25 +13,25 @@ ON CONFLICT (slug) DO NOTHING;
 -- ── Users ─────────────────────────────────────────────────────────────────────
 INSERT INTO tenant_b.users (id, email, password_hash, full_name, role) VALUES
   ('b1000001-0000-0000-0000-000000000001', 'sam.admin@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Sam Admin',       'admin'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Sam Admin',       'admin'),
   ('b1000001-0000-0000-0000-000000000002', 'nina.admin@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Nina Admin',       'admin'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Nina Admin',       'admin'),
   ('b1000001-0000-0000-0000-000000000003', 'oscar.agent@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Oscar Agent',      'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Oscar Agent',      'agent'),
   ('b1000001-0000-0000-0000-000000000004', 'paula.agent@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Paula Agent',      'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Paula Agent',      'agent'),
   ('b1000001-0000-0000-0000-000000000005', 'quinn.agent@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Quinn Agent',      'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Quinn Agent',      'agent'),
   ('b1000001-0000-0000-0000-000000000006', 'rachel.agent@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Rachel Agent',     'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Rachel Agent',     'agent'),
   ('b1000001-0000-0000-0000-000000000007', 'steven.agent@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Steven Agent',     'agent'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Steven Agent',     'agent'),
   ('b1000001-0000-0000-0000-000000000008', 'tara.viewer@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Tara Viewer',      'viewer'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Tara Viewer',      'viewer'),
   ('b1000001-0000-0000-0000-000000000009', 'uma.viewer@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Uma Viewer',       'viewer'),
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Uma Viewer',       'viewer'),
   ('b1000001-0000-0000-0000-000000000010', 'victor.viewer@retailedge.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Victor Viewer',    'viewer');
+   '$2b$10$mdPk.j5ma8VJYoHoQyegZu64BGY1AVFR25.3pFk/YZL918gEmxG1C', 'Victor Viewer',    'viewer');
 
 -- ── Assets ────────────────────────────────────────────────────────────────────
 INSERT INTO tenant_b.assets (id, name, asset_type, serial_number, status, location, assigned_to, purchased_at, warranty_until, metadata) VALUES
