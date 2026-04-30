@@ -7,7 +7,9 @@ ENV PATH="/app/venv/bin:$PATH"
 
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir setuptools && \
+
+RUN pip install --no-cache-dir --ignore-installed "setuptools>=69" && \
+    python -c "import pkg_resources; print('setuptools OK')" && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
