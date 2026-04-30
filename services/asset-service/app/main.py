@@ -29,7 +29,6 @@ def create_app() -> FastAPI:
     async def startup():
         init_db(settings.database_url)
         cache.init_cache(settings.redis_url)
-        # Auto-instrumentation — must run after engine is created
         SQLAlchemyInstrumentor().instrument(engine=_engine.sync_engine)
         RedisInstrumentor().instrument()
         logger.info("Asset service started: env=%s", settings.env)

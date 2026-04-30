@@ -2,12 +2,16 @@ FROM python:3.12-slim
 
 RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
+RUN python -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
+
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir setuptools && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
+RUN chown -R 65532:65532 /app
 
 USER 65532:65532
 
