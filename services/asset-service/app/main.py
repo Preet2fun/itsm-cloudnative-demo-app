@@ -7,9 +7,9 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.redis import RedisInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
-from app import cache
+from app import cache, db
 from app.config import settings
-from app.db import close_db, init_db, _engine
+from app.db import close_db, init_db
 from app.router import router
 from app.telemetry import setup_telemetry
 
@@ -29,7 +29,7 @@ def create_app() -> FastAPI:
     async def startup():
         init_db(settings.database_url)
         cache.init_cache(settings.redis_url)
-        SQLAlchemyInstrumentor().instrument(engine=_engine.sync_engine)
+        SQLAlchemyInstrumentor().instrument(engine=db._engine.sync_engine)
         RedisInstrumentor().instrument()
         logger.info("Asset service started: env=%s", settings.env)
 

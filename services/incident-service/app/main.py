@@ -6,9 +6,9 @@ from fastapi.responses import JSONResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
-from app import mq
+from app import db, mq
 from app.config import settings
-from app.db import close_db, init_db, _engine
+from app.db import close_db, init_db
 from app.router import router
 from app.telemetry import setup_telemetry
 
@@ -28,7 +28,7 @@ def create_app() -> FastAPI:
     async def startup():
         init_db(settings.database_url)
         await mq.init_mq(settings.rabbitmq_url)
-        SQLAlchemyInstrumentor().instrument(engine=_engine.sync_engine)
+        SQLAlchemyInstrumentor().instrument(engine=db._engine.sync_engine)
         logger.info("Incident service started: env=%s", settings.env)
 
     @app.on_event("shutdown")
