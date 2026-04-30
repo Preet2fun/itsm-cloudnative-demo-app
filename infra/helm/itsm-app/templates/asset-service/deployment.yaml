@@ -1,0 +1,93 @@
+{{- if .Values.assetService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.assetService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.assetService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.assetService.name }}
+    app.kubernetes.io/part-of: itsm-app
+    environment: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.assetService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.assetService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.assetService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.assetService.name }}
+      containers:
+        - name: asset-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.assetService.image.repository }}:{{ .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.assetService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.assetService.port }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.assetService.secretName }}
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.assetService.secretName }}
+                  key: redis-url
+            - name: ENV
+              value: {{ .Values.global.env | quote }}
+            - name: ASSET_SERVICE_PORT
+              value: {{ .Values.assetService.port | quote }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            {{- range $k, $v := .Values.assetService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.assetService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.assetService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.assetService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.assetService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.assetService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.assetService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.assetService.resources.requests.cpu }}
+              memory: {{ .Values.assetService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.assetService.resources.limits.cpu }}
+              memory: {{ .Values.assetService.resources.limits.memory }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # uvicorn needs /tmp
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+{{- end }}

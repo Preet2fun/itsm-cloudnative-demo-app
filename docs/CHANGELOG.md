@@ -108,4 +108,58 @@
 
 ---
 
+---
+
+## Phase 4 — Asset Service & Incident Service (Python/FastAPI)
+**Date:** 2026-04-27
+**Status:** 🔲 Code complete — pending cluster deployment validation
+
+### Added
+
+#### Infrastructure (Redis + RabbitMQ)
+- `infra/helm/itsm-app/templates/redis/statefulset.yaml` — Redis 7-alpine StatefulSet with 1Gi PVC (local-path), AOF persistence (`--appendonly yes --appendfsync everysec`), `runAsUser: 999`
+- `infra/helm/itsm-app/templates/redis/service.yaml` — ClusterIP on port 6379
+- `infra/helm/itsm-app/templates/rabbitmq/statefulset.yaml` — RabbitMQ 3.13-management-alpine StatefulSet with 2Gi PVC (local-path), credentials from `itsm-secrets`, `runAsUser: 999`
+- `infra/helm/itsm-app/templates/rabbitmq/service.yaml` — ClusterIP on ports 5672 (AMQP) and 15672 (management)
+- `infra/helm/itsm-app/values.yaml` — extended with `redis`, `rabbitmq`, `assetService`, `incidentService` blocks
+- `infra/helm/itsm-app/values-qa.yaml` — QA overrides for both new services
+
+#### Asset Service (`services/asset-service/`)
+- `app/config.py` — Pydantic v2 `BaseSettings`; reads `DATABASE_URL`, `REDIS_URL`, `ENV`, `ASSET_SERVICE_PORT` from environment
+- `app/telemetry.py` — OTLP gRPC exporter + TracerProvider; OTel failure is non-fatal
+- `app/db.py` — `create_async_engine` (postgresql+asyncpg), `tenant_session()` context manager sets `search_path TO {slug}, public` per connection
+- `app/cache.py` — async Redis client; key convention `itsm:{tenant}:assets:{op}:{md5[:8]}`; TTL=60s; scan-based invalidation
+- `app/models.py` — `Asset` ORM (`asset_metadata` attr → `metadata` column to avoid SQLAlchemy conflict); `IncidentSummary` read-only model
+- `app/repository.py` — `list_assets`, `get_asset`, `create_asset`, `update_asset`, `delete_asset`, `get_asset_incidents`; all use `tenant_session()`
+- `app/router.py` — `GET /api/v1/health`, `GET /api/v1/assets`, `POST /api/v1/assets`, `GET /api/v1/assets/{id}`, `PUT /api/v1/assets/{id}`, `DELETE /api/v1/assets/{id}`, `GET /api/v1/assets/{id}/incidents`; Redis cache on list/get; OTel spans + custom metrics
+- `app/main.py` — FastAPI app factory; startup/shutdown hooks; request-id middleware; SQLAlchemy + Redis auto-instrumentation
+- `requirements.txt` — pinned: fastapi 0.111, uvicorn, sqlalchemy[asyncio] 2.0.30, asyncpg, pydantic-settings, redis[asyncio], OTel 1.24/0.45b0 suite
+- `Dockerfile` — two-stage python:3.12-slim builder → runner; `adduser --uid 65532 nonroot`; `USER 65532:65532`
+- Helm templates: `deployment.yaml` (runAsUser 65532, readOnlyRootFilesystem: false), `service.yaml`, `hpa.yaml`
+
+#### Incident Service (`services/incident-service/`)
+- `app/config.py` — reads `DATABASE_URL`, `RABBITMQ_URL`, `ENV`, `INCIDENT_SERVICE_PORT`
+- `app/telemetry.py` — same pattern as asset-service
+- `app/db.py` — same `tenant_session()` pattern
+- `app/mq.py` — aio-pika robust connection; durable topic exchange `itsm.incidents`; W3C `traceparent` injected into AMQP headers; `DeliveryMode.PERSISTENT`; routing keys: `incident.created`, `incident.updated`, `incident.resolved`
+- `app/models.py` — `Incident` ORM with `SLA_HOURS = {P1:4, P2:8, P3:24, P4:72}`; `IncidentEvent` ORM (JSONB payload); columns match migration exactly (`related_asset`, `assigned_to`)
+- `app/repository.py` — full incident CRUD + event append + assign + resolve operations
+- `app/router.py` — `GET /api/v1/health`, `GET /api/v1/incidents`, `POST /api/v1/incidents`, `GET /api/v1/incidents/{id}`, `PUT /api/v1/incidents/{id}`, `POST /api/v1/incidents/{id}/events`, `POST /api/v1/incidents/{id}/assign`, `POST /api/v1/incidents/{id}/resolve`, `GET /api/v1/incidents/{id}/events`; OTel spans + counters + histograms; SLA breach detection
+- `app/main.py` — same factory pattern; RabbitMQ init on startup
+- `requirements.txt` — same as asset-service plus `aio-pika 9.4.1`, `opentelemetry-instrumentation-aio-pika`
+- `Dockerfile` — identical to asset-service
+- Helm templates: `deployment.yaml` (runAsUser 65532, readOnlyRootFilesystem: false), `service.yaml`, `hpa.yaml`
+
+#### Documentation
+- `docs/05_Phase_Deployment_Guides/Phase_04_Asset_Incident_Services.md` — full guide: Step 0 (local-path-provisioner — kubeadm StorageClass prerequisite), Step 1 (K8s Secret with 6 keys), Step 2 (Docker build+push), Step 3 (Helm deploy), Steps 4-8 (verification, RabbitMQ check, endpoint tests, acceptance checklist)
+
+### Architecture decisions recorded
+- local-path-provisioner (Rancher v0.0.26) is the standard StorageClass for kubeadm bare-metal clusters; installed once at cluster level, not per-namespace
+- Redis and RabbitMQ deployed as StatefulSets with PVCs (not Deployments) — data persistence required for production-mimicking setup
+- `readOnlyRootFilesystem: false` required for Python/uvicorn services (needs `/tmp`); Go distroless services can use `true`
+- `runAsUser: 65532` must accompany `runAsNonRoot: true` — K8s rejects named users ("nonroot") in older cluster versions
+- `metadata` column requires Python attribute rename to `asset_metadata` due to SQLAlchemy `DeclarativeBase.metadata` conflict
+- W3C TraceContext (`traceparent`) stored in AMQP message headers for end-to-end distributed tracing through RabbitMQ
+- `itsm-secrets` extended to 6 keys: `database-url`, `jwt-secret`, `redis-url`, `rabbitmq-url`, `rabbitmq-user`, `rabbitmq-password`
+
 *Future phases will be appended here as they are completed and validated.*

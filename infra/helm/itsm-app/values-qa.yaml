@@ -12,5 +12,13 @@ global:
 
 userService:
   env:
-    JWT_EXPIRY_HOURS: "8"   # shorter sessions in QA
+    JWT_EXPIRY_HOURS: "8"
     OTEL_SERVICE_NAME: "user-service"
+
+assetService:
+  env:
+    OTEL_SERVICE_NAME: "asset-service"
+
+incidentService:
+  env:
+    OTEL_SERVICE_NAME: "incident-service"

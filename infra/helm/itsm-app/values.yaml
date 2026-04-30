@@ -49,3 +49,103 @@ userService:
     path: /api/v1/health
     initialDelaySeconds: 15
     periodSeconds: 20
+
+# ── Redis ──────────────────────────────────────────────────────────────────────
+redis:
+  enabled: true
+  name: redis
+  image: redis:7-alpine
+  port: 6379
+  persistence:
+    size: 1Gi
+    storageClass: local-path
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# ── RabbitMQ ──────────────────────────────────────────────────────────────────
+rabbitmq:
+  enabled: true
+  name: rabbitmq
+  image: rabbitmq:3.13-management-alpine
+  port: 5672
+  managementPort: 15672
+  secretName: itsm-secrets
+  persistence:
+    size: 2Gi
+    storageClass: local-path
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+# ── Asset Service ──────────────────────────────────────────────────────────────
+assetService:
+  enabled: true
+  name: asset-service
+  image:
+    repository: asset-service    # full image = preet2fun/asset-service:<tag>
+    pullPolicy: IfNotPresent
+  port: 8000
+  replicas: 1
+  secretName: itsm-secrets
+  env:
+    OTEL_SERVICE_NAME: "asset-service"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 70
+  readinessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  livenessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 20
+    periodSeconds: 20
+
+# ── Incident Service ───────────────────────────────────────────────────────────
+incidentService:
+  enabled: true
+  name: incident-service
+  image:
+    repository: incident-service    # full image = preet2fun/incident-service:<tag>
+    pullPolicy: IfNotPresent
+  port: 8000
+  replicas: 1
+  secretName: itsm-secrets
+  env:
+    OTEL_SERVICE_NAME: "incident-service"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 70
+  readinessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  livenessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 20
+    periodSeconds: 20

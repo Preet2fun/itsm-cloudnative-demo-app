@@ -1,0 +1,22 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.rabbitmq.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.rabbitmq.name }}
+    app.kubernetes.io/part-of: itsm-app
+    environment: {{ .Values.global.env }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.rabbitmq.name }}
+  ports:
+    - name: amqp
+      port: {{ .Values.rabbitmq.port }}
+      targetPort: amqp
+    - name: management
+      port: {{ .Values.rabbitmq.managementPort }}
+      targetPort: management
+{{- end }}

@@ -1,0 +1,93 @@
+{{- if .Values.incidentService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.incidentService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.incidentService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.incidentService.name }}
+    app.kubernetes.io/part-of: itsm-app
+    environment: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.incidentService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.incidentService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.incidentService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.incidentService.name }}
+      containers:
+        - name: incident-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.incidentService.image.repository }}:{{ .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.incidentService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.incidentService.port }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.incidentService.secretName }}
+                  key: database-url
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.incidentService.secretName }}
+                  key: rabbitmq-url
+            - name: ENV
+              value: {{ .Values.global.env | quote }}
+            - name: INCIDENT_SERVICE_PORT
+              value: {{ .Values.incidentService.port | quote }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            {{- range $k, $v := .Values.incidentService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.incidentService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.incidentService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.incidentService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.incidentService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.incidentService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.incidentService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.incidentService.resources.requests.cpu }}
+              memory: {{ .Values.incidentService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.incidentService.resources.limits.cpu }}
+              memory: {{ .Values.incidentService.resources.limits.memory }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # uvicorn needs /tmp
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+{{- end }}
