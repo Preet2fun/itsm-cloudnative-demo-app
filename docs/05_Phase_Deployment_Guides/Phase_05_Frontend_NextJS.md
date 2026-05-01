@@ -338,16 +338,173 @@ Once all boxes are checked, proceed to Section 2.
 
 > **Start Section 2 only after Section 1 acceptance checklist is complete.**
 
-Section 2 covers:
-- `package.json` with exact pinned dependencies
-- `Dockerfile` for the Next.js frontend (using the same venv pattern from Python services)
-- `services/frontend/.env.local` template
-- Helm templates: Deployment, Service, HPA for the frontend
-- `values.yaml` update with `frontend:` block
-- K8s Secret update (no new secrets needed — frontend reads APIs via service names)
-- Docker build + push + Helm deploy steps
-- Port-forward verification
-- Acceptance checklist (login → dashboard → create incident → resolve → asset list)
+### Prerequisites
+
+- Docker running on the K8s master node (or a build machine with push access)
+- `kubectl` configured for the `itsm-dev` namespace
+- `helm` 3.15+
+- Docker Hub credentials (`docker login` as `preet2fun`)
+- All Phase 4 pods Running: `user-service`, `asset-service`, `incident-service`,
+  `redis-0`, `rabbitmq-0`
+
+---
+
+### Step 2.1 — Files Added by Claude Code (already done)
+
+The following files were created during Section 1 → Option B conversion:
+
+| File | Purpose |
+|---|---|
+| `services/frontend/Dockerfile` | Multi-stage build: deps → builder → runner |
+| `services/frontend/.dockerignore` | Exclude node_modules, .next, .env.local |
+| `services/frontend/next.config.ts` | `output: "standalone"` enabled |
+| `services/frontend/src/app/api/health/route.ts` | K8s health probe endpoint |
+| `infra/helm/itsm-app/templates/frontend/deployment.yaml` | K8s Deployment |
+| `infra/helm/itsm-app/templates/frontend/service.yaml` | ClusterIP Service (port 80 → 3000) |
+| `infra/helm/itsm-app/templates/frontend/hpa.yaml` | HPA min=1, max=2, CPU 70% |
+| `infra/helm/itsm-app/values.yaml` | `frontend:` block added |
+| `infra/helm/itsm-app/values-qa.yaml` | QA overrides for frontend |
+
+---
+
+### Step 2.2 — Build the Docker Image
+
+Run on the **K8s master node** (or any machine with Docker + push access):
+
+```bash
+# Pull the latest code
+cd ~/itsm-cloudnative-demo-app
+git pull origin main
+
+# Build the frontend image
+cd services/frontend
+docker build -t preet2fun/frontend:latest .
+
+# Verify the image starts correctly
+docker run --rm -p 3000:3000 \
+  -e USER_SERVICE_URL=http://localhost:8000 \
+  preet2fun/frontend:latest &
+sleep 5
+curl -s http://localhost:3000/api/health
+# Expected: {"status":"ok"}
+docker stop $(docker ps -q --filter ancestor=preet2fun/frontend:latest)
+
+# Push to Docker Hub
+docker push preet2fun/frontend:latest
+```
+
+**Expected build output:**
+```
+[+] Building ... (3 stages)
+ => [deps]    npm install
+ => [builder] npm run build    ← should print "Route (app)" table
+ => [runner]  COPY standalone
+Successfully tagged preet2fun/frontend:latest
+```
+
+---
+
+### Step 2.3 — Deploy with Helm
+
+```bash
+helm upgrade --install itsm-app ./infra/helm/itsm-app \
+  -n itsm-dev \
+  --set frontend.image.pullPolicy=Always
+
+# Watch the frontend pod come up
+kubectl get pods -n itsm-dev -w
+
+# Expected within ~60s:
+# NAME                        READY   STATUS    RESTARTS   AGE
+# frontend-xxxx               1/1     Running   0          45s
+```
+
+---
+
+### Step 2.4 — Verify the Deployment
+
+```bash
+# Health probe
+kubectl exec -n itsm-dev deploy/frontend -- \
+  wget -qO- http://localhost:3000/api/health
+# Expected: {"status":"ok"}
+
+# Port-forward to test the full UI
+kubectl port-forward -n itsm-dev svc/frontend 3000:80
+
+# Open in your browser: http://localhost:3000
+# You should see the ITSM Portal login page.
+```
+
+---
+
+### Step 2.5 — Acceptance Test (Golden Path)
+
+With the port-forward running, walk through this flow in the browser:
+
+| Step | Action | Expected result |
+|---|---|---|
+| 1 | Open `http://localhost:3000` | Redirected to `/login` |
+| 2 | Login: workspace=`tenant_a`, email=`alice@tenant-a.io`, password=`admin123` | JWT stored, redirect to `/dashboard` |
+| 3 | Dashboard loads | Stats cards, SLA section, recent incidents table visible |
+| 4 | Click **Incidents** in sidebar | Incident list with filters |
+| 5 | Click **New Incident** | Form page at `/incidents/new` |
+| 6 | Fill in title + description (P1) → Submit | Redirect to incident detail page |
+| 7 | Click **Resolve** on an open incident | Modal → submit → status badge changes to Resolved |
+| 8 | Click **Assets** in sidebar | Asset list loads |
+| 9 | Click any asset row | Asset detail with metadata + linked incidents |
+| 10 | Click **Sign out** in sidebar | Redirect to `/login`, localStorage cleared |
+
+---
+
+### Step 2.6 — Section 2 Acceptance Checklist
+
+- [ ] `docker build` completes without errors
+- [ ] `curl http://localhost:3000/api/health` returns `{"status":"ok"}`
+- [ ] `docker push preet2fun/frontend:latest` succeeds
+- [ ] Helm upgrade completes: `frontend-xxxx` pod is `1/1 Running`
+- [ ] Browser login works with real credentials (not mock data)
+- [ ] Dashboard fetches live incident and asset counts from backend
+- [ ] Create incident → new record appears in incident list
+- [ ] Resolve incident → status updates in real time
+- [ ] Asset detail shows live linked incidents
+- [ ] Sign out clears session and returns to login
+
+---
+
+## Troubleshooting (Section 2)
+
+### Build error: `Cannot find module 'next'`
+The `deps` stage failed. Run `docker build --no-cache` to force a clean install.
+
+### Build error: `output: 'standalone'` not found in `.next`
+Confirm `next.config.ts` has `output: "standalone"` uncommented (not commented out).
+
+### Pod stuck in `ImagePullBackOff`
+```bash
+kubectl describe pod -n itsm-dev <frontend-pod-name>
+# If "not found": the push didn't complete. Re-push:
+docker push preet2fun/frontend:latest
+# Then force a rollout:
+kubectl rollout restart deployment/frontend -n itsm-dev
+```
+
+### Pod `CrashLoopBackOff` — `ECONNREFUSED` to user-service/incident-service/asset-service
+The Next.js rewrites can't reach a backend service. Check:
+```bash
+kubectl get svc -n itsm-dev
+# All three services must exist: user-service, asset-service, incident-service
+kubectl logs -n itsm-dev deploy/frontend
+```
+
+### Login returns 401 / "Invalid credentials"
+The user-service is reachable but credentials are wrong. Confirm the tenant slug
+matches exactly what was seeded in Phase 3 (e.g. `tenant_a`, not `acme`).
+
+### Sidebar collapse doesn't shrink the main content area
+Expected — the CSS sync via `#main-content` relies on client JS. If the sidebar
+collapses but the content doesn't shift, hard-refresh the page. Full fix is in Phase 6
+when we wire up a shared context.
 
 ---
 

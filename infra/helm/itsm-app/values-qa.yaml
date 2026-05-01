@@ -22,3 +22,9 @@ assetService:
 incidentService:
   env:
     OTEL_SERVICE_NAME: "incident-service"
+
+frontend:
+  env:
+    userServiceUrl: "http://user-service"
+    incidentServiceUrl: "http://incident-service"
+    assetServiceUrl: "http://asset-service"

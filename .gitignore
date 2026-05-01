@@ -58,7 +58,7 @@ helm/charts/
 *.tgz
 
 # ── Docker ───────────────────────────────────────────────────────────────────
-.dockerignore
+# .dockerignore files ARE committed — they control the Docker build context
 
 # ── IDE / OS ─────────────────────────────────────────────────────────────────
 .DS_Store

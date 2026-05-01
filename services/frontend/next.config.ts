@@ -87,8 +87,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
 
-  // Output mode — set to "standalone" for Docker multi-stage builds
-  // output: "standalone",
+  // Output mode — standalone bundles only what is needed to run the server,
+  // enabling minimal Docker images without shipping all of node_modules.
+  output: "standalone",
 };
 
 export default nextConfig;

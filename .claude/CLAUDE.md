@@ -61,7 +61,7 @@ every manifest, query, and config reflects the live state of the system.
 | Phase 2 — Database Layer | ✅ Complete |
 | Phase 3 — User Service (Go) | ✅ Complete |
 | Phase 4 — Asset & Incident Services (Python) | ✅ Complete |
-| Phase 5 — Frontend (Next.js) | 🔲 Pending |
+| Phase 5 — Frontend (Next.js) | ✅ Complete |
 | Phase 6 — Istio + OPA | 🔲 Pending |
 | Phase 7 — AI Features | 🔲 Pending |
 | Phase 8 — Observability | 🔲 Pending |

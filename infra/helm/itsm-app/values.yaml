@@ -118,6 +118,46 @@ assetService:
     initialDelaySeconds: 20
     periodSeconds: 20
 
+# ── Frontend (Next.js 14) ──────────────────────────────────────────────────────
+frontend:
+  enabled: true
+  name: frontend
+  image:
+    repository: frontend          # full image = preet2fun/frontend:<tag>
+    pullPolicy: IfNotPresent
+  port: 3000
+  replicas: 1
+
+  env:
+    # These match the default K8s service names — no change needed for standard deploy.
+    # Override only if service names differ (e.g. multi-cluster or local dev).
+    userServiceUrl: "http://user-service"
+    incidentServiceUrl: "http://incident-service"
+    assetServiceUrl: "http://asset-service"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 70
+
+  readinessProbe:
+    path: /api/health
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+  livenessProbe:
+    path: /api/health
+    initialDelaySeconds: 30
+    periodSeconds: 20
+
 # ── Incident Service ───────────────────────────────────────────────────────────
 incidentService:
   enabled: true

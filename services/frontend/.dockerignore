@@ -1,0 +1,12 @@
+# services/frontend/.dockerignore
+
+node_modules
+.next
+.env.local
+.env*.local
+npm-debug.log*
+*.md
+.git
+.gitignore
+.DS_Store
+tweaks-panel.jsx
