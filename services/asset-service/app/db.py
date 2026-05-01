@@ -24,9 +24,10 @@ class Base(DeclarativeBase):
 
 
 def _pg_async_url(url: str) -> str:
-    """Rewrite postgres:// / postgresql:// to postgresql+asyncpg://."""
     url = url.replace("postgres://", "postgresql+asyncpg://", 1)
     url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # asyncpg doesn't accept sslmode — strip it (asyncpg uses ssl= connect_arg)
+    url = re.sub(r"[?&]sslmode=[^&]*", "", url)
     return url
 
 
