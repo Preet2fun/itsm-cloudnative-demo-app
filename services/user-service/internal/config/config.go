@@ -1,6 +1,9 @@
 package config
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,7 +14,7 @@ import (
 // Every value is sourced from environment variables — no config files.
 type Config struct {
 	DatabaseURL    string
-	JWTSecret      string
+	JWTPrivateKey  *rsa.PrivateKey // RS256 signing key (Phase 6+)
 	JWTExpiryHours int
 	Port           int
 	Env            string // dev | qa
@@ -24,7 +27,6 @@ type Config struct {
 func Load() (*Config, error) {
 	cfg := &Config{
 		DatabaseURL:    os.Getenv("DATABASE_URL"),
-		JWTSecret:      os.Getenv("JWT_SECRET"),
 		Env:            getEnvOrDefault("ENV", "dev"),
 		OTELEndpoint:   getEnvOrDefault("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317"),
 		ServiceName:    getEnvOrDefault("OTEL_SERVICE_NAME", "user-service"),
@@ -35,12 +37,33 @@ func Load() (*Config, error) {
 	if cfg.DatabaseURL == "" {
 		return nil, fmt.Errorf("DATABASE_URL is required")
 	}
-	if cfg.JWTSecret == "" {
-		return nil, fmt.Errorf("JWT_SECRET is required")
-	}
 	if cfg.Env != "dev" && cfg.Env != "qa" {
 		return nil, fmt.Errorf("ENV must be 'dev' or 'qa', got %q", cfg.Env)
 	}
+
+	// Parse RSA-2048 private key from PEM (accepts PKCS#1 or PKCS#8)
+	privPEM := os.Getenv("JWT_PRIVATE_KEY")
+	if privPEM == "" {
+		return nil, fmt.Errorf("JWT_PRIVATE_KEY is required")
+	}
+	block, _ := pem.Decode([]byte(privPEM))
+	if block == nil {
+		return nil, fmt.Errorf("JWT_PRIVATE_KEY: invalid PEM block")
+	}
+	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		// Fall back to PKCS#8 (openssl genpkey output)
+		raw, err2 := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err2 != nil {
+			return nil, fmt.Errorf("JWT_PRIVATE_KEY: cannot parse RSA private key: %w", err)
+		}
+		var ok bool
+		privKey, ok = raw.(*rsa.PrivateKey)
+		if !ok {
+			return nil, fmt.Errorf("JWT_PRIVATE_KEY: key is not RSA")
+		}
+	}
+	cfg.JWTPrivateKey = privKey
 
 	if v := os.Getenv("JWT_EXPIRY_HOURS"); v != "" {
 		n, err := strconv.Atoi(v)

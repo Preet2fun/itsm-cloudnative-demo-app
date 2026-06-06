@@ -2,8 +2,8 @@
 //
 // Responsibilities:
 //   - User registration, profile management, password management
-//   - JWT issuance (HS256) and refresh
-//   - JWKS endpoint for Istio RequestAuthentication (Phase 6)
+//   - JWT issuance (RS256) and refresh
+//   - JWKS endpoint for Istio RequestAuthentication
 //   - User CRUD — multi-tenant via search_path-per-request
 //
 // Configuration is read entirely from environment variables.
@@ -96,8 +96,8 @@ func run() error {
 		w.Write([]byte(`{"status":"ok","service":"user-service"}`)) //nolint:errcheck
 	})
 
-	// JWKS — unauthenticated, consumed by Istio RequestAuthentication in Phase 6
-	r.Get("/api/v1/.well-known/jwks.json", handlers.JWKS(cfg.JWTSecret))
+	// JWKS — unauthenticated, consumed by Istio RequestAuthentication
+	r.Get("/api/v1/.well-known/jwks.json", handlers.JWKS(cfg.JWTPrivateKey))
 
 	// Auth — unauthenticated (pre-JWT) endpoints
 	r.Route("/api/v1/auth", func(r chi.Router) {

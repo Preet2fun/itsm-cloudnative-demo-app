@@ -52,11 +52,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.userService.secretName }}
                   key: database-url
-            - name: JWT_SECRET
+            - name: JWT_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.userService.secretName }}
-                  key: jwt-secret
+                  key: jwt-private-key
             # ── From chart values ─────────────────────────────────────────────
             - name: ENV
               value: {{ .Values.global.env | quote }}

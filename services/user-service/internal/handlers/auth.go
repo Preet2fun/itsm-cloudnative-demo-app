@@ -19,6 +19,8 @@ import (
 	"github.com/itsm-cloudnative/user-service/internal/repository"
 )
 
+const jwtIssuer = "itsm-user-service"
+
 // ITSMClaims is the JWT payload for all tokens issued by the user-service.
 // Field names match what Istio outputClaimToHeaders expects (lowercase with underscores).
 type ITSMClaims struct {
@@ -43,9 +45,6 @@ func NewAuthHandler(repo *repository.Repo, cfg *config.Config, tracer trace.Trac
 //
 // POST /api/v1/auth/login
 // Body: { "email": "...", "password": "...", "tenant_slug": "tenant_a" }
-//
-// The tenant_slug is required at login time because no JWT exists yet —
-// Istio cannot inject X-Tenant-ID on an unauthenticated request.
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "itsm.user.login")
 	defer span.End()
@@ -113,14 +112,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 //
 // POST /api/v1/auth/refresh
 // Header: Authorization: Bearer <token>
-//
-// The User Service is the only place where JWT parsing happens — services
-// downstream never parse tokens themselves (that is Istio's job in Phase 6).
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "itsm.user.refresh")
 	defer span.End()
 
-	_ = ctx // span context propagated via otelhttp
+	_ = ctx
 
 	raw := extractBearerToken(r)
 	if raw == "" {
@@ -130,10 +126,10 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	claims := &ITSMClaims{}
 	_, err := jwt.ParseWithClaims(raw, claims, func(t *jwt.Token) (any, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
-		return []byte(h.cfg.JWTSecret), nil
+		return &h.cfg.JWTPrivateKey.PublicKey, nil
 	})
 	if err != nil {
 		span.SetStatus(codes.Error, "invalid token")
@@ -141,7 +137,6 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Re-issue with same identity, fresh expiry and new jti
 	user := &models.User{
 		ID:    mustParseUUID(claims.Subject),
 		Email: claims.Email,
@@ -177,15 +172,18 @@ func (h *AuthHandler) issueToken(user *models.User, tenantSlug string) (string, 
 		Role:     user.Role,
 		Email:    user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    jwtIssuer,
 			Subject:   user.ID.String(),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
-			ID:        uuid.New().String(), // jti — unique per token for future revocation
+			ID:        uuid.New().String(),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, err := token.SignedString([]byte(h.cfg.JWTSecret))
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["kid"] = "itsm-rs256-v1"
+
+	signed, err := token.SignedString(h.cfg.JWTPrivateKey)
 	if err != nil {
 		return "", time.Time{}, err
 	}
