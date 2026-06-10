@@ -128,7 +128,7 @@ All scripts, Helm charts, and ArgoCD manifests accept `ENV=dev` (default) or `EN
 
 | Service | CPU Request | CPU Limit | Mem Request | Mem Limit |
 |---|---|---|---|---|
-| Frontend (Next.js) | 50m | 200m | 128Mi | 256Mi |
+| Frontend (Vite+React nginx) | 50m | 200m | 64Mi | 128Mi |
 | User Service (Go) | 100m | 300m | 128Mi | 256Mi |
 | Asset Service (Python) | 100m | 300m | 128Mi | 256Mi |
 | Incident Service (Python) | 100m | 300m | 128Mi | 256Mi |

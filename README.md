@@ -1,11 +1,13 @@
-# ITSM CloudNative Demo App
+# ITSM CloudNative Demo App — Synap
 
 [![CI Build](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-build.yml/badge.svg)](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-build.yml)
 [![CI Lint](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-lint.yml/badge.svg)](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-lint.yml)
 
-A fully containerised, multi-tenant **IT Service Management (ITSM)** demo application built as a cloud-native reference implementation. Covers Asset Management, User Management, and Incident Management — deployed on Kubernetes with a full observability stack, GitOps delivery, OPA-based RBAC, and AI-powered features.
+A fully containerised, multi-tenant **IT Service Management (ITSM) + IT Operations (ITOM)** platform ("Synap") built as a cloud-native reference implementation. Covers Asset Management, User Management, and Incident Management — with AI-powered features, deployed on Kubernetes with a full observability stack, GitOps delivery, OPA-based RBAC, and an AI-native UI.
 
 Built to validate cloud-native patterns locally on kubeadm before transferring learnings to a production SaaS platform.
+
+> **UI process:** The frontend is built sprint-by-sprint from HTML/JSX prototypes designed in Claude's design tool. Prototypes live in `design_handoff_synap/reference/` and are the pixel-perfect spec for the production React app. See [Synap UI Design Workflow](#synap-ui--design--production-workflow) below.
 
 ---
 
@@ -50,13 +52,54 @@ Istio IngressGateway  (port 80/443)
 
 ---
 
+## Synap UI — Design → Production Workflow
+
+The frontend is built sprint-by-sprint from high-fidelity HTML/JSX prototypes created in Claude's design tool. Each sprint the prototype for one screen is committed to `design_handoff_synap/reference/`, and the production React app in `services/frontend/` is updated to match it pixel-for-pixel.
+
+```
+Claude design tool (artifact)
+         │  sprint handoff commit
+         ▼
+design_handoff_synap/reference/*.jsx    ← living spec, updated each sprint
+         │  implementation sprint
+         ▼
+services/frontend/                      ← Vite + React 18 + TypeScript
+  src/
+  ├── tokens/          ← CSS variables ported from styles.css (OKLCH, light/dark)
+  ├── components/ui/   ← Primitive components (Button, Badge, Card, StatCard, Icon…)
+  ├── components/      ← Feature components (IncidentTable, AssetCard, AiOrb…)
+  ├── pages/           ← One folder per sprint screen
+  ├── lib/data/        ← Typed mock data (port of data.jsx) until Sprint 11
+  └── lib/api/         ← API client — mock until Sprint 11, real TanStack Query after
+         │  docker build → nginx:alpine + dist/
+         ▼
+Istio IngressGateway
+  /api/v1/users*      → user-service      (K8s VirtualService)
+  /api/v1/assets*     → asset-service
+  /api/v1/incidents*  → incident-service
+  /*                  → frontend (nginx serving dist/)
+```
+
+**Sprint loop:**
+1. New prototype lands in `design_handoff_synap/reference/` (committed by you)
+2. Claude Code implements the screen in `services/frontend/` matching the prototype
+3. Running UI verified in browser against the prototype before merging
+4. Every faked AI `setTimeout` call gets a `// TODO: real API` comment as the wiring seam for Sprint 11
+
+**Three hero flows** (must always work end-to-end):
+- **Hero #1 — Zero-ticket self-service** (`portal.jsx`): Employee → AI chat → auto-fix applied → resolved in ~40s, no ticket
+- **Hero #2 — AI-assisted agent resolution** (`incidents.jsx`): Agent opens incident → AI runbook + live telemetry → "Approve & run" → MTTR in minutes
+- **Hero #3 — AIOps nervous-system loop** (`aiops.jsx`): 47-alert storm → "Correlate with Synap" → 1 root-cause incident → remediation → KB draft
+
+---
+
 ## Technology Stack
 
 | Layer | Technology |
 |---|---|
 | Backend (Go) | User Service, Notification Service — Chi v5, golang-jwt |
 | Backend (Python) | Asset Service, Incident Service, AI Service — FastAPI, SQLAlchemy |
-| Frontend | Next.js 14 (App Router) |
+| Frontend | Vite + React 18 + TypeScript (Synap UI) |
 | Database | PostgreSQL 16 — schema-per-tenant isolation |
 | Cache | Redis 7 |
 | Queue | RabbitMQ 3.13 |
@@ -175,7 +218,32 @@ See `docs/03_Deployment/03_Environment_Guide.md` for full details.
 
 ```
 itsm-cloudnative-demo-app/
-├── services/            # Application microservices (Go + Python + Next.js)
+├── design_handoff_synap/    # Synap UI design source of truth — sprint-by-sprint prototypes
+│   ├── reference/           # HTML/JSX prototype files (auth.jsx, shell.jsx, incidents.jsx…)
+│   │   ├── Synap.html       # Entry point — open locally to preview the full prototype
+│   │   ├── styles.css       # Design tokens (OKLCH colors, typography, spacing, shadows)
+│   │   ├── data.jsx         # Mock data / API contract — one collection per backend endpoint
+│   │   ├── ui.jsx           # Primitive components spec (Button, Badge, Card, StatCard…)
+│   │   ├── icons.jsx        # Icon set (inline SVG paths, lucide-compatible)
+│   │   ├── auth.jsx         # Login / SSO / MFA screens
+│   │   ├── shell.jsx        # App shell — sidebar + topbar + workspace switcher
+│   │   ├── dashboard.jsx    # Ops Dashboard — KPI cards, service health, AI feed
+│   │   ├── aiops.jsx        # AIOps Event Console — alert correlation (hero flow #3)
+│   │   ├── incidents.jsx    # Incidents list + detail (hero flow #2)
+│   │   ├── portal.jsx       # End-user self-service portal (hero flow #1)
+│   │   ├── inventory.jsx    # CMDB, Service Map, Cloud Inventory, Assets
+│   │   ├── modules.jsx      # Monitoring, Knowledge Base, Analytics, Admin
+│   │   └── copilot.jsx      # Global "Ask Synap" panel + ⌘K command palette
+│   ├── README.md            # Design token spec, screen inventory, interaction guide
+│   ├── BUILD_PLAN.md        # Per-sprint prompts for converting prototype → production code
+│   └── CLAUDE.md            # Context loaded by Claude Code for every UI sprint session
+├── services/                # Application microservices
+│   ├── frontend/            # Vite + React 18 + TypeScript (Synap UI production app)
+│   ├── user-service/        # Go — Chi v5, JWT issuance, JWKS endpoint
+│   ├── asset-service/       # Python — FastAPI, SQLAlchemy 2.x async, Redis cache
+│   ├── incident-service/    # Python — FastAPI, SQLAlchemy, RabbitMQ publisher
+│   ├── notification-service/# Go — RabbitMQ consumer, W3C trace propagation
+│   └── ai-service/          # Python — FastAPI, pgvector (Phase 7)
 ├── infra/
 │   ├── k8s/             # Raw Kubernetes manifests (namespaces, Istio, OPA, HPA, storage)
 │   ├── helm/            # Helm charts for app + observability stack
@@ -206,30 +274,49 @@ itsm-cloudnative-demo-app/
 
 ---
 
-## Phase Status
+## Work Status
+
+### Backend & Infrastructure Phases
 
 | Phase | Name | Status | K8s Validated |
 |---|---|---|---|
 | Pre-flight | MCP Server Setup | ✅ Done | — |
 | 1 | Repo Scaffold & Docs | ✅ Done | — |
-| 2 | Database & Migrations | ⬜ Not Started | — |
-| 3a | User Service (Go) | ⬜ Not Started | — |
-| 3b | Asset Service (Python) | ⬜ Not Started | — |
-| 3c | Incident Service (Python) | ⬜ Not Started | — |
-| 3d | Notification Service (Go) | ⬜ Not Started | — |
-| 4 | Frontend (Next.js) | ⬜ Not Started | — |
-| 5 | Observability Stack | ⬜ Not Started | — |
-| 6a | Helm Charts | ⬜ Not Started | — |
-| 6b | K8s Manifests | ⬜ Not Started | — |
-| 6c | Istio (mTLS + Routing + JWT) | ⬜ Not Started | — |
-| 6d | OPA (RBAC + Rego policies) | ⬜ Not Started | — |
-| 6e | ArgoCD GitOps | ⬜ Not Started | — |
+| 2 | Database & Migrations | ✅ Done | ⬜ Confirm |
+| 3a | User Service (Go) | ✅ Done | ⬜ Confirm |
+| 3b | Asset Service (Python) | ✅ Done | ⬜ Confirm |
+| 3c | Incident Service (Python) | ✅ Done | ⬜ Confirm |
+| 3d | Notification Service (Go) | ✅ Done | ⬜ Confirm |
+| 4 | Helm Charts + K8s Manifests + Dockerfiles | ✅ Done | ⬜ Confirm |
+| 5 | Observability Stack (OTel + Prometheus + Loki + Jaeger + Grafana) | ⬜ Not Started | — |
+| 6a | Istio — mTLS + JWT validation + Tenant routing | 🔲 In Progress | — |
+| 6b | OPA RBAC (Rego policies + ext_authz) | ⬜ Not Started | — |
+| 6c | ArgoCD GitOps | ⬜ Not Started | — |
 | 7a | AI Incident Triage | ⬜ Not Started | — |
-| 7b | AI Asset Search | ⬜ Not Started | — |
+| 7b | AI Asset Search (Semantic / pgvector) | ⬜ Not Started | — |
 | 7c | AI Anomaly Detection | ⬜ Not Started | — |
 | 7d | AI Chatbot (RAG) | ⬜ Not Started | — |
-| 8 | CI/CD (GitHub Actions) | ⬜ Not Started | — |
+| 8 | CI/CD (GitHub Actions → Docker Hub) | ⬜ Not Started | — |
 | 9 | Documentation Completion | ⬜ Not Started | — |
+
+### Synap UI Sprints (Vite + React 18 + TypeScript)
+
+Design source of truth: `design_handoff_synap/reference/`. Each sprint takes the latest prototype handoff and produces a tested, production-grade screen. Mock data from `data.jsx` is used until Sprint 11 wires real APIs.
+
+| Sprint | Screen | Reference File | Status |
+|---|---|---|---|
+| 0 | Foundation — scaffold + design tokens + primitive components | `styles.css`, `ui.jsx`, `icons.jsx` | 🔲 Not Started |
+| 1 | Login — email/password + SSO buttons + 6-digit MFA | `auth.jsx` | 🔲 Not Started |
+| 2 | App Shell — sidebar + topbar + routing + light/dark theme | `shell.jsx` | 🔲 Not Started |
+| 3 | Asset Module — list + detail + create/edit forms | `inventory.jsx → Assets` | 🔲 Not Started |
+| 4 | Incident Module — list + detail + lifecycle actions | `incidents.jsx` | 🔲 Not Started |
+| 5 | Ops Dashboard — KPI cards + service health + AI activity feed | `dashboard.jsx` | 🔲 Not Started |
+| 6 | AIOps Event Console — alert storm correlation (hero flow #3) | `aiops.jsx` | 🔲 Not Started |
+| 7 | End-user Portal — zero-ticket self-service (hero flow #1) | `portal.jsx` | 🔲 Not Started |
+| 8 | CMDB + Service Map + Cloud Inventory | `inventory.jsx` | 🔲 Not Started |
+| 9 | Monitoring + Knowledge Base + Analytics + Admin | `modules.jsx` | 🔲 Not Started |
+| 10 | Global Copilot panel + ⌘K command palette | `copilot.jsx` | 🔲 Not Started |
+| 11 | Real API wiring — replace mock layer with live backend calls | all | 🔲 Not Started |
 
 ---
 

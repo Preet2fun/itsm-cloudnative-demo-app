@@ -1,7 +1,5 @@
-# services/frontend/.dockerignore
-
 node_modules
-.next
+dist
 .env.local
 .env*.local
 npm-debug.log*
@@ -9,4 +7,3 @@ npm-debug.log*
 .git
 .gitignore
 .DS_Store
-tweaks-panel.jsx

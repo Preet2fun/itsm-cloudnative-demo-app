@@ -1,5 +1,33 @@
 # Changelog
 
+## Workflow Change — Synap Design → Production UI Process
+**Date:** 2026-06-09
+**Status:** ✅ Adopted
+
+### What changed
+- **Frontend technology:** Next.js 14 replaced by **Vite + React 18 + TypeScript** (`services/frontend/`) for the Synap UI
+- **UI development process:** Moved from monolithic phase approach to sprint-by-sprint design handoff
+  - Design prototypes (HTML/JSX) are created in Claude's design tool each sprint
+  - Prototypes are committed to `design_handoff_synap/reference/`
+  - Production code is built screen-by-screen matching the prototype pixel-for-pixel
+- **K8s container change:** Frontend will be served as static files via `nginx:alpine` (not a Node.js process), reducing memory footprint from 128–256 Mi to 64–128 Mi
+- **Sprint plan defined:** 12 sprints covering Login → App Shell → Assets → Incidents → Dashboard → AIOps → Portal → Inventory → Modules → Copilot → API Wiring
+
+### Files updated
+- `README.md` — Updated tech stack, repo structure, added Synap UI workflow section, rewrote phase/sprint status tables
+- `.claude/CLAUDE.md` — Added Section 10 (UI Development Process), updated phase status tables, updated frontend stack reference
+- `SYSTEM_PROMPT.md` — Updated frontend resource limits to nginx:alpine values
+- `design_handoff_synap/` — Committed Synap design prototype reference files (already in repo from prior commit)
+
+### What did NOT change
+- All backend services (User, Asset, Incident, Notification, AI) — unchanged
+- Database schema and migrations — unchanged
+- Infra (K8s manifests, Helm charts, Istio, OPA, ArgoCD) — unchanged
+- Architecture decisions (Istio gateway, OPA RBAC, schema-per-tenant, no Docker Compose) — unchanged
+- All OTel instrumentation requirements — unchanged
+
+---
+
 ## Phase 1 — Repository Scaffold & Documentation Foundation
 **Date:** 2026-04-13
 **Status:** ✅ Complete

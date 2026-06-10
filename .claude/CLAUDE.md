@@ -55,17 +55,36 @@ every manifest, query, and config reflects the live state of the system.
   in `SYSTEM_PROMPT.md`.
 
 ### Phase status (update as each is approved)
+
+#### Backend & Infrastructure Phases
 | Phase | Status |
 |---|---|
 | Phase 1 — Repo Scaffold | ✅ Complete |
 | Phase 2 — Database Layer | ✅ Complete |
 | Phase 3 — User Service (Go) | ✅ Complete |
 | Phase 4 — Asset & Incident Services (Python) | ✅ Complete |
-| Phase 5 — Frontend (Next.js) | ✅ Complete |
-| Phase 6 — Istio + OPA | 🔲 Pending |
+| Phase 5 — Helm Charts + K8s Manifests + Dockerfiles | ✅ Complete |
+| Phase 6 — Istio + OPA | 🔲 In Progress |
 | Phase 7 — AI Features | 🔲 Pending |
 | Phase 8 — Observability | 🔲 Pending |
 | Phase 9 — CI/CD & GitOps | 🔲 Pending |
+
+#### Synap UI Sprints (Vite + React 18 + TypeScript)
+Frontend is built from the design prototype in `design_handoff_synap/reference/`. Each sprint = one screen, pixel-matched to the prototype.
+| Sprint | Screen | Status |
+|---|---|---|
+| Sprint 0 | Foundation — scaffold + tokens + primitives | 🔲 Not Started |
+| Sprint 1 | Login — email/password + SSO + MFA | 🔲 Not Started |
+| Sprint 2 | App Shell — sidebar + topbar + routing + theme | 🔲 Not Started |
+| Sprint 3 | Asset Module — list + detail + CRUD | 🔲 Not Started |
+| Sprint 4 | Incident Module — list + detail + lifecycle | 🔲 Not Started |
+| Sprint 5 | Ops Dashboard | 🔲 Not Started |
+| Sprint 6 | AIOps Event Console | 🔲 Not Started |
+| Sprint 7 | End-user Portal | 🔲 Not Started |
+| Sprint 8 | CMDB + Service Map + Cloud | 🔲 Not Started |
+| Sprint 9 | Monitoring + KB + Analytics + Admin | 🔲 Not Started |
+| Sprint 10 | Global Copilot + ⌘K palette | 🔲 Not Started |
+| Sprint 11 | Real API wiring | 🔲 Not Started |
 
 ---
 
@@ -202,7 +221,7 @@ itsm_cache_misses_total{tenant, resource}            counter
 | Asset Service | Python 3.12+ | FastAPI 0.111+ | SQLAlchemy 2.x async, asyncpg |
 | Incident Service | Python 3.12+ | FastAPI 0.111+ | SQLAlchemy 2.x async, asyncpg, aio-pika |
 | AI Service | Python 3.12+ | FastAPI 0.111+ | pgvector, LLM provider TBD (Phase 7) |
-| Frontend | Next.js 14.x | App Router | TypeScript, Tailwind |
+| Frontend (Synap UI) | TypeScript | Vite + React 18 | React Router, TanStack Query, Zustand, CSS Modules/OKLCH tokens |
 
 ### JWT (HS256 — built-in, no external identity provider)
 Claims: `sub`, `tenant_id`, `role`, `email`, `exp`, `iat`, `jti`
@@ -259,7 +278,43 @@ queries/commands, rollback instructions, troubleshooting, and an acceptance chec
 
 ---
 
-## 10. What Not to Do
+## 10. Synap UI Development Process — Non-Negotiable
+
+The frontend is built sprint-by-sprint from a prototype design. Follow these rules every session.
+
+### Design source of truth
+`design_handoff_synap/reference/` is always the pixel-perfect spec. **Before implementing any UI, read the corresponding `*.jsx` file in that folder.** Do not invent UI — recreate the prototype exactly and re-architect underneath.
+
+### Frontend stack (Vite + React 18 + TypeScript)
+- **Build tool:** Vite
+- **Routing:** React Router (prototype's `view` state → real routes)
+- **Styling:** CSS variables with OKLCH tokens ported from `styles.css`; `[data-theme="dark"]` overrides; CSS Modules for components. Never hardcode colors.
+- **Server data:** TanStack Query
+- **Cross-cutting UI state:** Zustand (copilot open, theme, persona)
+- **Icons:** Port `icons.jsx` to a typed `<Icon>` component, or use lucide-react
+- **Do NOT port** `synap-tweaks.jsx` / `tweaks-panel.jsx` — prototype-only; build real Settings instead
+
+### API calls
+- Sprints 0–10 use **typed mock data** (port of `reference/data.jsx`) — no real backend calls
+- Every faked AI call (`setTimeout` in prototype) gets a `// TODO: real API` comment marking the integration seam
+- Sprint 11 replaces mock layer with TanStack Query + real backend endpoints
+- In K8s: use **relative API paths** (`/api/v1/*`) — Istio IngressGateway routes to backends. No hardcoded host URLs.
+
+### K8s deployment (nginx:alpine)
+- Vite builds to `dist/` — served by `nginx:alpine` (not Next.js with Node.js runtime)
+- Frontend image: 64Mi request / 128Mi limit (fits the 10–11 GB workload budget)
+- Dockerfile: multi-stage `node:20-alpine` build → `nginx:alpine` serve
+- `nginx.conf` must include: `try_files $uri $uri/ /index.html` for SPA routing and `location /api { proxy_pass ... }` is NOT needed (Istio handles routing at the ingress level)
+
+### One sprint at a time
+Build exactly the screen in the current sprint. Stop and verify against the prototype in a browser before moving to the next sprint. Never implement screens from future sprints speculatively.
+
+### Do NOT port tweaks panel
+`synap-tweaks.jsx` and `tweaks-panel.jsx` are prototype-only demo theming. Do not port them. Real theme settings go in the Admin screen (Sprint 9).
+
+---
+
+## 12. What Not to Do
 
 - Do NOT create a dedicated API Gateway service
 - Do NOT create K8s StatefulSet or PVC for PostgreSQL
