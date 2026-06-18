@@ -1,9 +1,65 @@
-# Workflow: ci-lint.yml
-# Status: STUB — populated in Phase 8.
-name: ci-lint
-on: [push]
+# ci-lint.yml
+# Lints all services on every push and PR.
+# Go: gofmt + golangci-lint | Python: ruff | TypeScript: eslint
+name: CI Lint
+
+on:
+  push:
+    branches: [main, "feature/**", "sprint/**", "phase/**"]
+  pull_request:
+    branches: [main]
+
 jobs:
-  placeholder:
+  lint-go:
+    name: Lint Go services
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Phase 8 - not yet implemented"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: gofmt check — user-service
+        run: |
+          unformatted=$(gofmt -l services/user-service/)
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted files:"; echo "$unformatted"; exit 1
+          fi
+      - name: golangci-lint — user-service
+        uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: services/user-service
+
+  lint-python:
+    name: Lint Python services
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff
+      - name: ruff — asset-service
+        run: ruff check services/asset-service/
+      - name: ruff — incident-service
+        run: ruff check services/incident-service/
+
+  lint-typescript:
+    name: Lint TypeScript (Synap UI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: services/frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: services/frontend
+      - name: ESLint
+        run: npm run lint
+        working-directory: services/frontend
+      - name: TypeScript type check
+        run: npm run type-check
+        working-directory: services/frontend

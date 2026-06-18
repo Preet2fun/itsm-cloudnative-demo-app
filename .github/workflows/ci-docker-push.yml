@@ -1,9 +1,40 @@
-# Workflow: ci-docker-push.yml
-# Status: STUB — populated in Phase 8.
-name: ci-docker-push
-on: [push]
+# ci-docker-push.yml
+# Builds and pushes versioned Docker images to Docker Hub on release tags.
+# Triggered by: git tag v* (e.g. git tag v0.6.0)
+# Full automated pipeline with Helm deploy is implemented in Phase 9.
+#
+# To push manually (before Phase 9 CI is live):
+#   VERSION=$(cat services/<service>/VERSION)
+#   docker build -t preet2fun/<service>:v$VERSION services/<service>/
+#   docker push preet2fun/<service>:v$VERSION
+
+name: CI Docker Push
+
+on:
+  push:
+    tags:
+      - "v*"                      # platform release: v0.6.0
+      - "*/v*"                    # service release: user-service/v0.3.0
+
 jobs:
-  placeholder:
+  push-on-tag:
+    name: Push Docker image on release tag
     runs-on: ubuntu-latest
+    # Phase 9 will expand this into per-service matrix builds with Helm deploy.
+    # For now it validates the tag format and documents the intent.
     steps:
-      - run: echo "Phase 8 - not yet implemented"
+      - uses: actions/checkout@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Extract tag info
+        id: tag
+        run: |
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "sha_short=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+      - name: Echo tag (Phase 9 will build + push here)
+        run: |
+          echo "Release tag: ${{ steps.tag.outputs.tag }}"
+          echo "Full CI/CD pipeline (matrix build + Helm upgrade) implemented in Phase 9"

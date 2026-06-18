@@ -1,5 +1,14 @@
 # Architecture Overview
 
+> **This document is a high-level orientation.** For the current, authoritative architecture documentation see:
+> - [`docs/architecture/01_System_Overview.md`](architecture/01_System_Overview.md) — full system diagram + component matrix
+> - [`docs/architecture/02_Service_Design.md`](architecture/02_Service_Design.md) — service inventory with correct ports
+> - [`docs/architecture/03_Multi_Tenancy.md`](architecture/03_Multi_Tenancy.md) — 7-layer tenant isolation model
+> - [`docs/architecture/04_Security_Model.md`](architecture/04_Security_Model.md) — auth flows + Istio/OPA security chain
+> - [`docs/architecture/05_Data_Model.md`](architecture/05_Data_Model.md) — PostgreSQL ER diagram + schema layout
+>
+> **Target deployment model:** separate K8s namespace per tenant (`tenant-a`, `tenant-b`, `tenant-c`) + subdomain routing via Istio. The current Phase 5 deployment in `itsm-dev` is a stepping stone; Phase 6 migrates to the target model.
+
 ## Purpose
 
 The ITSM CloudNative Demo App is a reference implementation of a multi-tenant IT Service Management platform built entirely on cloud-native open-source tooling. It serves three purposes:

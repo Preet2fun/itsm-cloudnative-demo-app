@@ -1,9 +1,56 @@
-# Workflow: ci-build.yml
-# Status: STUB — populated in Phase 8.
-name: ci-build
-on: [push]
+# ci-build.yml
+# Builds Docker images for all services to verify Dockerfiles are valid.
+# Does NOT push images — that is handled by ci-docker-push.yml.
+# Full CI/CD pipeline (push + Helm deploy) is implemented in Phase 9.
+name: CI Build
+
+on:
+  push:
+    branches: [main, "feature/**", "sprint/**", "phase/**"]
+  pull_request:
+    branches: [main]
+
 jobs:
-  placeholder:
+  build-user-service:
+    name: Build user-service
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Phase 8 - not yet implemented"
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/user-service:ci-${{ github.sha }} \
+            services/user-service/
+
+  build-asset-service:
+    name: Build asset-service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/asset-service:ci-${{ github.sha }} \
+            services/asset-service/
+
+  build-incident-service:
+    name: Build incident-service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/incident-service:ci-${{ github.sha }} \
+            services/incident-service/
+
+  build-frontend:
+    name: Build frontend (Synap UI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/frontend:ci-${{ github.sha }} \
+            services/frontend/

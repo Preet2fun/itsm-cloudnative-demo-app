@@ -270,7 +270,7 @@ Never use unprefixed keys. Never FLUSHDB (affects all tenants).
 
 After every phase, a step-by-step deployment guide must be written or updated in:
 ```
-docs/05_Phase_Deployment_Guides/Phase_0X_<Name>.md
+docs/06_Phase_Deployment_Guides/Phase_0X_<Name>.md
 ```
 
 The guide must include: prerequisites, ordered steps, expected output, verification

@@ -1,7 +1,9 @@
 # ITSM CloudNative Demo App — Synap
 
-[![CI Build](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-build.yml/badge.svg)](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-build.yml)
-[![CI Lint](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-lint.yml/badge.svg)](https://github.com/<your-username>/itsm-cloudnative-demo-app/actions/workflows/ci-lint.yml)
+[![CI Build](https://github.com/preet2fun/itsm-cloudnative-demo-app/actions/workflows/ci-build.yml/badge.svg)](https://github.com/preet2fun/itsm-cloudnative-demo-app/actions/workflows/ci-build.yml)
+[![CI Lint](https://github.com/preet2fun/itsm-cloudnative-demo-app/actions/workflows/ci-lint.yml/badge.svg)](https://github.com/preet2fun/itsm-cloudnative-demo-app/actions/workflows/ci-lint.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-v0.5.0-violet.svg)](VERSIONS.md)
 
 A fully containerised, multi-tenant **IT Service Management (ITSM) + IT Operations (ITOM)** platform ("Synap") built as a cloud-native reference implementation. Covers Asset Management, User Management, and Incident Management — with AI-powered features, deployed on Kubernetes with a full observability stack, GitOps delivery, OPA-based RBAC, and an AI-native UI.
 

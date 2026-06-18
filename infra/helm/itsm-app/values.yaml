@@ -5,9 +5,9 @@
 global:
   env: dev
   namespace: itsm-dev
-  imageRegistry: "preet2fun/"   # Docker Hub username prefix
-  imageTag: latest
+  imageRegistry: "preet2fun"    # Docker Hub username — images: preet2fun/<service>:<tag>
   otelCollectorEndpoint: "otel-collector.itsm-dev:4317"
+  # imageTag is NOT set globally — each service has its own image.tag for independent versioning
 
 # ── User Service ──────────────────────────────────────────────────────────────
 userService:
@@ -15,6 +15,7 @@ userService:
   name: user-service
   image:
     repository: user-service    # full image = preet2fun/user-service:<tag>
+    tag: "v0.2.0"               # bump to v0.3.0 in Phase 6 (RS256 migration)
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -92,6 +93,7 @@ assetService:
   name: asset-service
   image:
     repository: asset-service    # full image = preet2fun/asset-service:<tag>
+    tag: "v0.2.0"
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
@@ -118,30 +120,26 @@ assetService:
     initialDelaySeconds: 20
     periodSeconds: 20
 
-# ── Frontend (Next.js 14) ──────────────────────────────────────────────────────
+# ── Frontend (Synap UI — nginx:alpine serving Vite dist/) ─────────────────────
 frontend:
   enabled: true
   name: frontend
   image:
     repository: frontend          # full image = preet2fun/frontend:<tag>
+    tag: "v0.1.0"                 # Sprint 0 complete; bump to v0.2.0 in Sprint 1
     pullPolicy: IfNotPresent
-  port: 3000
+  port: 80                        # nginx:alpine serves on port 80 (not 3000)
   replicas: 1
-
-  env:
-    # These match the default K8s service names — no change needed for standard deploy.
-    # Override only if service names differ (e.g. multi-cluster or local dev).
-    userServiceUrl: "http://user-service"
-    incidentServiceUrl: "http://incident-service"
-    assetServiceUrl: "http://asset-service"
+  # No env vars needed — nginx serves static files; Istio VirtualService handles
+  # routing /api/v1/* to backend services at the mesh level.
 
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 64Mi
     limits:
       cpu: 200m
-      memory: 256Mi
+      memory: 128Mi
 
   hpa:
     minReplicas: 1
@@ -149,13 +147,13 @@ frontend:
     targetCPUUtilizationPercentage: 70
 
   readinessProbe:
-    path: /api/health
-    initialDelaySeconds: 15
+    path: /
+    initialDelaySeconds: 5
     periodSeconds: 10
 
   livenessProbe:
-    path: /api/health
-    initialDelaySeconds: 30
+    path: /
+    initialDelaySeconds: 10
     periodSeconds: 20
 
 # ── Incident Service ───────────────────────────────────────────────────────────
@@ -164,6 +162,7 @@ incidentService:
   name: incident-service
   image:
     repository: incident-service    # full image = preet2fun/incident-service:<tag>
+    tag: "v0.2.0"
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
