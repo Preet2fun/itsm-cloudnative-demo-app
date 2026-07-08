@@ -128,7 +128,7 @@ frontend:
     repository: frontend          # full image = preet2fun/frontend:<tag>
     tag: "v0.1.0"                  # Sprint 0 (Foundation) — matches services/frontend/VERSION
     pullPolicy: IfNotPresent
-  port: 80                        # nginx:alpine serves on port 80 (not 3000)
+  port: 8080                      # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
   replicas: 1
   # No env vars needed — nginx serves static files; Istio VirtualService handles
   # routing /api/v1/* to backend services at the mesh level.
