@@ -23,8 +23,5 @@ incidentService:
   env:
     OTEL_SERVICE_NAME: "incident-service"
 
-frontend:
-  env:
-    userServiceUrl: "http://user-service"
-    incidentServiceUrl: "http://incident-service"
-    assetServiceUrl: "http://asset-service"
+# frontend: nginx:alpine serves static files — no env overrides needed.
+# Istio VirtualService handles all API routing at the mesh level.

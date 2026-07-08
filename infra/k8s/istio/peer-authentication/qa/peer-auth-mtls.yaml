@@ -1,0 +1,11 @@
+# PeerAuthentication — STRICT mTLS for all workloads in itsm-qa.
+# Apply ONLY after all pods in itsm-qa are confirmed 2/2 READY.
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: itsm-mtls-strict
+  namespace: itsm-qa
+spec:
+  mtls:
+    mode: STRICT

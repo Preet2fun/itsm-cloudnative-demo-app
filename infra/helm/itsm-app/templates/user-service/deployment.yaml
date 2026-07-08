@@ -39,7 +39,7 @@ spec:
               app: {{ .Values.userService.name }}
       containers:
         - name: user-service
-          image: "{{ .Values.global.imageRegistry }}{{ .Values.userService.image.repository }}:{{ .Values.global.imageTag }}"
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}"
           imagePullPolicy: {{ .Values.userService.image.pullPolicy }}
           ports:
             - name: http

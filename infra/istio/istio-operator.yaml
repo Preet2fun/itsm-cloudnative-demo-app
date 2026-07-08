@@ -22,6 +22,10 @@ spec:
         envoyExtAuthzGrpc:
           service: opa.itsm-dev.svc.cluster.local
           port: "9191"
+      - name: opa-authz-qa
+        envoyExtAuthzGrpc:
+          service: opa.itsm-qa.svc.cluster.local
+          port: "9191"
 
   components:
     # ── Istiod (control plane) ─────────────────────────────────────────────────

@@ -33,7 +33,7 @@ spec:
               app: {{ .Values.assetService.name }}
       containers:
         - name: asset-service
-          image: "{{ .Values.global.imageRegistry }}{{ .Values.assetService.image.repository }}:{{ .Values.global.imageTag }}"
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.assetService.image.repository }}:{{ .Values.assetService.image.tag }}"
           imagePullPolicy: {{ .Values.assetService.image.pullPolicy }}
           ports:
             - name: http

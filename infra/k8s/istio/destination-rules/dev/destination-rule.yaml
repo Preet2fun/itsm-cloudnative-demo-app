@@ -1,0 +1,20 @@
+# DestinationRule — client-side mTLS for all services in itsm-dev.
+#
+# PeerAuthentication (server-side) enforces that incoming connections use mTLS.
+# This DestinationRule tells the client-side Envoy to USE mTLS (ISTIO_MUTUAL)
+# when initiating connections to services in this namespace.
+#
+# Together: server rejects plain-text AND client always sends mTLS.
+# Istio auto-mTLS handles this in most cases, but explicit rules prevent
+# misconfiguration when adding new services.
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: itsm-mtls-all
+  namespace: itsm-dev
+spec:
+  host: "*.itsm-dev.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

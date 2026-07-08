@@ -33,32 +33,14 @@ spec:
               app: {{ .Values.frontend.name }}
       containers:
         - name: frontend
-          image: "{{ .Values.global.imageRegistry }}{{ .Values.frontend.image.repository }}:{{ .Values.global.imageTag }}"
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.frontend.port }}
               protocol: TCP
-          env:
-            # Next.js rewrites route /api/v1/* to these service names.
-            # Defaults in next.config.ts already match the K8s service names,
-            # so these are only needed to override in non-standard environments.
-            - name: USER_SERVICE_URL
-              value: {{ .Values.frontend.env.userServiceUrl | quote }}
-            - name: INCIDENT_SERVICE_URL
-              value: {{ .Values.frontend.env.incidentServiceUrl | quote }}
-            - name: ASSET_SERVICE_URL
-              value: {{ .Values.frontend.env.assetServiceUrl | quote }}
-            - name: NEXT_PUBLIC_API_BASE_URL
-              value: ""
-            - name: NODE_ENV
-              value: "production"
-            - name: NEXT_TELEMETRY_DISABLED
-              value: "1"
-            - name: PORT
-              value: {{ .Values.frontend.port | quote }}
-            - name: ENV
-              value: {{ .Values.global.env | quote }}
+          # nginx:alpine serves pre-built static files — no runtime env vars needed.
+          # API routing is handled by Istio VirtualService at the mesh level.
           readinessProbe:
             httpGet:
               path: {{ .Values.frontend.readinessProbe.path }}
@@ -80,19 +62,12 @@ spec:
               memory: {{ .Values.frontend.resources.limits.memory }}
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 65532
             capabilities:
               drop:
                 - ALL
-          # Writable scratch space for Next.js runtime cache / ISR
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-      volumes:
-        - name: tmp
-          emptyDir: {}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

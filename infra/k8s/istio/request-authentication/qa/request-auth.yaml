@@ -1,0 +1,18 @@
+# RequestAuthentication — JWT validation for all workloads in itsm-qa
+# Mirrors dev config; JWKS endpoint resolves to user-service in itsm-qa.
+
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: itsm-jwt-auth
+  namespace: itsm-qa
+spec:
+  jwtRules:
+    - issuer: "itsm-user-service"
+      jwksUri: "http://user-service.itsm-qa.svc.cluster.local/api/v1/.well-known/jwks.json"
+      outputClaimToHeaders:
+        - header: "x-tenant-id"
+          claim: "tenant_id"
+        - header: "x-user-role"
+          claim: "role"
+      forwardOriginalToken: true

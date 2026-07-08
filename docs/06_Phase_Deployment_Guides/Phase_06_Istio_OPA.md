@@ -66,11 +66,12 @@ kubectl delete secret itsm-secrets -n itsm-dev
 kubectl create secret generic itsm-secrets -n itsm-dev \
   --from-literal=database-url='postgres://itsm:itsm@172.16.13.168:5432/itsm?sslmode=disable' \
   --from-file=jwt-private-key=/tmp/jwt-private.pem \
-  --from-literal=rabbitmq-password='itsm'
+  --from-literal=redis-url='redis://redis.itsm-dev:6379' \
+  --from-literal=rabbitmq-url='amqp://itsm:itsm@rabbitmq.itsm-dev:5672/'
 
 # Confirm the keys in the secret
 kubectl get secret itsm-secrets -n itsm-dev -o jsonpath='{.data}' | python3 -c "import sys,json; d=json.load(sys.stdin); print(list(d.keys()))"
-# Expected: ['database-url', 'jwt-private-key', 'rabbitmq-password']
+# Expected: ['database-url', 'jwt-private-key', 'redis-url', 'rabbitmq-url']
 
 # Clean up temp file
 rm /tmp/jwt-private.pem
@@ -178,11 +179,11 @@ istioctl analyze -n itsm-dev
 
 **Quick test — frontend is now reachable via IngressGateway:**
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://172.16.15.206:30080/api/health
+curl -s -o /dev/null -w "%{http_code}" http://172.16.15.206:30080/healthz
 # Expected: 200
 ```
 
-From your **laptop browser**: `http://172.16.15.206:30080` — login page should appear.
+From your **laptop browser**: `http://172.16.15.206:30080` — the Vite+React app loads (login page available after Sprint 1).
 
 ---
 

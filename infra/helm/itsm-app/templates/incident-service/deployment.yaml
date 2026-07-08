@@ -33,7 +33,7 @@ spec:
               app: {{ .Values.incidentService.name }}
       containers:
         - name: incident-service
-          image: "{{ .Values.global.imageRegistry }}{{ .Values.incidentService.image.repository }}:{{ .Values.global.imageTag }}"
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.incidentService.image.repository }}:{{ .Values.incidentService.image.tag }}"
           imagePullPolicy: {{ .Values.incidentService.image.pullPolicy }}
           ports:
             - name: http

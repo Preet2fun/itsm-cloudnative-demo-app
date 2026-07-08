@@ -64,10 +64,10 @@ every manifest, query, and config reflects the live state of the system.
 | Phase 3 — User Service (Go) | ✅ Complete |
 | Phase 4 — Asset & Incident Services (Python) | ✅ Complete |
 | Phase 5 — Helm Charts + K8s Manifests + Dockerfiles | ✅ Complete |
-| Phase 6 — Istio + OPA | 🔲 In Progress |
+| Phase 6 — Istio + OPA | ✅ Complete |
 | Phase 7 — AI Features | 🔲 Pending |
 | Phase 8 — Observability | 🔲 Pending |
-| Phase 9 — CI/CD & GitOps | 🔲 Pending |
+| Phase 9 — CI/CD & GitOps | 🔲 Pending — includes Helm chart split (see note below) |
 
 #### Synap UI Sprints (Vite + React 18 + TypeScript)
 Frontend is built from the design prototype in `design_handoff_synap/reference/`. Each sprint = one screen, pixel-matched to the prototype.
@@ -85,6 +85,30 @@ Frontend is built from the design prototype in `design_handoff_synap/reference/`
 | Sprint 9 | Monitoring + KB + Analytics + Admin | 🔲 Not Started |
 | Sprint 10 | Global Copilot + ⌘K palette | 🔲 Not Started |
 | Sprint 11 | Real API wiring | 🔲 Not Started |
+
+### Phase 9 — Helm Chart Split (planned refactor)
+
+Current state: single umbrella chart (`infra/helm/itsm-app/`) covers all services.
+This is correct for Phases 1–8 (single team, fast iteration, all services move together).
+
+**In Phase 9, split into per-service charts + a platform chart:**
+```
+infra/helm/
+├── platform/          ← shared infra: Redis, RabbitMQ, namespaces, RBAC
+├── user-service/      ← owns Deployment + Service + HPA
+├── asset-service/
+├── incident-service/
+├── notification-service/
+├── ai-service/
+└── frontend/
+```
+Each service chart becomes one ArgoCD `Application` — enabling independent deploy,
+independent rollback, and per-service health status in the ArgoCD UI.
+A shared `itsm-microservice` library chart (Helm library type) should provide the
+base Deployment + Service + HPA templates to avoid repetition across service charts.
+
+Do NOT split the chart before Phase 9 — the umbrella chart is the right tool until
+ArgoCD is the deployment driver.
 
 ---
 
@@ -223,10 +247,10 @@ itsm_cache_misses_total{tenant, resource}            counter
 | AI Service | Python 3.12+ | FastAPI 0.111+ | pgvector, LLM provider TBD (Phase 7) |
 | Frontend (Synap UI) | TypeScript | Vite + React 18 | React Router, TanStack Query, Zustand, CSS Modules/OKLCH tokens |
 
-### JWT (HS256 — built-in, no external identity provider)
+### JWT (RS256 — built-in, no external identity provider)
 Claims: `sub`, `tenant_id`, `role`, `email`, `exp`, `iat`, `jti`
-Issued by: User Service
-Validated by: Istio RequestAuthentication via JWKS endpoint on User Service
+Issued by: User Service (signs with RSA-2048 private key; `kid: itsm-rs256-v1`)
+Validated by: Istio RequestAuthentication via JWKS endpoint on User Service (`/api/v1/.well-known/jwks.json`)
 
 ### Key infrastructure
 - **Kubernetes:** kubeadm 1.29+, already installed, 3 nodes

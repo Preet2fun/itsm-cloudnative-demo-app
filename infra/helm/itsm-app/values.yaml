@@ -5,7 +5,7 @@
 global:
   env: dev
   namespace: itsm-dev
-  imageRegistry: "preet2fun"    # Docker Hub username — images: preet2fun/<service>:<tag>
+  imageRegistry: "preet2fun/"   # Docker Hub org prefix — images: preet2fun/<service>:<tag>
   otelCollectorEndpoint: "otel-collector.itsm-dev:4317"
   # imageTag is NOT set globally — each service has its own image.tag for independent versioning
 
@@ -15,7 +15,7 @@ userService:
   name: user-service
   image:
     repository: user-service    # full image = preet2fun/user-service:<tag>
-    tag: "v0.2.0"               # bump to v0.3.0 in Phase 6 (RS256 migration)
+    tag: "v0.3.0"               # Phase 6: RS256 migration
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -147,12 +147,12 @@ frontend:
     targetCPUUtilizationPercentage: 70
 
   readinessProbe:
-    path: /
+    path: /healthz
     initialDelaySeconds: 5
     periodSeconds: 10
 
   livenessProbe:
-    path: /
+    path: /healthz
     initialDelaySeconds: 10
     periodSeconds: 20
 
