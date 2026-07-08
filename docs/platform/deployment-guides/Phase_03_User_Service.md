@@ -128,7 +128,7 @@ docker build -t preet2fun/user-service:latest .
 
 # Verify it runs
 docker run --rm \
-  -e DATABASE_URL="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
+  -e DATABASE_URL="postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable" \
   -e JWT_SECRET="local-dev-test" \
   -e ENV=dev \
   -p 8080:8080 \
@@ -150,7 +150,7 @@ Secrets are **never stored in git**. Create them directly in the cluster:
 ```bash
 # Replace values with your actual DATABASE_URL and a strong JWT_SECRET
 kubectl create secret generic itsm-secrets \
-  --from-literal=database-url="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
+  --from-literal=database-url="postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable" \
   --from-literal=jwt-secret="$(openssl rand -base64 48)" \
   -n itsm-dev
 

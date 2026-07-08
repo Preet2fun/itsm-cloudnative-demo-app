@@ -35,7 +35,7 @@ git push origin v0.6.0
 | Kubernetes | 1.29+ | 3-node kubeadm cluster |
 | Istio | 1.22.0 | Pending Phase 6 |
 | OPA | 0.65+ | Pending Phase 6 |
-| PostgreSQL | 16 | External standalone host — `172.16.13.168:5432` |
+| PostgreSQL | 16 | External standalone host — `172.16.12.226:5432` |
 | Redis | 7.x | In-cluster StatefulSet |
 | RabbitMQ | 3.13.x | In-cluster StatefulSet |
 | ArgoCD | 2.11+ | Pending Phase 9 |

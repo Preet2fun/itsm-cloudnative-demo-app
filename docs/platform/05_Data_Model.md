@@ -229,7 +229,7 @@ database/migrations/
 
 **Run migrations:**
 ```bash
-export DATABASE_URL=postgres://itsm:itsm@172.16.13.168:5432/itsm?sslmode=disable
+export DATABASE_URL=postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable
 migrate -database "$DATABASE_URL" -path database/migrations up
 ```
 

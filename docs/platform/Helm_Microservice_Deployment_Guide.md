@@ -445,7 +445,7 @@ kubectl apply -f infra/k8s/namespaces/dev/namespace-itsm-dev.yaml
 
 # 2. Create the secret (replace IP with your postgres machine IP)
 kubectl create secret generic itsm-secrets \
-  --from-literal=database-url="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
+  --from-literal=database-url="postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable" \
   --from-literal=jwt-secret="$(openssl rand -base64 48)" \
   -n itsm-dev
 ```

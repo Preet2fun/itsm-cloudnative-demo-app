@@ -69,7 +69,7 @@ graph TB
     end
 
     subgraph "External Services"
-        PG[(PostgreSQL 16<br/>172.16.13.168:5432<br/>schema-per-tenant)]
+        PG[(PostgreSQL 16<br/>172.16.12.226:5432<br/>schema-per-tenant)]
         REDIS[(Redis 7.x<br/>prefix-per-tenant)]
         MQ[RabbitMQ 3.13<br/>W3C traceparent in headers]
     end
@@ -177,8 +177,8 @@ All resources accept `ENV=dev` (default) or `ENV=qa`. Switching environments cha
 
 | ENV | Namespaces | External DB |
 |---|---|---|
-| dev | tenant-a, tenant-b, tenant-c | 172.16.13.168:5432/itsm |
-| qa | tenant-a-qa, tenant-b-qa, tenant-c-qa | 172.16.13.168:5432/itsm_qa |
+| dev | tenant-a, tenant-b, tenant-c | 172.16.12.226:5432/itsm |
+| qa | tenant-a-qa, tenant-b-qa, tenant-c-qa | 172.16.12.226:5432/itsm_qa |
 
 ---
 

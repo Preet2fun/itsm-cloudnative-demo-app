@@ -64,7 +64,7 @@ kubectl delete secret itsm-secrets -n itsm-dev
 # Recreate with the new key name
 # Replace <your-rabbitmq-password> with whatever value you used before
 kubectl create secret generic itsm-secrets -n itsm-dev \
-  --from-literal=database-url='postgres://itsm:itsm@172.16.13.168:5432/itsm?sslmode=disable' \
+  --from-literal=database-url='postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable' \
   --from-file=jwt-private-key=/tmp/jwt-private.pem \
   --from-literal=redis-url='redis://redis.itsm-dev:6379' \
   --from-literal=rabbitmq-url='amqp://itsm:itsm@rabbitmq.itsm-dev:5672/'

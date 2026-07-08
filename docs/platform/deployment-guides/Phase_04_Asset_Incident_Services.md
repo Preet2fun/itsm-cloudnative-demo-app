@@ -57,7 +57,7 @@ JWT=$(kubectl get secret itsm-secrets -n itsm-dev \
 kubectl delete secret itsm-secrets -n itsm-dev
 
 kubectl create secret generic itsm-secrets \
-  --from-literal=database-url="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
+  --from-literal=database-url="postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable" \
   --from-literal=jwt-secret="${JWT}" \
   --from-literal=redis-url="redis://redis:6379/0" \
   --from-literal=rabbitmq-url="amqp://itsm:itsm@rabbitmq:5672/" \
@@ -72,7 +72,7 @@ kubectl describe secret itsm-secrets -n itsm-dev
 For QA (when needed):
 ```bash
 kubectl create secret generic itsm-secrets \
-  --from-literal=database-url="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
+  --from-literal=database-url="postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable" \
   --from-literal=jwt-secret="$(openssl rand -base64 48)" \
   --from-literal=redis-url="redis://redis:6379/0" \
   --from-literal=rabbitmq-url="amqp://itsm:itsm@rabbitmq:5672/" \
@@ -100,7 +100,7 @@ docker push preet2fun/incident-service:latest
 Verify images locally before pushing:
 ```bash
 docker run --rm \
-  -e DATABASE_URL="postgres://itsm:itsm@172.16.13.203:5432/itsm?sslmode=disable" \
+  -e DATABASE_URL="postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable" \
   -e REDIS_URL="redis://localhost:6379/0" \
   -p 8000:8000 \
   preet2fun/asset-service:latest &
@@ -308,7 +308,7 @@ kubectl logs -n itsm-dev -l app=asset-service --previous
 ```
 - `database_url field required` → Secret missing `database-url` key
 - `redis_url field required` → Secret missing `redis-url` key
-- `could not connect to server` → DB unreachable; check `172.16.13.203` firewall
+- `could not connect to server` → DB unreachable; check `172.16.12.226` firewall
 
 ### incident-service CrashLoopBackOff
 ```bash

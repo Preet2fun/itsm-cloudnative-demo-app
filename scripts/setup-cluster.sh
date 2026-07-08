@@ -19,7 +19,7 @@ NS="itsm-${ENV}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # ── Defaults (override via env vars before running) ───────────────────────────
-DATABASE_URL="${DATABASE_URL:-postgres://itsm:itsm@172.16.13.168:5432/itsm?sslmode=disable}"
+DATABASE_URL="${DATABASE_URL:-postgres://itsm:itsm@172.16.12.226:5432/itsm?sslmode=disable}"
 REDIS_URL="${REDIS_URL:-redis://redis.${NS}:6379}"
 RABBITMQ_URL="${RABBITMQ_URL:-amqp://itsm:itsm@rabbitmq.${NS}:5672/}"
 JWT_KEY_PATH="${JWT_KEY_PATH:-/tmp/jwt-private-${ENV}.pem}"
