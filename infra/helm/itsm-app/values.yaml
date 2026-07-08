@@ -93,7 +93,7 @@ assetService:
   name: asset-service
   image:
     repository: asset-service    # full image = preet2fun/asset-service:<tag>
-    tag: "v0.2.0"
+    tag: "latest"                # only tag actually pushed to Docker Hub as of Phase 6
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
@@ -126,7 +126,7 @@ frontend:
   name: frontend
   image:
     repository: frontend          # full image = preet2fun/frontend:<tag>
-    tag: "v0.1.0"                 # Sprint 0 complete; bump to v0.2.0 in Sprint 1
+    tag: "latest"                 # only tag actually pushed to Docker Hub as of Phase 6
     pullPolicy: IfNotPresent
   port: 80                        # nginx:alpine serves on port 80 (not 3000)
   replicas: 1
@@ -162,7 +162,7 @@ incidentService:
   name: incident-service
   image:
     repository: incident-service    # full image = preet2fun/incident-service:<tag>
-    tag: "v0.2.0"
+    tag: "latest"                    # only tag actually pushed to Docker Hub as of Phase 6
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
