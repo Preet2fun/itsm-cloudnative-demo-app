@@ -126,7 +126,7 @@ frontend:
   name: frontend
   image:
     repository: frontend          # full image = preet2fun/frontend:<tag>
-    tag: "latest"                 # only tag actually pushed to Docker Hub as of Phase 6
+    tag: "v0.1.0"                  # Sprint 0 (Foundation) — matches services/frontend/VERSION
     pullPolicy: IfNotPresent
   port: 80                        # nginx:alpine serves on port 80 (not 3000)
   replicas: 1
