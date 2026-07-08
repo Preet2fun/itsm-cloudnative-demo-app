@@ -127,7 +127,9 @@ frontend:
   image:
     repository: frontend          # full image = preet2fun/frontend:<tag>
     tag: "v0.1.0"                  # Sprint 0 (Foundation) — matches services/frontend/VERSION
-    pullPolicy: IfNotPresent
+    pullPolicy: Always             # TEMP: v0.1.0 is still being iterated on during initial deploy debugging —
+                                    # IfNotPresent lets nodes serve a stale cached image under this same tag.
+                                    # Revert to IfNotPresent once this image is stable.
   port: 8080                      # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
   replicas: 1
   # No env vars needed — nginx serves static files; Istio VirtualService handles
