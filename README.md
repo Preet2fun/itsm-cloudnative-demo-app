@@ -212,7 +212,7 @@ ENV=qa bash scripts/setup-cluster.sh
 ENV=qa bash scripts/create-tenants.sh
 ```
 
-See `docs/03_Deployment/03_Environment_Guide.md` for full details.
+See `docs/platform/deployment/03_Environment_Guide.md` for full details.
 
 ---
 
@@ -265,14 +265,14 @@ itsm-cloudnative-demo-app/
 | Document | Description |
 |---|---|
 | [Architecture Overview](docs/00_Overview.md) | Full architecture narrative and service map |
-| [Service Design](docs/02_App_Architecture/01_Service_Design.md) | Service responsibilities and communication patterns |
-| [Multi-Tenancy Model](docs/02_App_Architecture/03_Multi_Tenancy.md) | Isolation model, JWT flow, Istio routing |
-| [Environment Guide](docs/03_Deployment/03_Environment_Guide.md) | How dev/qa environments work |
+| [Service Design](docs/platform/02_Service_Design.md) | Service responsibilities and communication patterns |
+| [Multi-Tenancy Model](docs/platform/03_Multi_Tenancy.md) | Isolation model, JWT flow, Istio routing |
+| [Environment Guide](docs/platform/deployment/03_Environment_Guide.md) | How dev/qa environments work |
 | [Schema Diagram](database/schema-diagram.md) | Entity-relationship model |
-| [OTel Concepts](docs/01_OpenTelemetry/01_Concepts.md) | OpenTelemetry internals (Phase 5) |
-| [K8s: HPA](docs/04_K8s_Concepts/01_HPA.md) | Autoscaling config (Phase 6) |
-| [K8s: Istio](docs/04_K8s_Concepts/02_Istio.md) | mTLS, routing, JWT validation (Phase 6) |
-| [K8s: OPA](docs/04_K8s_Concepts/04_OPA.md) | Rego RBAC, ext_authz integration (Phase 6) |
+| [OTel Concepts](docs/platform/observability/01_Concepts.md) | OpenTelemetry internals (Phase 5) |
+| [K8s: HPA](docs/platform/k8s-concepts/01_HPA.md) | Autoscaling config (Phase 6) |
+| [K8s: Istio](docs/platform/k8s-concepts/02_Istio.md) | mTLS, routing, JWT validation (Phase 6) |
+| [K8s: OPA](docs/platform/k8s-concepts/04_OPA.md) | Rego RBAC, ext_authz integration (Phase 6) |
 
 ---
 
@@ -342,9 +342,9 @@ Copy-paste these checklists into your project management tool as acceptance crit
 - [ ] `CONTRIBUTING.md` covers branch naming, commit convention, PR checklist, and OPA test guide
 - [ ] `.gitignore` covers Python, Go, Node, K8s secrets, `.env*`, kubeconfig
 - [ ] `docs/00_Overview.md` contains full request flow walkthrough and 7-layer isolation model
-- [ ] `docs/02_App_Architecture/01_Service_Design.md` documents all 6 services with language rationale
-- [ ] `docs/02_App_Architecture/03_Multi_Tenancy.md` documents all isolation layers with YAML examples
-- [ ] `docs/03_Deployment/03_Environment_Guide.md` explains `ENV=dev|qa` with Helm values layering
+- [ ] `docs/platform/02_Service_Design.md` documents all 6 services with language rationale
+- [ ] `docs/platform/03_Multi_Tenancy.md` documents all isolation layers with YAML examples
+- [ ] `docs/platform/deployment/03_Environment_Guide.md` explains `ENV=dev|qa` with Helm values layering
 - [ ] `database/schema-diagram.md` describes all 7 tables with columns, indexes, and SLA targets
 - [ ] `docs/CHANGELOG.md` has Phase 1 entry
 - [ ] All stub files created for future phases with purpose-comment headers
@@ -469,7 +469,7 @@ Copy-paste these checklists into your project management tool as acceptance crit
 - [ ] Single login request produces: Prometheus counter increment + Loki log entry + Jaeger trace with ≥4 spans
 - [ ] Manual business span `itsm.incident.created` visible in Jaeger with all required attributes
 - [ ] Clicking `trace_id` in Loki opens correct trace in Grafana Jaeger panel (log-to-trace correlation)
-- [ ] All OTel docs (`docs/01_OpenTelemetry/`) fully written with app-specific examples
+- [ ] All OTel docs (`docs/platform/observability/`) fully written with app-specific examples
 
 ---
 
@@ -502,7 +502,7 @@ Copy-paste these checklists into your project management tool as acceptance crit
 - [ ] `PeerAuthentication` STRICT mTLS applied to all tenant namespaces
 - [ ] `istioctl authn tls-check <pod>.tenant-a <service>` shows STRICT for all services
 - [ ] `scripts/install-istio.sh` runs idempotently without errors
-- [ ] `docs/04_K8s_Concepts/02_Istio.md` fully written
+- [ ] `docs/platform/k8s-concepts/02_Istio.md` fully written
 
 ---
 
@@ -516,7 +516,7 @@ Copy-paste these checklists into your project management tool as acceptance crit
 - [ ] `agent` JWT → `POST /api/v1/incidents` → 201
 - [ ] `admin` JWT → all endpoints → correct 2xx responses
 - [ ] Policy update: edit `rbac.rego` → apply ConfigMap → restart OPA pod → new rule active without any service restart
-- [ ] `docs/04_K8s_Concepts/04_OPA.md` fully written
+- [ ] `docs/platform/k8s-concepts/04_OPA.md` fully written
 
 ---
 
@@ -528,7 +528,7 @@ Copy-paste these checklists into your project management tool as acceptance crit
 - [ ] `kubectl get pods -n tenant-a` shows all services in `Running` state
 - [ ] k6 load test against incident service → HPA scales pods from 1 → 2 → back to 1 after cool-down
 - [ ] Push change to `values-dev.yaml` in git → ArgoCD detects and auto-syncs all 3 tenant apps within 3 minutes
-- [ ] `docs/03_Deployment/01_K8s_Deployment.md` and `02_GitOps_Runbook.md` fully written
+- [ ] `docs/platform/deployment/01_K8s_Deployment.md` and `02_GitOps_Runbook.md` fully written
 
 ---
 
@@ -584,10 +584,10 @@ Copy-paste these checklists into your project management tool as acceptance crit
 ---
 
 ### Phase 9 — Documentation Completion
-- [ ] `docs/01_OpenTelemetry/03_Instrumentation.md` has dedicated manual instrumentation section with real code examples from all services
-- [ ] `docs/02_App_Architecture/04_AI_Architecture.md` documents LLM integration, RAG design, vector search
-- [ ] `docs/04_K8s_Concepts/` — HPA, Istio, Storage, OPA docs all complete with app-specific YAML examples
-- [ ] `docs/05_AI_Features/` — all 4 AI feature docs complete
+- [ ] `docs/platform/observability/03_Instrumentation.md` has dedicated manual instrumentation section with real code examples from all services
+- [ ] `docs/platform/07_AI_Platform_Architecture.md` documents LLM integration, RAG design, vector search
+- [ ] `docs/platform/k8s-concepts/` — HPA, Istio, Storage, OPA docs all complete with app-specific YAML examples
+- [ ] `docs/product/ai-features/` — all 4 AI feature docs complete
 - [ ] `README.md` phase status table shows all phases ✅
 - [ ] `docs/CHANGELOG.md` has entries for all 9 phases
 - [ ] New engineer can clone repo and run `ENV=dev bash scripts/setup-cluster.sh` to get full running demo in under 15 minutes following README

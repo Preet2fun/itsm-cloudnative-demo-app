@@ -619,9 +619,9 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
 - [ ] `CONTRIBUTING.md` — branch naming (`feat/`, `fix/`, `infra/`, `docs/`), commit convention, PR checklist
 - [ ] `.gitignore` — Python, Go, Node, K8s secrets, `.env*`, `*.pem`, kubeconfig
 - [ ] `docs/00_Overview.md` — architecture narrative, service responsibility matrix, Istio-as-gateway rationale
-- [ ] `docs/02_App_Architecture/01_Service_Design.md` — all service responsibilities, language choices, communication patterns
-- [ ] `docs/02_App_Architecture/03_Multi_Tenancy.md` — namespace isolation, schema-per-tenant, JWT flow, Istio subdomain routing
-- [ ] `docs/03_Deployment/03_Environment_Guide.md` — how `ENV=dev|qa` affects namespaces, values, Istio hosts, ArgoCD apps
+- [ ] `docs/platform/02_Service_Design.md` — all service responsibilities, language choices, communication patterns
+- [ ] `docs/platform/03_Multi_Tenancy.md` — namespace isolation, schema-per-tenant, JWT flow, Istio subdomain routing
+- [ ] `docs/platform/deployment/03_Environment_Guide.md` — how `ENV=dev|qa` affects namespaces, values, Istio hosts, ArgoCD apps
 - [ ] `docs/CHANGELOG.md` — Phase 1 entry
 - [ ] `database/schema-diagram.md` — full ER descriptions for all entities
 
@@ -644,7 +644,7 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
 - [ ] `database/seeds/seed-tenant-c.sql` — minimal: 5 users, 5 assets, 3 incidents
 - [ ] `scripts/create-tenants.sh` — accepts `ENV=dev|qa`, creates correct namespaced schemas and runs seeds
 - [ ] PostgreSQL deployed as K8s StatefulSet (not Deployment) with PVC
-- [ ] `docs/02_App_Architecture/02_Data_Flow.md`
+- [ ] `docs/platform/06_Data_Flow.md`
 
 **Acceptance Criteria:**
 - `ENV=dev bash scripts/create-tenants.sh` completes without error
@@ -786,8 +786,8 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
 - [ ] Grafana datasources provisioned: Prometheus, Loki, Jaeger — trace-to-logs and logs-to-traces correlation via `trace_id`
 - [ ] Loki Promtail forwards all pod logs from all tenant + observability namespaces
 - [ ] `infra/helm/observability/` Helm chart deployed via ArgoCD `observability.yaml`
-- [ ] `docs/01_OpenTelemetry/` — all 4 documents fully written using this app's actual configs and code
-- [ ] `docs/01_OpenTelemetry/03_Instrumentation.md` — dedicated manual instrumentation section: creating spans, adding attributes, span events, custom metrics — with real code examples from all services
+- [ ] `docs/platform/observability/` — all 4 documents fully written using this app's actual configs and code
+- [ ] `docs/platform/observability/03_Instrumentation.md` — dedicated manual instrumentation section: creating spans, adding attributes, span events, custom metrics — with real code examples from all services
 
 **Acceptance Criteria:**
 - `kubectl port-forward -n observability svc/grafana 3000:3000` → all 6 dashboards show live data
@@ -843,7 +843,7 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
 - [ ] All above patterns replicated for `tenant-b`, `tenant-c`, and all QA variants
 - [ ] `scripts/install-istio.sh` — demo profile, sidecar injection labels on all tenant namespaces
 - [ ] `scripts/apply-istio-config.sh` — applies all Istio manifests for `ENV=dev|qa`
-- [ ] `docs/04_K8s_Concepts/02_Istio.md` — full walkthrough with `istioctl` debugging guide
+- [ ] `docs/platform/k8s-concepts/02_Istio.md` — full walkthrough with `istioctl` debugging guide
 
 #### Phase 6d — OPA Policy Engine (ext_authz)
 
@@ -875,7 +875,7 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
   - `helpers.rego` — shared functions: `path_matches(pattern)`, `is_read_method`, `is_write_method`
   - `rbac_test.rego` — OPA unit tests covering: admin full access, agent restricted to incidents/assets, viewer read-only, health bypass, cross-tenant header missing → deny
 - [ ] `scripts/install-opa.sh` — deploys OPA namespace + resources + patches MeshConfig + applies custom AuthorizationPolicies; idempotent
-- [ ] `docs/04_K8s_Concepts/04_OPA.md` — full doc: OPA concepts, Rego language primer, ext_authz architecture diagram, how policies are loaded and hot-reloaded, RBAC rule walkthrough with this app's Rego as examples, `opa test` guide, debugging with OPA REST API
+- [ ] `docs/platform/k8s-concepts/04_OPA.md` — full doc: OPA concepts, Rego language primer, ext_authz architecture diagram, how policies are loaded and hot-reloaded, RBAC rule walkthrough with this app's Rego as examples, `opa test` guide, debugging with OPA REST API
 
 **Acceptance Criteria:**
 - `kubectl get pods -n opa` shows OPA pod Running
@@ -906,7 +906,7 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
   ```
 - [ ] Same pattern for all tenants, both envs
 - [ ] `scripts/setup-cluster.sh` — full bootstrap: `ENV=dev bash scripts/setup-cluster.sh`
-- [ ] `docs/03_Deployment/01_K8s_Deployment.md` and `02_GitOps_Runbook.md`
+- [ ] `docs/platform/deployment/01_K8s_Deployment.md` and `02_GitOps_Runbook.md`
 
 **Phase 6 Acceptance Criteria:**
 - `ENV=dev bash scripts/setup-cluster.sh` completes without manual steps (includes OPA install)
@@ -979,11 +979,11 @@ All services ──OTLP──▶ OTel Collector ──▶ Prometheus / Loki / Ja
 ### PHASE 9 — Documentation Completion & Demo Runbook
 
 **Deliverables:**
-- [ ] `docs/01_OpenTelemetry/` — all 4 documents complete with real config and code examples from this app
-- [ ] `docs/01_OpenTelemetry/03_Instrumentation.md` — comprehensive manual instrumentation guide: spans, attributes, span events, custom metrics, trace propagation across RabbitMQ — all examples from actual service code
-- [ ] `docs/02_App_Architecture/04_AI_Architecture.md` — AI service design, LLM integration, RAG, vector search
-- [ ] `docs/04_K8s_Concepts/` — all 3 docs complete with app-specific YAML examples
-- [ ] `docs/05_AI_Features/` — all 4 AI feature documents complete
+- [ ] `docs/platform/observability/` — all 4 documents complete with real config and code examples from this app
+- [ ] `docs/platform/observability/03_Instrumentation.md` — comprehensive manual instrumentation guide: spans, attributes, span events, custom metrics, trace propagation across RabbitMQ — all examples from actual service code
+- [ ] `docs/platform/07_AI_Platform_Architecture.md` — AI service design, LLM integration, RAG, vector search
+- [ ] `docs/platform/k8s-concepts/` — all 3 docs complete with app-specific YAML examples
+- [ ] `docs/product/ai-features/` — all 4 AI feature documents complete
 - [ ] `README.md` — final: all badges, ASCII diagram, phase status all ✅, two-command demo start
 - [ ] `docs/CHANGELOG.md` — all 9 phases documented
 - [ ] `scripts/port-forward.sh` — exposes Grafana (3000), Jaeger (16686), ArgoCD (8080), Prometheus (9090), all 3 frontend tenants

@@ -365,7 +365,7 @@ viewer blocked from POST, mTLS confirmed STRICT.
 \`user-service v0.2.0\` → \`v0.3.0\`, \`helm-chart v0.2.0\` → \`v0.3.0\`, platform \`v0.5.0\` → \`v0.6.0\`
 
 ## Deployment guide
-\`docs/06_Phase_Deployment_Guides/Phase_06_Istio_OPA.md\`" \
+\`docs/platform/deployment-guides/Phase_06_Istio_OPA.md\`" \
   "phase,now,roadmap,security,multi-tenant,infra" "false")
 add_to_project_with_stage "$N" "$OPT_NOW" "$OPT_TYPE_PHASE" "$OPT_LAYER_ALL"
 log "Created #$N: Phase 6"

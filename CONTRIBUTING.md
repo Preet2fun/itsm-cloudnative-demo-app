@@ -98,7 +98,7 @@ docs(istio): add tenant routing walkthrough to 02_Istio.md
 ## Environment Variables
 
 Never commit `.env` files. Use `.env.example` as a reference template.
-All secrets are managed via Kubernetes Secrets — see `docs/03_Deployment/01_K8s_Deployment.md`.
+All secrets are managed via Kubernetes Secrets — see `docs/platform/deployment/01_K8s_Deployment.md`.
 
 ---
 

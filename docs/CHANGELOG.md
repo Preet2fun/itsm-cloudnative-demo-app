@@ -38,9 +38,9 @@
 - `CONTRIBUTING.md` — branch naming, commit conventions (Conventional Commits), PR checklist, OPA policy testing guide
 - `.gitignore` — Python, Go, Node, K8s secrets, `.env*` files, kubeconfig
 - `docs/00_Overview.md` — full architecture narrative, request flow walkthrough, multi-tenancy layer diagram, OPA RBAC flow, GitOps delivery model
-- `docs/02_App_Architecture/01_Service_Design.md` — all service responsibilities, language rationale, inter-service communication patterns, why no dedicated API Gateway
-- `docs/02_App_Architecture/03_Multi_Tenancy.md` — seven-layer isolation model with YAML examples, JWT structure, adding a new tenant guide
-- `docs/03_Deployment/03_Environment_Guide.md` — `ENV=dev|qa` variable usage, Helm values layering, ArgoCD Application structure, `/etc/hosts` setup, dev→qa promotion workflow
+- `docs/platform/02_Service_Design.md` — all service responsibilities, language rationale, inter-service communication patterns, why no dedicated API Gateway
+- `docs/platform/03_Multi_Tenancy.md` — seven-layer isolation model with YAML examples, JWT structure, adding a new tenant guide
+- `docs/platform/deployment/03_Environment_Guide.md` — `ENV=dev|qa` variable usage, Helm values layering, ArgoCD Application structure, `/etc/hosts` setup, dev→qa promotion workflow
 - `database/schema-diagram.md` — full ER descriptions for all 7 entities with column definitions, indexes, SLA targets, migration strategy
 - `docs/CHANGELOG.md` (this file)
 - Stub files for all services, infra directories, scripts, CI workflows (populated in later phases)
@@ -84,10 +84,10 @@
 - `scripts/create-tenants.sh` — updated to parse `DATABASE_URL` directly (no separate DB_HOST/PORT vars needed)
 
 #### Documentation
-- `docs/02_App_Architecture/02_Data_Flow.md` — complete: read path, write path, async notification path, schema-per-tenant routing, Redis cache strategy, migration execution flow, service-to-DB connection model, OTel span naming, custom metrics
-- `docs/05_Phase_Deployment_Guides/README.md` — index of all phase deployment guides
-- `docs/05_Phase_Deployment_Guides/Phase_01_Repo_Scaffold.md` — Phase 1 deployment steps
-- `docs/05_Phase_Deployment_Guides/Phase_02_Database.md` — full Phase 2 deployment guide: PostgreSQL install, remote access, migrations, tenant creation, seed data, GUI verification, rollback, troubleshooting, acceptance checklist
+- `docs/platform/06_Data_Flow.md` — complete: read path, write path, async notification path, schema-per-tenant routing, Redis cache strategy, migration execution flow, service-to-DB connection model, OTel span naming, custom metrics
+- `docs/platform/deployment-guides/README.md` — index of all phase deployment guides
+- `docs/platform/deployment-guides/Phase_01_Repo_Scaffold.md` — Phase 1 deployment steps
+- `docs/platform/deployment-guides/Phase_02_Database.md` — full Phase 2 deployment guide: PostgreSQL install, remote access, migrations, tenant creation, seed data, GUI verification, rollback, troubleshooting, acceptance checklist
 
 ### Architecture decisions recorded
 - `search_path` set per-connection at request time (not DSN) — tenant slug sourced from Istio-injected `X-Tenant-ID` header
@@ -126,7 +126,7 @@
 - `templates/user-service/hpa.yaml` — autoscaling/v2, CPU 70%, max=2
 
 #### Documentation
-- `docs/05_Phase_Deployment_Guides/Phase_03_User_Service.md` — full guide: local build/test, Docker image, K8s Secret creation, Helm deploy, port-forward verification, tenant isolation test, rollback, troubleshooting, acceptance checklist
+- `docs/platform/deployment-guides/Phase_03_User_Service.md` — full guide: local build/test, Docker image, K8s Secret creation, Helm deploy, port-forward verification, tenant isolation test, rollback, troubleshooting, acceptance checklist
 
 ### Architecture decisions recorded
 - Login endpoint requires `tenant_slug` in request body because no JWT exists at login time — Istio cannot inject `X-Tenant-ID` on unauthenticated requests
@@ -179,7 +179,7 @@
 - Helm templates: `deployment.yaml` (runAsUser 65532, readOnlyRootFilesystem: false), `service.yaml`, `hpa.yaml`
 
 #### Documentation
-- `docs/05_Phase_Deployment_Guides/Phase_04_Asset_Incident_Services.md` — full guide: Step 0 (local-path-provisioner — kubeadm StorageClass prerequisite), Step 1 (K8s Secret with 6 keys), Step 2 (Docker build+push), Step 3 (Helm deploy), Steps 4-8 (verification, RabbitMQ check, endpoint tests, acceptance checklist)
+- `docs/platform/deployment-guides/Phase_04_Asset_Incident_Services.md` — full guide: Step 0 (local-path-provisioner — kubeadm StorageClass prerequisite), Step 1 (K8s Secret with 6 keys), Step 2 (Docker build+push), Step 3 (Helm deploy), Steps 4-8 (verification, RabbitMQ check, endpoint tests, acceptance checklist)
 
 ### Architecture decisions recorded
 - local-path-provisioner (Rancher v0.0.26) is the standard StorageClass for kubeadm bare-metal clusters; installed once at cluster level, not per-namespace

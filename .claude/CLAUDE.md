@@ -56,42 +56,44 @@ every manifest, query, and config reflects the live state of the system.
 
 ### Phase status (update as each is approved)
 
-#### Backend & Infrastructure Phases
+#### Platform Track (P-Phase N)
+Infra any product could reuse: K8s/Helm delivery, service mesh, authz, observability, CI/CD, the Identity Engine, AI infra, notification delivery. Full taxonomy: `docs/superpowers/specs/2026-07-08-platform-product-split-design.md`.
 | Phase | Status |
 |---|---|
-| Phase 1 — Repo Scaffold | ✅ Complete |
-| Phase 2 — Database Layer | ✅ Complete |
-| Phase 3 — User Service (Go) | ✅ Complete |
-| Phase 4 — Asset & Incident Services (Python) | ✅ Complete |
-| Phase 5 — Helm Charts + K8s Manifests + Dockerfiles | ✅ Complete |
-| Phase 6 — Istio + OPA | ✅ Complete |
-| Phase 7 — AI Features | 🔲 Pending |
-| Phase 8 — Observability | 🔲 Pending |
-| Phase 9 — CI/CD & GitOps | 🔲 Pending — includes Helm chart split (see note below) |
+| P-Phase 1 — Repo Scaffold | ✅ Complete |
+| P-Phase 2 — Database Layer | ✅ Complete |
+| P-Phase 3 — Identity Engine (User Service backend: JWT/JWKS/tenant registry) | ✅ Complete |
+| P-Phase 4 — Helm Charts + K8s Manifests + Dockerfiles | ✅ Complete |
+| P-Phase 5 — Istio + OPA | ✅ Complete — dev-cluster validation in progress as of 2026-07-08, see `docs/platform/deployment-guides/Phase_06_Istio_OPA.md` |
+| P-Phase 6 — Observability | 🔲 Pending |
+| P-Phase 7 — CI/CD & GitOps | 🔲 Pending — includes Helm chart split (see note below) |
+| P-Phase 8 — AI Platform (vector DB, LLM provider integration, MCP servers) | 🔲 Pending |
+| P-Phase 9 — Multi-Tenant Data Layer Enhancements (schema scaling, tenant provisioning automation) | 🔲 Pending |
 
-#### Synap UI Sprints (Vite + React 18 + TypeScript)
-Frontend is built from the design prototype in `design_handoff_synap/reference/`. Each sprint = one screen, pixel-matched to the prototype.
+#### Product Track (Sprint N)
+Synap-specific business logic + UX: Asset/Incident Service business logic, the entire frontend (all sprints, including Login), and AI *features* consuming Platform's AI infra. Built from the design prototype in `design_handoff_synap/reference/`; each sprint = one screen, pixel-matched to the prototype.
 | Sprint | Screen | Status |
 |---|---|---|
-| Sprint 0 | Foundation — scaffold + tokens + primitives | 🔲 Not Started |
-| Sprint 1 | Login — email/password + SSO + MFA | 🔲 Not Started |
+| Sprint 0 | Foundation — scaffold + tokens + primitives | ✅ Complete |
+| Sprint 1 | Login — email/password + SSO + MFA (UI only; backend = P-Phase 3) | 🔲 Not Started |
 | Sprint 2 | App Shell — sidebar + topbar + routing + theme | 🔲 Not Started |
-| Sprint 3 | Asset Module — list + detail + CRUD | 🔲 Not Started |
-| Sprint 4 | Incident Module — list + detail + lifecycle | 🔲 Not Started |
+| Sprint 3 | Asset Module — list + detail + CRUD (+ Asset Service backend business logic) | 🔲 Not Started |
+| Sprint 4 | Incident Module — list + detail + lifecycle (+ Incident Service backend business logic) | 🔲 Not Started |
 | Sprint 5 | Ops Dashboard | 🔲 Not Started |
 | Sprint 6 | AIOps Event Console | 🔲 Not Started |
 | Sprint 7 | End-user Portal | 🔲 Not Started |
 | Sprint 8 | CMDB + Service Map + Cloud | 🔲 Not Started |
-| Sprint 9 | Monitoring + KB + Analytics + Admin | 🔲 Not Started |
+| Sprint 9 | Monitoring + KB + Analytics + Admin (+ tenant management UI) | 🔲 Not Started |
 | Sprint 10 | Global Copilot + ⌘K palette | 🔲 Not Started |
 | Sprint 11 | Real API wiring | 🔲 Not Started |
+| — | AI Product Features (triage, runbook, KB auto-draft, semantic search UX) — cross-links Sprints 4/6/7/9/10 | 🔲 Not Started |
 
-### Phase 9 — Helm Chart Split (planned refactor)
+### P-Phase 7 — Helm Chart Split (planned refactor)
 
 Current state: single umbrella chart (`infra/helm/itsm-app/`) covers all services.
-This is correct for Phases 1–8 (single team, fast iteration, all services move together).
+This is correct for P-Phase 1–6 (single team, fast iteration, all services move together).
 
-**In Phase 9, split into per-service charts + a platform chart:**
+**In P-Phase 7, split into per-service charts + a platform chart:**
 ```
 infra/helm/
 ├── platform/          ← shared infra: Redis, RabbitMQ, namespaces, RBAC
@@ -107,7 +109,7 @@ independent rollback, and per-service health status in the ArgoCD UI.
 A shared `itsm-microservice` library chart (Helm library type) should provide the
 base Deployment + Service + HPA templates to avoid repetition across service charts.
 
-Do NOT split the chart before Phase 9 — the umbrella chart is the right tool until
+Do NOT split the chart before P-Phase 7 — the umbrella chart is the right tool until
 ArgoCD is the deployment driver.
 
 ---
@@ -292,13 +294,19 @@ Never use unprefixed keys. Never FLUSHDB (affects all tenants).
 
 ## 9. Deployment Guide Reminder
 
-After every phase, a step-by-step deployment guide must be written or updated in:
+After every Platform phase, a step-by-step deployment guide must be written or updated in:
 ```
-docs/06_Phase_Deployment_Guides/Phase_0X_<Name>.md
+docs/platform/deployment-guides/Phase_0X_<Name>.md
 ```
 
-The guide must include: prerequisites, ordered steps, expected output, verification
-queries/commands, rollback instructions, troubleshooting, and an acceptance checklist.
+After every Product sprint that requires a K8s deployment step, a guide must be written or updated in:
+```
+docs/product/deployment-guides/Sprint_0X_<Name>.md
+```
+
+Both guide types must include: prerequisites, ordered steps, expected output,
+verification queries/commands, rollback instructions, troubleshooting, and an
+acceptance checklist.
 
 ---
 
