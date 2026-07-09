@@ -70,6 +70,26 @@ Input: `{session_id, code}`. Looks up the OTP in Redis; on match, deletes the OT
 
 OTP Redis key is scoped to `tenant_slug` (from the original login request), matching the existing `itsm:{tenant_slug}:{resource}:{operation}:{hash}` cache-key convention from `CLAUDE.md` section 8. JWT issued at the end still carries `tenant_id` in its claims as before — no change to the token structure itself, only to when/how it's issued.
 
+### OpenTelemetry instrumentation
+
+`CLAUDE.md` section 5 requires both auto- and manual instrumentation on every business operation, "from Day One." Current state in `user-service`: `otelhttp` auto-instrumentation and a `TracerProvider` already exist (`telemetry.Init`, `services/user-service/telemetry/telemetry.go`); the existing `Login` handler already emits an `itsm.user.login` span with the two required attributes (`tenant.id`, `user.role`). There is currently **no metrics pipeline at all** in this service — `telemetry.Init` only sets up traces, no `MeterProvider` exists anywhere in the codebase. This sprint is the first to add one.
+
+**Traces** (extends the existing pattern, one span per handler):
+- `itsm.user.login` (existing span, no rename) — behavior changes: since a successful call no longer means "fully authenticated" (MFA still pending), replace the existing `span.AddEvent("login_success")` with `span.AddEvent("credentials_valid")`. Attributes unchanged: `tenant.id`, `user.role` (both already set today).
+- `itsm.user.mfa_send` (new) — attributes `tenant.id`, `user.role` (read from the pending-session record). `span.RecordError`/`span.SetStatus(codes.Error, ...)` on invalid/expired `session_id`, matching the existing error-handling pattern in `auth.go`.
+- `itsm.user.mfa_verify` (new) — same attribute set; `span.AddEvent("mfa_verify_success")` on the success path (this is the true "fully authenticated" event, replacing where `login_success` used to fire); `SetStatus(codes.Error, ...)` on wrong/expired code.
+
+**Metrics** (new — first metrics in this service, so `telemetry.Init` needs to grow a `MeterProvider` + OTLP gRPC metric exporter alongside its existing `TracerProvider`, using the same collector endpoint/connection):
+- `itsm_login_attempts_total{tenant, result}` counter — `result` = `success` | `invalid_credentials` | `inactive_account`
+- `itsm_mfa_otp_sent_total{tenant}` counter
+- `itsm_mfa_verify_attempts_total{tenant, result}` counter — `result` = `success` | `invalid_code` | `expired`
+
+Naming follows the `itsm_<domain>_<verb>_total{tenant, ...}` convention already established by `CLAUDE.md` section 5's example metrics list (`itsm_incidents_created_total`, etc.) — these three are additions to that list, not a new convention.
+
+**Logs:** continues the existing pattern — structured `slog` JSON logging for operational events (already used throughout `main.go`), no new log-correlation infrastructure needed since no log aggregation backend exists yet (Loki is P-Phase 6, Pending). The one new log line this sprint requires is the dev-mode OTP fallback itself (`slog.Info` with the generated code, only when `SMTP_HOST` is unset) — this is a deliberate, explicit operational log per issue #9's dev-mode requirement, not a substitute for span-based error tracking.
+
+**Known limitation, not a Sprint 1 blocker:** the OTel Collector itself (`infra/observability/otel-collector/` is currently just an empty placeholder directory) has not been deployed — that is Platform-track P-Phase 6 (Observability), still Pending. `OTEL_EXPORTER_OTLP_ENDPOINT` already points at `otel-collector.itsm-dev:4317` (set via `global.otelCollectorEndpoint` in `values.yaml`), so traces and metrics emitted by this sprint's new spans/counters will export correctly the moment P-Phase 6 stands up the Collector — no code changes needed then. Until it exists, OTLP exports fail silently in the background (already true today for every existing span in this service; not a new condition introduced by this sprint).
+
 ## 5. Istio / OPA
 
 Two new Rego `public if {...}` rules added to `infra/k8s/opa/policy-configmap.yaml` (identified during Phase 6 validation earlier, not yet applied):
@@ -98,6 +118,7 @@ Redeploy: `kubectl apply -f infra/k8s/opa/policy-configmap.yaml` + `kubectl roll
 3. Wrong OTP code → `401` from `/api/v1/auth/mfa/verify`.
 4. Expired OTP (wait 6+ minutes, or manually expire the Redis key) → `401`.
 5. Refreshing the browser mid-MFA (on `/login/mfa`) → redirected back to `/login` (session-hand-off design from §2).
+6. OTel sanity check: with `OTEL_EXPORTER_OTLP_ENDPOINT` pointed at a real (or `otel/opentelemetry-collector` debug-exporter test) collector, confirm the three new spans (`itsm.user.login`, `itsm.user.mfa_send`, `itsm.user.mfa_verify`) and three new metrics (`itsm_login_attempts_total`, `itsm_mfa_otp_sent_total`, `itsm_mfa_verify_attempts_total`) actually emit with correct attributes — this can be done with a local `docker run otel/opentelemetry-collector --config ... ` debug exporter or a temporary log-only collector config, since the real cluster Collector doesn't exist yet (P-Phase 6). Without this check, a bug in the new `MeterProvider` wiring could silently no-op forever and go unnoticed until P-Phase 6 ships.
 
 ## 8. Explicit non-goals
 
@@ -106,3 +127,4 @@ Redeploy: `kubectl apply -f infra/k8s/opa/policy-configmap.yaml` + `kubectl roll
 - No rate-limiting or lockout after N failed OTP attempts (not required by issue #9; can be added later if needed).
 - No real SMTP/email provider integration — stdout logging only, per issue #9's explicit dev-mode fallback.
 - No changes to the JWT claim structure, JWKS endpoint, or RS256 signing — those are already correct from Phase 6.
+- No deployment of the OTel Collector, Prometheus, Loki, Jaeger, or Grafana — that entire stack is Platform-track P-Phase 6 (Observability), a separate not-yet-started phase. This sprint only adds correctly-instrumented spans/metrics that will start flowing the moment that phase ships.
