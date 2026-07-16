@@ -8,6 +8,13 @@ Versioning: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [0.4.1] - 2026-07-16
+
+### Fixed
+- Dockerfile builder stage bumped `golang:1.22-alpine` → `golang:1.24-alpine` — `github.com/redis/go-redis/v9 v9.21.0` (added in 0.4.0) requires Go >= 1.24, so the container build was silently failing; local `go build`/`go test` never caught it because the dev toolchain auto-upgrades, masking the mismatch. Re-tagged as a new version (rather than re-pushing `v0.4.0`) to avoid stale-image-cache issues on nodes with `imagePullPolicy: IfNotPresent` that had already pulled the broken `v0.4.0` build.
+
+---
+
 ## [0.4.0] - 2026-07-09
 
 ### Added (Sprint 1)

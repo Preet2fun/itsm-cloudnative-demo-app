@@ -15,7 +15,7 @@ userService:
   name: user-service
   image:
     repository: user-service    # full image = preet2fun/user-service:<tag>
-    tag: "v0.4.0"               # Sprint 1: email OTP MFA
+    tag: "v0.4.1"               # Sprint 1: email OTP MFA (v0.4.1: Dockerfile go1.24 fix, fresh tag to dodge stale-cache on v0.4.0)
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
