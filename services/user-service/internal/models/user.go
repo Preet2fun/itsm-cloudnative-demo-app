@@ -55,6 +55,22 @@ type LoginResponse struct {
 	User      *UserResponse `json:"user"`
 }
 
+// MfaRequiredResponse is returned by Login on valid credentials — no token
+// yet, the caller must complete POST /api/v1/auth/mfa/send + /mfa/verify.
+type MfaRequiredResponse struct {
+	MfaRequired bool   `json:"mfa_required"`
+	SessionID   string `json:"session_id"`
+}
+
+type MfaSendRequest struct {
+	SessionID string `json:"session_id"`
+}
+
+type MfaVerifyRequest struct {
+	SessionID string `json:"session_id"`
+	Code      string `json:"code"`
+}
+
 type RefreshResponse struct {
 	Token     string    `json:"token"`
 	ExpiresAt time.Time `json:"expires_at"`

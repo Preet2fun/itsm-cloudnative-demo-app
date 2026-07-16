@@ -15,7 +15,7 @@ userService:
   name: user-service
   image:
     repository: user-service    # full image = preet2fun/user-service:<tag>
-    tag: "v0.3.0"               # Phase 6: RS256 migration
+    tag: "v0.4.0"               # Sprint 1: email OTP MFA
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -126,10 +126,8 @@ frontend:
   name: frontend
   image:
     repository: frontend          # full image = preet2fun/frontend:<tag>
-    tag: "v0.1.0"                  # Sprint 0 (Foundation) — matches services/frontend/VERSION
-    pullPolicy: Always             # TEMP: v0.1.0 is still being iterated on during initial deploy debugging —
-                                    # IfNotPresent lets nodes serve a stale cached image under this same tag.
-                                    # Revert to IfNotPresent once this image is stable.
+    tag: "v0.2.0"                 # Sprint 1: Login + email OTP MFA
+    pullPolicy: IfNotPresent
   port: 8080                      # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
   replicas: 1
   # No env vars needed — nginx serves static files; Istio VirtualService handles

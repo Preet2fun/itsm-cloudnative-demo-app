@@ -12,6 +12,10 @@ import { getToken, getTenantId, logout } from "./auth";
 import type {
   LoginRequest,
   LoginResponse,
+  MfaSendRequest,
+  MfaSendResponse,
+  MfaVerifyRequest,
+  MfaVerifyResponse,
   RefreshRequest,
   RefreshResponse,
   Incident,
@@ -59,15 +63,20 @@ interface RequestOptions {
 async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, params, public: isPublic = false } = opts;
 
-  // Build URL with optional query string
-  const url = new URL(`${BASE_URL}${path}`);
+  // Build URL with optional query string.
+  // NOTE: paths are relative (e.g. "/api/v1/auth/login") — Istio IngressGateway
+  // routes them, so we never have an absolute base to hand to `new URL()`.
+  // Build the query string with URLSearchParams instead of a URL object.
+  const searchParams = new URLSearchParams();
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== "") {
-        url.searchParams.set(k, String(v));
+        searchParams.set(k, String(v));
       }
     });
   }
+  const queryString = searchParams.toString();
+  const url = `${BASE_URL}${path}${queryString ? `?${queryString}` : ""}`;
 
   // Build headers
   const headers: Record<string, string> = {
@@ -87,14 +96,18 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
     }
   }
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(url, {
     method,
     headers,
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
 
-  // Handle 401 — clear local session and redirect to login
-  if (response.status === 401) {
+  // Handle 401 on authenticated requests — clear local session and redirect
+  // to login. Public endpoints (login, mfa/send, mfa/verify, refresh) have no
+  // session to invalidate and can return 401 for endpoint-specific reasons
+  // (bad credentials, bad OTP code) — those fall through to normal error
+  // parsing below so callers get the real server message.
+  if (response.status === 401 && !isPublic) {
     logout();
     if (typeof window !== "undefined") {
       window.location.href = "/login";
@@ -108,7 +121,9 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
     let code: string | undefined;
     try {
       const errorBody = await response.json();
-      message = errorBody.message ?? errorBody.detail ?? message;
+      // User Service's writeError() emits { "error": "<message>" };
+      // message/detail are kept for compatibility with other services.
+      message = errorBody.message ?? errorBody.detail ?? errorBody.error ?? message;
       code = errorBody.code;
     } catch {
       // non-JSON error body — use the default message
@@ -130,11 +145,35 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
 
 export const authApi = {
   /**
-   * Authenticate a user.
-   * Returns { token } — caller is responsible for storing it via setToken().
+   * Start a login — validates credentials, returns an MFA session to
+   * complete via mfaSend() + mfaVerify(). Does NOT return a usable token.
    */
   login(body: LoginRequest): Promise<LoginResponse> {
     return request<LoginResponse>("/api/v1/auth/login", {
+      method: "POST",
+      body,
+      public: true,
+    });
+  },
+
+  /**
+   * Trigger sending (or, in dev mode, server-side logging) of the email OTP
+   * for a pending login session.
+   */
+  mfaSend(body: MfaSendRequest): Promise<MfaSendResponse> {
+    return request<MfaSendResponse>("/api/v1/auth/mfa/send", {
+      method: "POST",
+      body,
+      public: true,
+    });
+  },
+
+  /**
+   * Complete login by submitting the OTP. Returns the real JWT — caller
+   * stores it via setToken().
+   */
+  mfaVerify(body: MfaVerifyRequest): Promise<MfaVerifyResponse> {
+    return request<MfaVerifyResponse>("/api/v1/auth/mfa/verify", {
       method: "POST",
       body,
       public: true,

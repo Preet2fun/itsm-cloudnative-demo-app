@@ -6,16 +6,29 @@ Versioning: [Semantic Versioning](https://semver.org/)
 
 ## [Unreleased]
 
-### Planned (v0.3.0 — Phase 6)
+---
+
+## [0.4.0] - 2026-07-09
+
+### Added (Sprint 1)
+- `POST /api/v1/auth/mfa/send` — generates a 6-digit email OTP, stores it in Redis (`itsm:{tenant_slug}:otp:{session_id}`, 5 min TTL); logs the code to stdout in dev mode (`SMTP_HOST` unset) rather than sending real email
+- `POST /api/v1/auth/mfa/verify` — validates the OTP, issues the RS256 JWT on success (single-use code, deleted immediately on a correct match)
+- `POST /api/v1/auth/login` now returns `{"mfa_required": true, "session_id": "..."}` instead of issuing a token directly — the pending-login user/tenant association is stored at `itsm:auth-session:{session_id}` (10 min TTL)
+- New `itsm.user.mfa_send` and `itsm.user.mfa_verify` OTel spans (`tenant.id`, `user.role` attributes)
+- New OTel metrics: `itsm_login_attempts_total{tenant, result}`, `itsm_mfa_otp_sent_total{tenant}`, `itsm_mfa_verify_attempts_total{tenant, result}` — first metrics in this service; `telemetry.Init` now also registers a `MeterProvider`
+- New `REDIS_URL` (required) and `SMTP_HOST` (optional, empty = dev mode) environment variables
+
+### Changed
+- `itsm.user.login` span's `login_success` event renamed to `credentials_valid` — the true "fully authenticated" event is now `mfa_verify_success` on the new `itsm.user.mfa_verify` span
+
+---
+
+## [0.3.0] - 2026-07-08
+
+### Added (Phase 6 — Istio + OPA, retroactively documented; this work shipped before this CHANGELOG entry was written)
 - RS256 JWT signing — private key loaded from `JWT_PRIVATE_KEY` env var
 - JWKS endpoint updated to serve RSA public key (`kty: RSA`) for Istio RequestAuthentication
 - `iss` claim added to JWT payload (`itsm-user-service`)
-
-### Planned (v0.4.0 — Sprint 1)
-- `POST /api/v1/auth/mfa/send` — generate email OTP, store in Redis (5 min TTL), send via SMTP
-- `POST /api/v1/auth/mfa/verify` — validate OTP, issue JWT on success
-- Login response updated: returns `{"mfa_required": true, "session_id": "..."}` before OTP step
-- SMTP sender with dev-mode fallback (logs OTP to stdout when `SMTP_HOST` unset)
 
 ---
 
