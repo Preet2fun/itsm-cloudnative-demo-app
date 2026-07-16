@@ -20,6 +20,8 @@ type Config struct {
 	Env            string // dev | qa
 	OTELEndpoint   string // gRPC endpoint e.g. otel-collector:4317
 	ServiceName    string
+	RedisURL       string
+	SMTPHost       string // empty = dev mode: OTP logged to stdout instead of emailed
 }
 
 // Load reads configuration from environment variables.
@@ -30,12 +32,17 @@ func Load() (*Config, error) {
 		Env:            getEnvOrDefault("ENV", "dev"),
 		OTELEndpoint:   getEnvOrDefault("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317"),
 		ServiceName:    getEnvOrDefault("OTEL_SERVICE_NAME", "user-service"),
+		RedisURL:       os.Getenv("REDIS_URL"),
+		SMTPHost:       getEnvOrDefault("SMTP_HOST", ""),
 		JWTExpiryHours: 24,
 		Port:           8080,
 	}
 
 	if cfg.DatabaseURL == "" {
 		return nil, fmt.Errorf("DATABASE_URL is required")
+	}
+	if cfg.RedisURL == "" {
+		return nil, fmt.Errorf("REDIS_URL is required")
 	}
 	if cfg.Env != "dev" && cfg.Env != "qa" {
 		return nil, fmt.Errorf("ENV must be 'dev' or 'qa', got %q", cfg.Env)

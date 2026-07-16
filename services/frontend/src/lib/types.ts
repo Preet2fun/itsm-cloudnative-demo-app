@@ -19,7 +19,35 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  mfa_required: true;
+  session_id: string;
+}
+
+export interface MfaSendRequest {
+  session_id: string;
+}
+
+export interface MfaSendResponse {
+  status: string;
+}
+
+export interface MfaVerifyRequest {
+  session_id: string;
+  code: string;
+}
+
+export interface MfaVerifyResponse {
   token: string;
+  expires_at: string;
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+    role: "admin" | "agent" | "viewer";
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 export interface RefreshRequest {

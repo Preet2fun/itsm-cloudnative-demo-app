@@ -20,6 +20,9 @@ data:
     # ── Public paths — allow without JWT ──────────────────────────────────────
     # Login endpoint
     public if { path == "/api/v1/auth/login" }
+    # MFA endpoints — a user has no JWT yet at this point in the flow
+    public if { path == "/api/v1/auth/mfa/send" }
+    public if { path == "/api/v1/auth/mfa/verify" }
     # JWKS endpoint (Istio fetches this)
     public if { startswith(path, "/api/v1/.well-known/") }
     # Health checks on any service

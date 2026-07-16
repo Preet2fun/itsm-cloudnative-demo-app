@@ -30,6 +30,7 @@ import (
 	"github.com/itsm-cloudnative/user-service/internal/handlers"
 	appmw "github.com/itsm-cloudnative/user-service/internal/middleware"
 	"github.com/itsm-cloudnative/user-service/internal/repository"
+	"github.com/itsm-cloudnative/user-service/internal/sessionstore"
 	"github.com/itsm-cloudnative/user-service/telemetry"
 )
 
@@ -78,9 +79,19 @@ func run() error {
 	defer pool.Close()
 	slog.Info("database connected")
 
+	// ── Session store (Redis) ────────────────────────────────────────────────
+	sessStore, err := sessionstore.New(cfg.RedisURL)
+	if err != nil {
+		return fmt.Errorf("session store: %w", err)
+	}
+	defer sessStore.Close()
+
 	// ── Dependencies ──────────────────────────────────────────────────────────
 	repo := repository.New(pool)
-	authH := handlers.NewAuthHandler(repo, cfg, tracer)
+	authH, err := handlers.NewAuthHandler(repo, cfg, tracer, otel.Meter(cfg.ServiceName), sessStore)
+	if err != nil {
+		return fmt.Errorf("auth handler: %w", err)
+	}
 	userH := handlers.NewUserHandler(repo, tracer)
 
 	// ── Router ────────────────────────────────────────────────────────────────
@@ -103,6 +114,8 @@ func run() error {
 	r.Route("/api/v1/auth", func(r chi.Router) {
 		r.Post("/login", authH.Login)
 		r.Post("/refresh", authH.Refresh)
+		r.Post("/mfa/send", authH.MfaSend)
+		r.Post("/mfa/verify", authH.MfaVerify)
 	})
 
 	// Users — require X-Tenant-ID header (injected by Istio in Phase 6;

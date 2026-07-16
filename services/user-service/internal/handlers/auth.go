@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log/slog"
+	"math/big"
 	"net/http"
 	"strings"
 	"time"
@@ -11,12 +15,14 @@ import (
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/itsm-cloudnative/user-service/internal/config"
 	"github.com/itsm-cloudnative/user-service/internal/models"
 	"github.com/itsm-cloudnative/user-service/internal/repository"
+	"github.com/itsm-cloudnative/user-service/internal/sessionstore"
 )
 
 const jwtIssuer = "itsm-user-service"
@@ -35,13 +41,50 @@ type AuthHandler struct {
 	repo   *repository.Repo
 	cfg    *config.Config
 	tracer trace.Tracer
+	store  *sessionstore.Store
+
+	loginAttempts     metric.Int64Counter
+	mfaOtpSent        metric.Int64Counter
+	mfaVerifyAttempts metric.Int64Counter
 }
 
-func NewAuthHandler(repo *repository.Repo, cfg *config.Config, tracer trace.Tracer) *AuthHandler {
-	return &AuthHandler{repo: repo, cfg: cfg, tracer: tracer}
+func NewAuthHandler(repo *repository.Repo, cfg *config.Config, tracer trace.Tracer, meter metric.Meter, store *sessionstore.Store) (*AuthHandler, error) {
+	loginAttempts, err := meter.Int64Counter(
+		"itsm_login_attempts_total",
+		metric.WithDescription("Login attempts by result"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create itsm_login_attempts_total counter: %w", err)
+	}
+	mfaOtpSent, err := meter.Int64Counter(
+		"itsm_mfa_otp_sent_total",
+		metric.WithDescription("MFA OTP codes sent"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create itsm_mfa_otp_sent_total counter: %w", err)
+	}
+	mfaVerifyAttempts, err := meter.Int64Counter(
+		"itsm_mfa_verify_attempts_total",
+		metric.WithDescription("MFA verification attempts by result"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create itsm_mfa_verify_attempts_total counter: %w", err)
+	}
+
+	return &AuthHandler{
+		repo:              repo,
+		cfg:               cfg,
+		tracer:            tracer,
+		store:             store,
+		loginAttempts:     loginAttempts,
+		mfaOtpSent:        mfaOtpSent,
+		mfaVerifyAttempts: mfaVerifyAttempts,
+	}, nil
 }
 
-// Login authenticates a user and returns a signed JWT.
+// Login validates credentials and starts the MFA step — it does NOT issue a
+// JWT. On success, call POST /api/v1/auth/mfa/send with the returned
+// session_id, then POST /api/v1/auth/mfa/verify with the emailed code.
 //
 // POST /api/v1/auth/login
 // Body: { "email": "...", "password": "...", "tenant_slug": "tenant_a" }
@@ -68,6 +111,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.repo.FindByEmail(ctx, req.TenantSlug, req.Email)
 	if errors.Is(err, repository.ErrNotFound) {
 		span.SetStatus(codes.Error, "user not found")
+		h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("tenant", req.TenantSlug),
+			attribute.String("result", "invalid_credentials"),
+		))
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
@@ -80,17 +127,198 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if !user.IsActive {
 		span.SetStatus(codes.Error, "user inactive")
+		h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("tenant", req.TenantSlug),
+			attribute.String("result", "inactive_account"),
+		))
 		writeError(w, http.StatusUnauthorized, "account is inactive")
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		span.SetStatus(codes.Error, "wrong password")
+		h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("tenant", req.TenantSlug),
+			attribute.String("result", "invalid_credentials"),
+		))
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
 
-	token, expiresAt, err := h.issueToken(user, req.TenantSlug)
+	sessionID := uuid.New().String()
+	if err := h.store.SaveSession(ctx, sessionID, user.ID.String(), req.TenantSlug, 10*time.Minute); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "session store failed")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	span.SetAttributes(attribute.String("user.role", user.Role))
+	span.AddEvent("credentials_valid")
+	h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
+		attribute.String("tenant", req.TenantSlug),
+		attribute.String("result", "success"),
+	))
+
+	writeJSON(w, http.StatusOK, &models.MfaRequiredResponse{
+		MfaRequired: true,
+		SessionID:   sessionID,
+	})
+}
+
+// MfaSend generates and sends (or, in dev mode, logs) a one-time email code
+// for the session started by Login.
+//
+// POST /api/v1/auth/mfa/send
+// Body: { "session_id": "..." }
+func (h *AuthHandler) MfaSend(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.tracer.Start(r.Context(), "itsm.user.mfa_send")
+	defer span.End()
+
+	var req models.MfaSendRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if req.SessionID == "" {
+		writeError(w, http.StatusBadRequest, "session_id is required")
+		return
+	}
+
+	userID, tenantSlug, err := h.store.GetSession(ctx, req.SessionID)
+	if errors.Is(err, sessionstore.ErrNotFound) {
+		span.SetStatus(codes.Error, "session not found")
+		writeError(w, http.StatusUnauthorized, "invalid or expired session")
+		return
+	}
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "session store error")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	user, err := h.repo.FindByID(ctx, tenantSlug, mustParseUUID(userID))
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "user lookup failed")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	span.SetAttributes(
+		attribute.String("tenant.id", tenantSlug),
+		attribute.String("user.role", user.Role),
+	)
+
+	code, err := generateOTP()
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "otp generation failed")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	if err := h.store.SaveOTP(ctx, tenantSlug, req.SessionID, code, 5*time.Minute); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "otp store failed")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	if h.cfg.SMTPHost == "" {
+		// Dev mode — no real email provider. This log line IS the delivery
+		// mechanism for local/dev-cluster testing (see design spec §4).
+		slog.Info("dev-mode: MFA OTP generated", "tenant", tenantSlug, "email", user.Email, "code", code)
+	}
+	// else: real SMTP send — explicitly out of scope for Sprint 1 (design spec §8 non-goals).
+
+	h.mfaOtpSent.Add(ctx, 1, metric.WithAttributes(attribute.String("tenant", tenantSlug)))
+
+	writeJSON(w, http.StatusOK, map[string]string{"status": "sent"})
+}
+
+// MfaVerify checks the one-time code and, on success, issues the real JWT —
+// this is the actual "fully authenticated" moment (Login only validated
+// credentials; MfaSend only sent a code).
+//
+// POST /api/v1/auth/mfa/verify
+// Body: { "session_id": "...", "code": "123456" }
+func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.tracer.Start(r.Context(), "itsm.user.mfa_verify")
+	defer span.End()
+
+	var req models.MfaVerifyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if req.SessionID == "" || req.Code == "" {
+		writeError(w, http.StatusBadRequest, "session_id and code are required")
+		return
+	}
+
+	userID, tenantSlug, err := h.store.GetSession(ctx, req.SessionID)
+	if errors.Is(err, sessionstore.ErrNotFound) {
+		span.SetStatus(codes.Error, "session not found")
+		h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("tenant", "unknown"),
+			attribute.String("result", "expired"),
+		))
+		writeError(w, http.StatusUnauthorized, "invalid or expired session")
+		return
+	}
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "session store error")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	span.SetAttributes(attribute.String("tenant.id", tenantSlug))
+
+	storedCode, err := h.store.GetOTP(ctx, tenantSlug, req.SessionID)
+	if errors.Is(err, sessionstore.ErrNotFound) {
+		span.SetStatus(codes.Error, "otp expired")
+		h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("tenant", tenantSlug),
+			attribute.String("result", "expired"),
+		))
+		writeError(w, http.StatusUnauthorized, "code expired — request a new one")
+		return
+	}
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "otp store error")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	if storedCode != req.Code {
+		span.SetStatus(codes.Error, "wrong code")
+		h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
+			attribute.String("tenant", tenantSlug),
+			attribute.String("result", "invalid_code"),
+		))
+		writeError(w, http.StatusUnauthorized, "invalid code")
+		return
+	}
+
+	// Single-use — delete immediately after a correct match, before doing
+	// anything else that could fail and leave a valid code reusable.
+	if err := h.store.DeleteOTP(ctx, tenantSlug, req.SessionID); err != nil {
+		span.RecordError(err) // non-fatal — log via span, continue
+	}
+
+	user, err := h.repo.FindByID(ctx, tenantSlug, mustParseUUID(userID))
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "user lookup failed")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	token, expiresAt, err := h.issueToken(user, tenantSlug)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "token issue failed")
@@ -98,8 +326,16 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := h.store.DeleteSession(ctx, req.SessionID); err != nil {
+		span.RecordError(err) // non-fatal — token already issued
+	}
+
 	span.SetAttributes(attribute.String("user.role", user.Role))
-	span.AddEvent("login_success")
+	span.AddEvent("mfa_verify_success")
+	h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
+		attribute.String("tenant", tenantSlug),
+		attribute.String("result", "success"),
+	))
 
 	writeJSON(w, http.StatusOK, &models.LoginResponse{
 		Token:     token,
@@ -204,4 +440,15 @@ func mustParseUUID(s string) uuid.UUID {
 		return uuid.Nil
 	}
 	return id
+}
+
+// generateOTP returns a cryptographically random 6-digit numeric code,
+// zero-padded (e.g. "004821").
+func generateOTP() (string, error) {
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%06d", n.Int64()), nil
 }
