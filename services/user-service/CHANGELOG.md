@@ -8,6 +8,13 @@ Versioning: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [0.4.2] - 2026-07-16
+
+### Fixed
+- `sessionstore.New()` used a naive `strings.TrimPrefix(url, "redis://")` instead of parsing the URL, so a `REDIS_URL` with a DB-index suffix (the live cluster's is `redis://redis:6379/0`) produced an invalid address (`redis:6379/0`) — Go's dialer read `6379/0` as the port and failed with `lookup tcp/6379/0: unknown port`, breaking every Redis call (session save, OTP save/get) and surfacing as a generic "internal error" on login. Switched to `redis.ParseURL()`, the library's own URL parser, which handles the DB-index suffix (and auth/TLS) correctly. This was flagged as a known non-blocking risk during Task 1's review ("recommend redis.ParseURL as fast-follow") — the live REDIS_URL format is exactly the case that risk predicted.
+
+---
+
 ## [0.4.1] - 2026-07-16
 
 ### Fixed

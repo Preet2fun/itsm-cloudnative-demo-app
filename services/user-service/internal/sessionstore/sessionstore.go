@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strings"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -19,11 +19,13 @@ type Store struct {
 	client *redis.Client
 }
 
-// New creates a Store from a "redis://host:port" (or "rediss://...") URL.
+// New creates a Store from a "redis://[user:pass@]host:port[/db]" (or "rediss://...") URL.
 func New(redisURL string) (*Store, error) {
-	addr := strings.TrimPrefix(redisURL, "redis://")
-	addr = strings.TrimPrefix(addr, "rediss://")
-	client := redis.NewClient(&redis.Options{Addr: addr})
+	opts, err := redis.ParseURL(redisURL)
+	if err != nil {
+		return nil, fmt.Errorf("sessionstore: invalid redis URL: %w", err)
+	}
+	client := redis.NewClient(opts)
 	return &Store{client: client}, nil
 }
 
