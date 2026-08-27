@@ -1,0 +1,82 @@
+{{- if .Values.paymentService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.paymentService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.paymentService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.paymentService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.paymentService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.paymentService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.paymentService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        checksum/secret: {{ .Values.paymentService.secretName | sha256sum }}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.paymentService.name }}
+      containers:
+        - name: payment-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.paymentService.image.repository }}:{{ .Values.paymentService.image.tag }}"
+          imagePullPolicy: {{ .Values.paymentService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.paymentService.port }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.paymentService.secretName }}
+                  key: database-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            {{- range $k, $v := .Values.paymentService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.paymentService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.paymentService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.paymentService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.paymentService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.paymentService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.paymentService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.paymentService.resources.requests.cpu }}
+              memory: {{ .Values.paymentService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.paymentService.resources.limits.cpu }}
+              memory: {{ .Values.paymentService.resources.limits.memory }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+{{- end }}

@@ -1,0 +1,92 @@
+{{- if .Values.catalogService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.catalogService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.catalogService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.catalogService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.catalogService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.catalogService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.catalogService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        checksum/secret: {{ .Values.catalogService.secretName | sha256sum }}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.catalogService.name }}
+      containers:
+        - name: catalog-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.catalogService.image.repository }}:{{ .Values.catalogService.image.tag }}"
+          imagePullPolicy: {{ .Values.catalogService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.catalogService.port }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.catalogService.secretName }}
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.catalogService.secretName }}
+                  key: redis-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ .Values.catalogService.name | quote }}
+            {{- range $k, $v := .Values.catalogService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.catalogService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.catalogService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.catalogService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.catalogService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.catalogService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.catalogService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.catalogService.resources.requests.cpu }}
+              memory: {{ .Values.catalogService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.catalogService.resources.limits.cpu }}
+              memory: {{ .Values.catalogService.resources.limits.memory }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+{{- end }}

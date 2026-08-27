@@ -1,0 +1,87 @@
+{{- if .Values.deliveryService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deliveryService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.deliveryService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.deliveryService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.deliveryService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deliveryService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deliveryService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        checksum/secret: {{ .Values.deliveryService.secretName | sha256sum }}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.deliveryService.name }}
+      containers:
+        - name: delivery-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.deliveryService.image.repository }}:{{ .Values.deliveryService.image.tag }}"
+          imagePullPolicy: {{ .Values.deliveryService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.deliveryService.port }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.deliveryService.secretName }}
+                  key: database-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            {{- range $k, $v := .Values.deliveryService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.deliveryService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.deliveryService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.deliveryService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.deliveryService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.deliveryService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.deliveryService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.deliveryService.resources.requests.cpu }}
+              memory: {{ .Values.deliveryService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.deliveryService.resources.limits.cpu }}
+              memory: {{ .Values.deliveryService.resources.limits.memory }}
+          # No runAsUser/readOnlyRootFilesystem — this image's non-root user
+          # (alpine `adduser -S`) doesn't have a fixed, known UID the way the
+          # distroless/--uid=65532 Go and Python images do, and whether the
+          # JVM needs a writable path at runtime hasn't been live-tested yet.
+          # See the deployment guide's hardening-follow-up note.
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+{{- end }}

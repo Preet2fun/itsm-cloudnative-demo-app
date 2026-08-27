@@ -1,0 +1,21 @@
+{{- if .Values.catalogService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.catalogService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.catalogService.name }}
+    app.kubernetes.io/name: {{ .Values.catalogService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.catalogService.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+{{- end }}

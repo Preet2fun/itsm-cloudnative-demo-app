@@ -1,0 +1,21 @@
+{{- if .Values.paymentService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.paymentService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.paymentService.name }}
+    app.kubernetes.io/name: {{ .Values.paymentService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.paymentService.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+{{- end }}

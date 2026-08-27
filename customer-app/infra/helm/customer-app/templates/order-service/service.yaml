@@ -1,0 +1,21 @@
+{{- if .Values.orderService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.orderService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.orderService.name }}
+    app.kubernetes.io/name: {{ .Values.orderService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.orderService.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+{{- end }}

@@ -1,0 +1,24 @@
+{{- if .Values.deliveryService.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.deliveryService.name }}-hpa
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.deliveryService.name }}
+    environment: {{ .Values.global.env }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.deliveryService.name }}
+  minReplicas: {{ .Values.deliveryService.hpa.minReplicas }}
+  maxReplicas: {{ .Values.deliveryService.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.deliveryService.hpa.targetCPUUtilizationPercentage }}
+{{- end }}

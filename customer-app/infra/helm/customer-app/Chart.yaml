@@ -1,0 +1,6 @@
+apiVersion: v2
+name: customer-app
+description: Customer App — multi-tenant food-delivery demo observed by Platform App
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

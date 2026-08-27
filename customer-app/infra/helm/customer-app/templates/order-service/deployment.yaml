@@ -1,0 +1,87 @@
+{{- if .Values.orderService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.orderService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.orderService.name }}
+    version: v1
+    app.kubernetes.io/name: {{ .Values.orderService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  replicas: {{ .Values.orderService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.orderService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.orderService.name }}
+        version: v1
+        environment: {{ .Values.global.env }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        checksum/secret: {{ .Values.orderService.secretName | sha256sum }}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.orderService.name }}
+      containers:
+        - name: order-service
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag }}"
+          imagePullPolicy: {{ .Values.orderService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.orderService.port }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.orderService.secretName }}
+                  key: database-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.global.otelCollectorEndpoint | quote }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ .Values.orderService.name | quote }}
+            {{- range $k, $v := .Values.orderService.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.orderService.readinessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.orderService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.orderService.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.orderService.livenessProbe.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.orderService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.orderService.livenessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.orderService.resources.requests.cpu }}
+              memory: {{ .Values.orderService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.orderService.resources.limits.cpu }}
+              memory: {{ .Values.orderService.resources.limits.memory }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+{{- end }}

@@ -1,0 +1,21 @@
+{{- if .Values.deliveryService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.deliveryService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.deliveryService.name }}
+    app.kubernetes.io/name: {{ .Values.deliveryService.name }}
+    app.kubernetes.io/part-of: customer-app
+    environment: {{ .Values.global.env }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.deliveryService.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+{{- end }}

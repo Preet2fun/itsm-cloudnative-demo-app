@@ -1,0 +1,15 @@
+# values-qa.yaml — overrides for ENV=qa. Same resource envelope as dev
+# (cluster budget doesn't grow for qa), different namespace + OTel endpoint.
+
+global:
+  env: qa
+  namespace: customer-app-qa
+  otelCollectorEndpoint: "otel-collector.itsm-qa:4317"
+
+orderService:
+  env:
+    ENV: "qa"
+
+catalogService:
+  env:
+    ENV: "qa"

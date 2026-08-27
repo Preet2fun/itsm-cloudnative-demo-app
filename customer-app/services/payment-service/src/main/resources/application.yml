@@ -1,0 +1,10 @@
+server:
+  port: ${PAYMENT_SERVICE_PORT:8080}
+
+spring:
+  application:
+    name: payment-service
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d","level":"%p","service":"payment-service","message":"%m"}%n'
