@@ -1,0 +1,27 @@
+# values-qa.yaml — QA environment overrides
+# Applied on top of values.yaml:
+#   helm upgrade --install itsm-app ./infra/helm/itsm-app \
+#     -f infra/helm/itsm-app/values.yaml \
+#     -f infra/helm/itsm-app/values-qa.yaml \
+#     -n itsm-qa
+
+global:
+  env: qa
+  namespace: itsm-qa
+  otelCollectorEndpoint: "otel-collector.itsm-qa:4317"
+
+userService:
+  env:
+    JWT_EXPIRY_HOURS: "8"
+    OTEL_SERVICE_NAME: "user-service"
+
+assetService:
+  env:
+    OTEL_SERVICE_NAME: "asset-service"
+
+incidentService:
+  env:
+    OTEL_SERVICE_NAME: "incident-service"
+
+# frontend: nginx:alpine serves static files — no env overrides needed.
+# Istio VirtualService handles all API routing at the mesh level.

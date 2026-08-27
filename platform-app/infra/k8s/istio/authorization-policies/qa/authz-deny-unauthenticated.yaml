@@ -1,0 +1,21 @@
+# AuthorizationPolicy — DENY unauthenticated requests to protected API paths (itsm-qa)
+# Mirrors dev policy exactly; namespace scope handles the rest.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-unauthenticated-api
+  namespace: itsm-qa
+spec:
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notRequestPrincipals: ["*"]
+      to:
+        - operation:
+            paths:
+              - /api/v1/users*
+              - /api/v1/incidents*
+              - /api/v1/assets*
+              - /api/v1/auth/refresh

@@ -1,0 +1,14 @@
+# AuthorizationPolicy — CUSTOM OPA RBAC for itsm-qa.
+# References the "opa-authz-qa" provider registered in istio-operator.yaml.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: opa-authz
+  namespace: itsm-qa
+spec:
+  action: CUSTOM
+  provider:
+    name: opa-authz-qa
+  rules:
+    - {}

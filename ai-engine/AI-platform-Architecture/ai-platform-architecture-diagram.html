@@ -1,0 +1,719 @@
+<title>AI Platform Blueprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #eef1f6;
+    --bg-dot: rgba(28,32,41,0.09);
+    --surface: #ffffff;
+    --surface-2: #f3f5f9;
+    --ink: #1b1f29;
+    --ink-dim: #4d5566;
+    --ink-faint: #7c8494;
+    --border: #d7dce4;
+    --border-strong: #b9c1cf;
+    --accent: #a8231c;
+    --accent-ink: #ffffff;
+    --shadow: 0 1px 2px rgba(20,24,32,0.04), 0 8px 20px -12px rgba(20,24,32,0.18);
+
+    --hue-orch: #5b3aa6;      --hue-orch-bg: #f1edfa;      --hue-orch-border: #cabdea;
+    --hue-memory: #1f7a4d;    --hue-memory-bg: #eaf6ef;    --hue-memory-border: #b9e2c9;
+    --hue-tools: #a5670a;     --hue-tools-bg: #fbf1de;     --hue-tools-border: #edd6a3;
+    --hue-external: #3c4a63; --hue-external-bg: #eef1f5;   --hue-external-border: #c7cedb;
+    --hue-cross: #1c5fa8;     --hue-cross-bg: #eaf2fb;     --hue-cross-border: #bcd6f0;
+    --hue-goals: #1c5fa8;     --hue-goals-bg: #eaf2fb;     --hue-goals-border: #bcd6f0;
+    --hue-tradeoff: #6a3f8f;  --hue-tradeoff-bg: #f3edf9;  --hue-tradeoff-border: #d4c2e8;
+    --hue-infer: #a8231c;     --hue-infer-bg: #fbebea;     --hue-infer-border: #eabdb9;
+    --hue-gateway: #21606b;  --hue-gateway-bg: #e8f3f4;   --hue-gateway-border: #b9dde1;
+
+    --flow-request: #1b1f29;
+    --flow-control: #6d3fc9;
+    --flow-data: #1f9d5c;
+    --flow-tool: #b5700f;
+
+    --font-head: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    --radius: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11141b;
+      --bg-dot: rgba(230,235,245,0.07);
+      --surface: #181c26;
+      --surface-2: #1f2430;
+      --ink: #eef1f6;
+      --ink-dim: #b6bece;
+      --ink-faint: #838da0;
+      --border: #2b3140;
+      --border-strong: #3a4256;
+      --accent: #ef6a5c;
+      --accent-ink: #1a1010;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+
+      --hue-orch: #b6a1f2;      --hue-orch-bg: #241c37;      --hue-orch-border: #3d2f5b;
+      --hue-memory: #7cdba6;    --hue-memory-bg: #15281f;    --hue-memory-border: #234a34;
+      --hue-tools: #f0bb5c;     --hue-tools-bg: #2e2411;     --hue-tools-border: #4a3a1a;
+      --hue-external: #c2cbdc; --hue-external-bg: #1d2230;   --hue-external-border: #333c4f;
+      --hue-cross: #85b8ee;     --hue-cross-bg: #142238;      --hue-cross-border: #234a70;
+      --hue-goals: #85b8ee;     --hue-goals-bg: #142238;      --hue-goals-border: #234a70;
+      --hue-tradeoff: #d0aef2;  --hue-tradeoff-bg: #241a34;   --hue-tradeoff-border: #3d2c53;
+      --hue-infer: #ef6a5c;     --hue-infer-bg: #2e1613;      --hue-infer-border: #4a2622;
+      --hue-gateway: #7fd4e0;   --hue-gateway-bg: #12262a;    --hue-gateway-border: #1f4650;
+
+      --flow-request: #eef1f6;
+      --flow-control: #a988ec;
+      --flow-data: #5bd393;
+      --flow-tool: #f0b04f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11141b;
+    --bg-dot: rgba(230,235,245,0.07);
+    --surface: #181c26;
+    --surface-2: #1f2430;
+    --ink: #eef1f6;
+    --ink-dim: #b6bece;
+    --ink-faint: #838da0;
+    --border: #2b3140;
+    --border-strong: #3a4256;
+    --accent: #ef6a5c;
+    --accent-ink: #1a1010;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+
+    --hue-orch: #b6a1f2;      --hue-orch-bg: #241c37;      --hue-orch-border: #3d2f5b;
+    --hue-memory: #7cdba6;    --hue-memory-bg: #15281f;    --hue-memory-border: #234a34;
+    --hue-tools: #f0bb5c;     --hue-tools-bg: #2e2411;     --hue-tools-border: #4a3a1a;
+    --hue-external: #c2cbdc; --hue-external-bg: #1d2230;   --hue-external-border: #333c4f;
+    --hue-cross: #85b8ee;     --hue-cross-bg: #142238;      --hue-cross-border: #234a70;
+    --hue-goals: #85b8ee;     --hue-goals-bg: #142238;      --hue-goals-border: #234a70;
+    --hue-tradeoff: #d0aef2;  --hue-tradeoff-bg: #241a34;   --hue-tradeoff-border: #3d2c53;
+    --hue-infer: #ef6a5c;     --hue-infer-bg: #2e1613;      --hue-infer-border: #4a2622;
+    --hue-gateway: #7fd4e0;   --hue-gateway-bg: #12262a;    --hue-gateway-border: #1f4650;
+
+    --flow-request: #eef1f6;
+    --flow-control: #a988ec;
+    --flow-data: #5bd393;
+    --flow-tool: #f0b04f;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(var(--bg-dot) 1px, transparent 1px) 0 0 / 22px 22px,
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 64px) clamp(16px, 4vw, 40px) 48px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
+    letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent);
+    margin: 0 0 14px;
+  }
+  .eyebrow::before { content: ""; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; display: inline-block; }
+  h1 {
+    font-family: var(--font-head); font-weight: 700;
+    font-size: clamp(30px, 4.4vw, 52px); line-height: 1.04;
+    letter-spacing: -0.01em; margin: 0 0 14px; text-wrap: balance;
+    max-width: 20ch;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .dek {
+    font-size: clamp(15px, 1.6vw, 18px); color: var(--ink-dim);
+    max-width: 62ch; margin: 0 0 22px; text-wrap: pretty;
+  }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .meta-chip {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 8px 14px; border: 1px solid var(--border); border-radius: 9px;
+    background: var(--surface);
+  }
+  .meta-chip .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  .meta-chip .v { font-size: 13.5px; font-weight: 500; color: var(--ink); }
+
+  /* ---------- Section headers ---------- */
+  .section { margin: 56px 0; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+  .section-num { font-family: var(--font-mono); font-size: 13px; color: var(--ink-faint); }
+  h2 {
+    font-family: var(--font-head); font-weight: 700; font-size: clamp(20px, 2.4vw, 27px);
+    margin: 0; letter-spacing: -0.005em;
+  }
+  .section-sub { color: var(--ink-dim); font-size: 14.5px; max-width: 72ch; margin: 6px 0 24px; }
+
+  /* ---------- Flow map figure ---------- */
+  figure.flowmap-fig { margin: 0; }
+  .flowmap-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 8px 4px; }
+  svg.flowmap { display: block; min-width: 880px; width: 100%; height: auto; font-family: var(--font-body); }
+  .flowmap .lbl-node { font-family: var(--font-head); font-weight: 700; }
+  .flowmap .lbl-sub { font-family: var(--font-mono); }
+  .flowmap .lbl-arrow { font-family: var(--font-mono); font-weight: 500; }
+  .flowmap rect.box { rx: 10; stroke-width: 1.6; }
+  .flowmap .node-client rect.box, .flowmap .node-users rect.box { fill: var(--surface-2); stroke: var(--border-strong); }
+  .flowmap .node-gateway rect.box { fill: var(--hue-gateway-bg); stroke: var(--hue-gateway); }
+  .flowmap .node-orch rect.box { fill: var(--hue-orch-bg); stroke: var(--hue-orch); }
+  .flowmap .node-memory rect.box { fill: var(--hue-memory-bg); stroke: var(--hue-memory); }
+  .flowmap .node-tools rect.box { fill: var(--hue-tools-bg); stroke: var(--hue-tools); }
+  .flowmap .node-ext rect.box { fill: var(--hue-external-bg); stroke: var(--hue-external); }
+  .flowmap .node-infer rect.box { fill: var(--hue-infer-bg); stroke: var(--hue-infer); stroke-width: 2; }
+  .flowmap .node-cross rect.box { fill: var(--hue-cross-bg); stroke: var(--hue-cross); stroke-dasharray: 3 3; }
+  .flowmap text { fill: var(--ink); }
+  .flowmap text.dim { fill: var(--ink-faint); }
+  .flowmap .edge-request { stroke: var(--flow-request); }
+  .flowmap .edge-control { stroke: var(--flow-control); stroke-dasharray: 5 4; }
+  .flowmap .edge-data { stroke: var(--flow-data); stroke-dasharray: 5 4; }
+  .flowmap .edge-tool { stroke: var(--flow-tool); }
+  .flowmap .edge { fill: none; stroke-width: 2; }
+  .flowmap .edge-label { font-size: 12px; }
+  .flowmap .edge-label.request { fill: var(--flow-request); }
+  .flowmap .edge-label.control { fill: var(--flow-control); }
+  .flowmap .edge-label.data { fill: var(--flow-data); }
+  .flowmap .edge-label.tool { fill: var(--flow-tool); }
+
+  .legend-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-dim); }
+  .legend-swatch { width: 22px; height: 0; border-top-width: 2.5px; border-top-style: solid; }
+  .legend-swatch.request { border-color: var(--flow-request); }
+  .legend-swatch.control { border-color: var(--flow-control); border-top-style: dashed; }
+  .legend-swatch.data { border-color: var(--flow-data); border-top-style: dashed; }
+  .legend-swatch.tool { border-color: var(--flow-tool); }
+
+  /* ---------- Blueprint grid ---------- */
+  .blueprint-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .blueprint {
+    display: grid;
+    grid-template-columns: 1fr 0.82fr 0.86fr 1.65fr 1.05fr 1.1fr 0.92fr 1.05fr;
+    gap: 16px;
+    min-width: 1280px;
+    align-items: start;
+  }
+  .card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .card.tinted { background: var(--tint-bg); border-color: var(--tint-border); }
+  .card-title {
+    font-family: var(--font-head); font-weight: 700; font-size: 14.5px;
+    display: flex; align-items: center; gap: 8px; margin: 0 0 10px;
+    color: var(--tint-ink, var(--ink));
+  }
+  .card-title .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tint-ink, var(--ink-faint)); flex: none; }
+  .card ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-dim); }
+  .card ul li { margin: 3px 0; }
+  .card ul li b, .card ul li strong { color: var(--ink); font-weight: 600; }
+  .card .note { font-size: 11.5px; color: var(--ink-faint); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+  .subblock { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .subblock:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+  .subblock-title {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--tint-ink, var(--ink-faint));
+    margin: 0 0 6px;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-family: var(--font-mono); font-size: 11.5px; padding: 3px 8px;
+    border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--ink);
+  }
+
+  .col-goals    { --tint-bg: var(--hue-goals-bg); --tint-border: var(--hue-goals-border); --tint-ink: var(--hue-goals); }
+  .col-gateway  { --tint-bg: var(--hue-gateway-bg); --tint-border: var(--hue-gateway-border); --tint-ink: var(--hue-gateway); }
+  .col-orch     { --tint-bg: var(--hue-orch-bg); --tint-border: var(--hue-orch-border); --tint-ink: var(--hue-orch); }
+  .col-memory   { --tint-bg: var(--hue-memory-bg); --tint-border: var(--hue-memory-border); --tint-ink: var(--hue-memory); }
+  .col-tools    { --tint-bg: var(--hue-tools-bg); --tint-border: var(--hue-tools-border); --tint-ink: var(--hue-tools); }
+  .col-ext      { --tint-bg: var(--hue-external-bg); --tint-border: var(--hue-external-border); --tint-ink: var(--hue-external); }
+  .col-tradeoff { --tint-bg: var(--hue-tradeoff-bg); --tint-border: var(--hue-tradeoff-border); --tint-ink: var(--hue-tradeoff); }
+
+  .g-goals { grid-column: 1; }
+  .g-client { grid-column: 2; }
+  .g-gateway { grid-column: 3; }
+  .g-orch { grid-column: 4; }
+  .g-memory { grid-column: 5; }
+  .g-tools { grid-column: 6; }
+  .g-ext { grid-column: 7; }
+  .g-tradeoff { grid-column: 8; }
+
+  /* Agent core loop mini-diagram */
+  .loop-scroll { overflow-x: auto; margin-top: 4px; }
+  svg.loop { display: block; min-width: 560px; width: 100%; height: auto; font-family: var(--font-body); }
+  .loop rect.step { fill: var(--surface-2); stroke: var(--hue-orch-border); stroke-width: 1.4; rx: 22; }
+  .loop text { fill: var(--ink); font-size: 11px; font-weight: 500; }
+  .loop text.n { fill: var(--hue-orch); font-family: var(--font-mono); font-size: 10px; font-weight: 600; }
+  .loop .edge { stroke: var(--hue-orch); stroke-width: 1.6; fill: none; }
+  .loop .loopback { stroke-dasharray: 4 3; }
+  .loop .loop-label { fill: var(--hue-orch); font-family: var(--font-mono); font-size: 10.5px; }
+
+  /* ---------- Full-width bands ---------- */
+  .band {
+    border: 1.5px solid var(--tint-border); border-radius: 16px;
+    background: var(--tint-bg); padding: 22px;
+  }
+  .band-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .band-head h3 { font-family: var(--font-head); font-weight: 700; font-size: 18px; margin: 0; color: var(--tint-ink); }
+  .band-head .band-sub { font-size: 13px; color: var(--ink-dim); }
+  .band-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+  .band .card { background: var(--surface); }
+
+  .band-infer { --tint-bg: var(--hue-infer-bg); --tint-border: var(--hue-infer-border); --tint-ink: var(--hue-infer); }
+  .band-cross { --tint-bg: var(--hue-cross-bg); --tint-border: var(--hue-cross-border); --tint-ink: var(--hue-cross); }
+
+  /* ---------- Footer / philosophy ---------- */
+  .philosophy {
+    margin-top: 60px; padding: 28px clamp(18px, 4vw, 40px);
+    border-radius: 16px; border: 1.5px solid var(--border-strong);
+    background: linear-gradient(180deg, var(--surface), var(--surface-2));
+    display: flex; gap: 18px; align-items: flex-start;
+  }
+  .philosophy .mark { font-family: var(--font-head); font-size: 40px; line-height: 1; color: var(--accent); flex: none; }
+  .philosophy blockquote { margin: 0; font-size: clamp(15px, 1.7vw, 19px); font-style: italic; color: var(--ink); line-height: 1.5; text-wrap: pretty; }
+  .philosophy cite { display: block; margin-top: 10px; font-style: normal; font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); }
+
+  .footnote { margin-top: 28px; font-size: 12.5px; color: var(--ink-faint); max-width: 78ch; }
+  .footnote a { color: inherit; }
+
+  @media (max-width: 720px) {
+    .philosophy { flex-direction: column; gap: 8px; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow">Reference Architecture · AI Engine Track</p>
+    <h1>AI Platform Blueprint for <em>Production Agents</em></h1>
+    <p class="dek">
+      A faithful, comprehensive rendering of the reference diagram
+      <code style="font-family:var(--font-mono)">AI-arch.jpeg</code> — the
+      infrastructure that has to exist underneath any production agentic AI
+      system serving Observability, ITSM, and Security use cases.
+    </p>
+    <div class="meta-row">
+      <div class="meta-chip"><span class="k">Source</span><span class="v">AI-arch.jpeg (2026)</span></div>
+      <div class="meta-chip"><span class="k">Companion doc</span><span class="v">ai-platform-architecture.md</span></div>
+      <div class="meta-chip"><span class="k">Status</span><span class="v">Reference — step 1 of iterative build</span></div>
+      <div class="meta-chip"><span class="k">Applies to</span><span class="v">Observability · ITSM · Security</span></div>
+    </div>
+  </header>
+
+  <!-- ============ FLOW MAP ============ -->
+  <section class="section">
+    <div class="section-head"><span class="section-num">00</span><h2>Request, Control &amp; Tool Flow</h2></div>
+    <p class="section-sub">The mechanism at a glance — how a single request moves through the platform, and which of the four flow types governs each hop.</p>
+
+    <figure class="flowmap-fig">
+      <div class="flowmap-scroll">
+        <svg class="flowmap" viewBox="0 0 1180 400" role="img" aria-label="Flow diagram: a request moves from Client through Gateway into the Orchestration layer, which exchanges context with Memory, dispatches Tool calls, and drives the Inference layer; Memory and Tools reach External Systems; Cross-Cutting Infrastructure wraps every layer.">
+          <defs>
+            <marker id="arrowInk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--flow-request)" />
+            </marker>
+            <marker id="arrowControl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--flow-control)" />
+            </marker>
+            <marker id="arrowData" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--flow-data)" />
+            </marker>
+            <marker id="arrowTool" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--flow-tool)" />
+            </marker>
+          </defs>
+
+          <!-- cross-cutting band (drawn first, sits behind) -->
+          <g class="node-cross">
+            <rect class="box" x="10" y="322" width="1050" height="56" />
+            <text x="30" y="345" class="lbl-node" font-size="13">Cross-Cutting Infrastructure</text>
+            <text x="30" y="363" class="lbl-sub dim" font-size="11">observability · reliability · security · CI/CD · cost — wraps every layer above, not a request hop</text>
+          </g>
+          <line x1="435" y1="322" x2="435" y2="264" class="edge" style="stroke:var(--hue-cross);stroke-dasharray:2 4;opacity:.6" />
+          <line x1="625" y1="322" x2="625" y2="264" class="edge" style="stroke:var(--hue-cross);stroke-dasharray:2 4;opacity:.6" />
+          <line x1="805" y1="322" x2="805" y2="264" class="edge" style="stroke:var(--hue-cross);stroke-dasharray:2 4;opacity:.6" />
+
+          <!-- top row nodes -->
+          <g class="node-users">
+            <rect class="box" x="10" y="40" width="130" height="58" />
+            <text x="75" y="64" text-anchor="middle" class="lbl-node" font-size="13">Users /</text>
+            <text x="75" y="80" text-anchor="middle" class="lbl-node" font-size="13">Clients</text>
+          </g>
+
+          <g class="node-gateway">
+            <rect class="box" x="200" y="40" width="130" height="58" />
+            <text x="265" y="64" text-anchor="middle" class="lbl-node" font-size="13">API Gateway</text>
+            <text x="265" y="80" text-anchor="middle" class="lbl-sub dim" font-size="10.5">Auth · rate limit · route</text>
+          </g>
+
+          <g class="node-orch">
+            <rect class="box" x="390" y="40" width="170" height="58" />
+            <text x="475" y="64" text-anchor="middle" class="lbl-node" font-size="13">Orchestration</text>
+            <text x="475" y="80" text-anchor="middle" class="lbl-sub dim" font-size="10.5">plan · decide · reflect</text>
+          </g>
+
+          <g class="node-memory">
+            <rect class="box" x="620" y="40" width="150" height="58" />
+            <text x="695" y="64" text-anchor="middle" class="lbl-node" font-size="13">Memory</text>
+            <text x="695" y="80" text-anchor="middle" class="lbl-sub dim" font-size="10.5">short · long · structured</text>
+          </g>
+
+          <g class="node-tools">
+            <rect class="box" x="830" y="40" width="150" height="58" />
+            <text x="905" y="64" text-anchor="middle" class="lbl-node" font-size="13">Tool Use</text>
+            <text x="905" y="80" text-anchor="middle" class="lbl-sub dim" font-size="10.5">MCP · LangChain tools</text>
+          </g>
+
+          <g class="node-ext">
+            <rect class="box" x="1040" y="40" width="130" height="58" />
+            <text x="1105" y="64" text-anchor="middle" class="lbl-node" font-size="13">External</text>
+            <text x="1105" y="80" text-anchor="middle" class="lbl-sub dim" font-size="10.5">SaaS · DBs · web</text>
+          </g>
+
+          <!-- inference node -->
+          <g class="node-infer">
+            <rect class="box" x="410" y="210" width="360" height="60" />
+            <text x="590" y="235" text-anchor="middle" class="lbl-node" font-size="13.5">AI Inference &amp; Serving</text>
+            <text x="590" y="252" text-anchor="middle" class="lbl-sub dim" font-size="10.5">vLLM / TensorRT-LLM / TGI — the compute heart</text>
+          </g>
+
+          <!-- horizontal request flow -->
+          <line x1="140" y1="69" x2="196" y2="69" class="edge edge-request" marker-end="url(#arrowInk)" />
+          <text x="168" y="60" text-anchor="middle" class="edge-label request">request</text>
+
+          <line x1="330" y1="69" x2="386" y2="69" class="edge edge-request" marker-end="url(#arrowInk)" />
+          <text x="358" y="60" text-anchor="middle" class="edge-label request">authenticated</text>
+
+          <!-- orch <-> memory data/context -->
+          <line x1="560" y1="60" x2="616" y2="60" class="edge edge-data" marker-end="url(#arrowData)" />
+          <line x1="616" y1="78" x2="560" y2="78" class="edge edge-data" marker-end="url(#arrowData)" />
+          <text x="588" y="98" text-anchor="middle" class="edge-label data" font-size="10.5">context r/w</text>
+
+          <!-- memory <-> tools tool/external -->
+          <line x1="770" y1="60" x2="826" y2="60" class="edge edge-tool" marker-end="url(#arrowTool)" />
+          <line x1="826" y1="78" x2="770" y2="78" class="edge edge-tool" marker-end="url(#arrowTool)" />
+          <text x="798" y="98" text-anchor="middle" class="edge-label tool" font-size="10.5">informs</text>
+
+          <!-- tools <-> external tool call -->
+          <line x1="980" y1="60" x2="1036" y2="60" class="edge edge-tool" marker-end="url(#arrowTool)" />
+          <line x1="1036" y1="78" x2="980" y2="78" class="edge edge-tool" marker-end="url(#arrowTool)" />
+          <text x="1008" y="98" text-anchor="middle" class="edge-label tool" font-size="10.5">tool call</text>
+
+          <!-- vertical control flow orch -> infer -->
+          <line x1="450" y1="98" x2="450" y2="206" class="edge edge-control" marker-end="url(#arrowControl)" />
+          <line x1="500" y1="206" x2="500" y2="98" class="edge edge-control" marker-end="url(#arrowControl)" />
+          <text x="405" y="155" text-anchor="middle" class="edge-label control" font-size="10.5" transform="rotate(-90 405 155)">reason / plan</text>
+
+          <!-- memory -> infer -->
+          <line x1="695" y1="98" x2="695" y2="206" class="edge edge-data" marker-end="url(#arrowData)" />
+          <text x="718" y="155" text-anchor="middle" class="edge-label data" font-size="10.5" transform="rotate(-90 718 155)">embeddings</text>
+
+          <!-- tools -> infer -->
+          <line x1="905" y1="98" x2="905" y2="206" class="edge edge-control" marker-end="url(#arrowControl)" />
+          <text x="928" y="155" text-anchor="middle" class="edge-label control" font-size="10.5" transform="rotate(-90 928 155)">tool-arg gen</text>
+
+        </svg>
+      </div>
+    </figure>
+    <figcaption style="font-size:12.5px;color:var(--ink-faint);margin-top:8px;">
+      Every reasoning step, memory lookup, and tool-argument generation ultimately resolves to a call into the Inference layer; Cross-Cutting Infrastructure instruments and protects all of it without sitting in the request path.
+    </figcaption>
+
+    <div class="legend-row">
+      <div class="legend-item"><span class="legend-swatch request"></span>User / request flow</div>
+      <div class="legend-item"><span class="legend-swatch control"></span>Control / decision flow</div>
+      <div class="legend-item"><span class="legend-swatch data"></span>Data / context flow</div>
+      <div class="legend-item"><span class="legend-swatch tool"></span>Tool / external call</div>
+    </div>
+  </section>
+
+  <!-- ============ MAIN BLUEPRINT GRID ============ -->
+  <section class="section">
+    <div class="section-head"><span class="section-num">01</span><h2>Platform Blueprint</h2></div>
+    <p class="section-sub">Every building block from the source diagram, grouped exactly as drawn — client edge on the left, external edge on the right, design goals and trade-offs flanking the pipeline as guardrails.</p>
+
+    <div class="blueprint-scroll">
+      <div class="blueprint">
+
+        <!-- GOALS -->
+        <div class="card tinted col-goals g-goals">
+          <p class="card-title"><span class="dot"></span>Key Design Goals</p>
+          <ul>
+            <li>Reliable &amp; Correct</li>
+            <li>Low Latency</li>
+            <li>Cost Effective</li>
+            <li>Scalable &amp; Elastic</li>
+            <li>Secure &amp; Compliant</li>
+            <li>Observable &amp; Debuggable</li>
+          </ul>
+        </div>
+
+        <!-- CLIENT -->
+        <div class="card g-client">
+          <p class="card-title"><span class="dot"></span>Users / Clients</p>
+          <ul>
+            <li>Web / Mobile</li>
+            <li>Backend Services</li>
+            <li>Enterprise Apps</li>
+            <li>Human / Ops</li>
+          </ul>
+        </div>
+
+        <!-- GATEWAY -->
+        <div class="card tinted col-gateway g-gateway">
+          <p class="card-title"><span class="dot"></span>API Gateway &amp; Auth</p>
+          <ul>
+            <li>Auth (OIDC / OAuth)</li>
+            <li>Rate Limiting</li>
+            <li>Request Routing</li>
+            <li>Quota &amp; Billing</li>
+          </ul>
+        </div>
+
+        <!-- ORCHESTRATION -->
+        <div class="card tinted col-orch g-orch">
+          <p class="card-title"><span class="dot"></span>Agent Orchestration &amp; Planning Layer</p>
+
+          <div class="subblock">
+            <p class="subblock-title">Agent Frameworks</p>
+            <div class="tag-row">
+              <span class="tag">LangGraph</span>
+              <span class="tag">CrewAI</span>
+              <span class="tag">AutoGen</span>
+              <span class="tag">Custom Workflows</span>
+            </div>
+          </div>
+
+          <div class="subblock">
+            <p class="subblock-title">Agent Core Loop — iterate until goal achieved</p>
+            <div class="loop-scroll">
+              <svg class="loop" viewBox="0 0 900 130" role="img" aria-label="Agent core loop: Goal or Task, then Plan or Reason, then Decide Next Action, then Tool Call or Observe, then Reflect or Update State, looping back to Goal or Task.">
+                <defs>
+                  <marker id="loopArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M0,0 L10,5 L0,10 z" style="fill:var(--hue-orch)" />
+                  </marker>
+                </defs>
+                <rect class="step" x="10" y="14" width="132" height="42" />
+                <text x="76" y="31" text-anchor="middle" class="n">01</text>
+                <text x="76" y="46" text-anchor="middle">Goal / Task</text>
+
+                <line x1="142" y1="35" x2="180" y2="35" class="edge" marker-end="url(#loopArrow)" />
+
+                <rect class="step" x="182" y="14" width="132" height="42" />
+                <text x="248" y="31" text-anchor="middle" class="n">02</text>
+                <text x="248" y="46" text-anchor="middle">Plan / Reason</text>
+
+                <line x1="314" y1="35" x2="352" y2="35" class="edge" marker-end="url(#loopArrow)" />
+
+                <rect class="step" x="354" y="14" width="150" height="42" />
+                <text x="429" y="31" text-anchor="middle" class="n">03</text>
+                <text x="429" y="46" text-anchor="middle">Decide Next Action</text>
+
+                <line x1="504" y1="35" x2="542" y2="35" class="edge" marker-end="url(#loopArrow)" />
+
+                <rect class="step" x="544" y="14" width="150" height="42" />
+                <text x="619" y="31" text-anchor="middle" class="n">04</text>
+                <text x="619" y="46" text-anchor="middle">Tool Call / Observe</text>
+
+                <line x1="694" y1="35" x2="732" y2="35" class="edge" marker-end="url(#loopArrow)" />
+
+                <rect class="step" x="734" y="14" width="156" height="42" />
+                <text x="812" y="31" text-anchor="middle" class="n">05</text>
+                <text x="812" y="46" text-anchor="middle">Reflect / Update</text>
+
+                <path class="edge loopback" d="M 812 56 C 812 105, 76 105, 76 56" marker-end="url(#loopArrow)" />
+                <text x="444" y="122" text-anchor="middle" class="loop-label">↻ iterate until goal achieved</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="subblock">
+            <p class="subblock-title">State Management</p>
+            <div class="tag-row">
+              <span class="tag">Session</span>
+              <span class="tag">Checkpointing</span>
+              <span class="tag">Concurrency Control</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEMORY -->
+        <div class="card tinted col-memory g-memory">
+          <p class="card-title"><span class="dot"></span>Memory Layer</p>
+
+          <div class="subblock">
+            <p class="subblock-title">Short-Term</p>
+            <ul><li>Conversation History</li><li>Working Memory (in-context)</li></ul>
+          </div>
+          <div class="subblock">
+            <p class="subblock-title">Long-Term</p>
+            <ul><li>Vector DB — Pinecone / Chroma / Weaviate / Redis</li><li>RAG for knowledge retrieval</li></ul>
+          </div>
+          <div class="subblock">
+            <p class="subblock-title">Structured</p>
+            <ul><li>Graph DB / SQLite</li><li>Task History</li><li>User &amp; Entity Profiles</li></ul>
+          </div>
+        </div>
+
+        <!-- TOOLS -->
+        <div class="card tinted col-tools g-tools">
+          <p class="card-title"><span class="dot"></span>Tool Use &amp; Execution</p>
+
+          <div class="subblock">
+            <p class="subblock-title">Tool Abstraction Layer</p>
+            <ul>
+              <li>MCP <span style="color:var(--ink-faint)">(Multi-Tool Control Protocol, as labeled in source)</span></li>
+              <li>LangChain Tools — custom / built-in</li>
+            </ul>
+          </div>
+          <div class="subblock">
+            <p class="subblock-title">Tool Categories</p>
+            <div class="tag-row">
+              <span class="tag">Web Search</span>
+              <span class="tag">APIs / Services</span>
+              <span class="tag">Code Interpreter</span>
+              <span class="tag">Databases</span>
+              <span class="tag">Email / Messaging</span>
+              <span class="tag">File / Storage</span>
+            </div>
+            <p class="note">...and more — diagram indicates an illustrative, not exhaustive, list.</p>
+          </div>
+        </div>
+
+        <!-- EXTERNAL -->
+        <div class="card tinted col-ext g-ext">
+          <p class="card-title"><span class="dot"></span>External Systems / Tools</p>
+          <ul>
+            <li>Search Engines</li>
+            <li>SaaS APIs</li>
+            <li>Databases</li>
+            <li>Business Apps — Salesforce, SAP...</li>
+            <li>File Storage — S3, GCS...</li>
+            <li>Email / Slack / Teams</li>
+            <li>Internet / Web</li>
+          </ul>
+        </div>
+
+        <!-- TRADEOFFS -->
+        <div class="card tinted col-tradeoff g-tradeoff">
+          <p class="card-title"><span class="dot"></span>Key Trade-offs</p>
+          <ul>
+            <li><b>Latency vs Accuracy</b> — smaller models vs smarter agents</li>
+            <li><b>Cost vs Autonomy</b> — more reasoning &amp; tools = higher cost</li>
+            <li><b>Statefulness vs Scalability</b> — persistent memory vs horizontal scale</li>
+            <li><b>Single vs Multi-Agent</b> — simplicity vs collaboration power</li>
+            <li><b>Inference Optimization vs Quality</b> — quantization / batching / speculative decoding cut cost, risk quality</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INFERENCE BAND ============ -->
+  <section class="section">
+    <div class="section-head"><span class="section-num">02</span><h2>AI Inference &amp; Serving Layer</h2></div>
+    <p class="section-sub">"The Compute Heart" — the source diagram's own framing. Sits beneath, and is depended on by, Orchestration, Memory, and Tool Use for every model call.</p>
+
+    <div class="band band-infer">
+      <div class="band-head">
+        <h3>Compute Heart</h3>
+        <span class="band-sub">serves Orchestration · Memory · Tool Use</span>
+      </div>
+      <div class="band-grid">
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Model Inference Servers</p>
+          <div class="tag-row"><span class="tag">vLLM</span><span class="tag">TensorRT-LLM</span><span class="tag">TGI</span></div>
+          <p class="note">Optimizations: batching · speculative decoding · quantization · KV cache</p>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Model / Weights Storage</p>
+          <ul><li>Model Registry — HF Hub / S3 / GCS</li><li>Versioning &amp; Rollback</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Cache Layer</p>
+          <ul><li>KV Cache (GPU / CPU) + SSD offload</li><li>Embedding Cache (Feature Store)</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Scheduler &amp; Autoscaling</p>
+          <ul><li>GPU Auto-scaling — spot + on-demand</li><li>Queueing &amp; Prioritization for bursty workloads</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CROSS-CUTTING BAND ============ -->
+  <section class="section">
+    <div class="section-head"><span class="section-num">03</span><h2>Cross-Cutting Infrastructure (Enablers)</h2></div>
+    <p class="section-sub">Wraps every layer above rather than sitting in any single request path — the non-functional backbone that makes the rest of this trustworthy at production scale.</p>
+
+    <div class="band band-cross">
+      <div class="band-head">
+        <h3>Enablers</h3>
+        <span class="band-sub">spans Users/Clients → External Systems</span>
+      </div>
+      <div class="band-grid">
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Observability &amp; Monitoring</p>
+          <ul><li>Causal Tracing (end-to-end)</li><li>Token-level Logging</li><li>Latency / Error Tracking</li><li>Cost Attribution (per user/agent)</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Data &amp; Feature Layer</p>
+          <ul><li>Vector Indexing Pipelines</li><li>Embedding Models</li><li>Feature Store</li><li>Data Quality Monitoring</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Reliability &amp; Resilience</p>
+          <ul><li>Retries &amp; Backoff</li><li>Circuit Breakers</li><li>Tool Failure Handling</li><li>Idempotency &amp; Deduplication</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Security &amp; Governance</p>
+          <ul><li>PII Redaction</li><li>Data Encryption</li><li>Access Control (RBAC)</li><li>Audit Logs &amp; Compliance</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>CI/CD &amp; Evaluation</p>
+          <ul><li>Prompt / Agent Versioning</li><li>Automated Evaluations</li><li>Canary Deployments</li><li>A/B Testing</li></ul>
+        </div>
+        <div class="card">
+          <p class="card-title"><span class="dot"></span>Cost Management</p>
+          <ul><li>Budget Alerts</li><li>Spend Dashboards</li><li>Model &amp; Token Costing</li><li>Right-sizing &amp; Optimization</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHILOSOPHY ============ -->
+  <div class="philosophy">
+    <span class="mark">&ldquo;</span>
+    <div>
+      <blockquote>
+        I'd design the system with a LangGraph orchestration layer on top of scalable inference infra (vLLM + GPU auto-scaling), persistent vector memory for RAG, and explicit cost/observability controls — because agents only succeed when the infra makes them reliable and economical at scale.
+        <cite>— design philosophy, source diagram</cite>
+      </blockquote>
+    </div>
+  </div>
+
+  <p class="footnote">
+    This page mirrors <code style="font-family:var(--font-mono)">AI-arch.jpeg</code> and its companion
+    <code style="font-family:var(--font-mono)">ai-platform-architecture.md</code> 1:1 — every building
+    block above traces back to the source diagram. It is a reference architecture, not yet a build plan;
+    production-hardening gaps against this reference are tracked separately, outside this document, to
+    keep this page a clean record of the source.
+  </p>
+
+</div>

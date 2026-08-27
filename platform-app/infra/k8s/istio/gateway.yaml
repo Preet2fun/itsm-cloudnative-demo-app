@@ -1,0 +1,21 @@
+# Istio Gateway — binds the IngressGateway to HTTP port 80
+# Accepts all hostnames ("*") — suitable for bare-metal / NodePort setups
+# where no domain name is configured.
+#
+# Access: http://<any-node-ip>:30080
+
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: itsm-gateway
+  namespace: itsm-dev
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"

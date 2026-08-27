@@ -1,0 +1,20 @@
+# AuthorizationPolicy — Layer 2: CUSTOM action delegates RBAC to OPA.
+#
+# Every request to workloads in itsm-dev is forwarded to the OPA gRPC ext_authz
+# server. OPA evaluates the Rego policy in policy-configmap.yaml and returns
+# allow/deny based on the x-user-role header (injected by Istio from the JWT).
+#
+# The "opa-authz" provider is registered in the Istio meshConfig extensionProvider
+# inside infra/istio/istio-operator.yaml.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: opa-authz
+  namespace: itsm-dev
+spec:
+  action: CUSTOM
+  provider:
+    name: opa-authz
+  rules:
+    - {}  # Match all requests — the Rego policy handles public-path exemptions

@@ -4,8 +4,8 @@
 # Full automated pipeline with Helm deploy is implemented in Phase 9.
 #
 # To push manually (before Phase 9 CI is live):
-#   VERSION=$(cat services/<service>/VERSION)
-#   docker build -t preet2fun/<service>:v$VERSION services/<service>/
+#   VERSION=$(cat platform-app/services/<service>/VERSION)
+#   docker build -t preet2fun/<service>:v$VERSION platform-app/services/<service>/
 #   docker push preet2fun/<service>:v$VERSION
 
 name: CI Docker Push

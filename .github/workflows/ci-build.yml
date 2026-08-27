@@ -20,7 +20,7 @@ jobs:
         run: |
           docker build \
             -t preet2fun/user-service:ci-${{ github.sha }} \
-            services/user-service/
+            platform-app/services/user-service/
 
   build-asset-service:
     name: Build asset-service
@@ -31,7 +31,7 @@ jobs:
         run: |
           docker build \
             -t preet2fun/asset-service:ci-${{ github.sha }} \
-            services/asset-service/
+            platform-app/services/asset-service/
 
   build-incident-service:
     name: Build incident-service
@@ -42,7 +42,7 @@ jobs:
         run: |
           docker build \
             -t preet2fun/incident-service:ci-${{ github.sha }} \
-            services/incident-service/
+            platform-app/services/incident-service/
 
   build-frontend:
     name: Build frontend (Synap UI)
@@ -53,4 +53,4 @@ jobs:
         run: |
           docker build \
             -t preet2fun/frontend:ci-${{ github.sha }} \
-            services/frontend/
+            platform-app/services/frontend/

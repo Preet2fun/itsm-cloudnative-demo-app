@@ -20,14 +20,14 @@ jobs:
           go-version: "1.22"
       - name: gofmt check — user-service
         run: |
-          unformatted=$(gofmt -l services/user-service/)
+          unformatted=$(gofmt -l platform-app/services/user-service/)
           if [ -n "$unformatted" ]; then
             echo "Unformatted files:"; echo "$unformatted"; exit 1
           fi
       - name: golangci-lint — user-service
         uses: golangci/golangci-lint-action@v6
         with:
-          working-directory: services/user-service
+          working-directory: platform-app/services/user-service
 
   lint-python:
     name: Lint Python services
@@ -40,9 +40,9 @@ jobs:
       - name: Install ruff
         run: pip install ruff
       - name: ruff — asset-service
-        run: ruff check services/asset-service/
+        run: ruff check platform-app/services/asset-service/
       - name: ruff — incident-service
-        run: ruff check services/incident-service/
+        run: ruff check platform-app/services/incident-service/
 
   lint-typescript:
     name: Lint TypeScript (Synap UI)
@@ -53,13 +53,13 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: services/frontend/package-lock.json
+          cache-dependency-path: platform-app/services/frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
-        working-directory: services/frontend
+        working-directory: platform-app/services/frontend
       - name: ESLint
         run: npm run lint
-        working-directory: services/frontend
+        working-directory: platform-app/services/frontend
       - name: TypeScript type check
         run: npm run type-check
-        working-directory: services/frontend
+        working-directory: platform-app/services/frontend

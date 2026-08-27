@@ -1,0 +1,69 @@
+# VirtualService — path-based routing through the Istio IngressGateway
+#
+# Route map:
+#   /api/v1/auth/*            → user-service   (login/refresh — no JWT required)
+#   /api/v1/.well-known/*     → user-service   (JWKS endpoint — no JWT required)
+#   /api/v1/users/*           → user-service   (JWT required)
+#   /api/v1/incidents/*       → incident-service
+#   /api/v1/assets/*          → asset-service
+#   /* (catch-all)            → frontend        (Next.js app + /api/health)
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: itsm-routing
+  namespace: itsm-dev
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - itsm-gateway
+  http:
+    # Auth + JWKS (user-service) — must come before the /api/v1/users prefix
+    - match:
+        - uri:
+            prefix: /api/v1/auth/
+        - uri:
+            prefix: /api/v1/.well-known/
+      route:
+        - destination:
+            host: user-service
+            port:
+              number: 80
+
+    # User management (user-service)
+    - match:
+        - uri:
+            prefix: /api/v1/users/
+      route:
+        - destination:
+            host: user-service
+            port:
+              number: 80
+
+    # Incidents (incident-service)
+    - match:
+        - uri:
+            prefix: /api/v1/incidents/
+      route:
+        - destination:
+            host: incident-service
+            port:
+              number: 80
+
+    # Assets (asset-service)
+    - match:
+        - uri:
+            prefix: /api/v1/assets/
+      route:
+        - destination:
+            host: asset-service
+            port:
+              number: 80
+
+    # Frontend — catch-all: Next.js pages, _next/static, /api/health
+    - route:
+        - destination:
+            host: frontend
+            port:
+              number: 80
