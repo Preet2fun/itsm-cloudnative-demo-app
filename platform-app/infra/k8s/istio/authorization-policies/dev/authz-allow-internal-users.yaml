@@ -1,0 +1,38 @@
+# AuthorizationPolicy — restrict /internal/users/* to notification-service's
+# own mTLS identity. Closes the 2026-08-15 finding: InternalGetByID took
+# tenant_slug from an unauthenticated query param and had no real caller
+# authorization ("protected by Istio mTLS" only proves transport identity,
+# not who the caller is). Combined with users.go no longer accepting a
+# caller-supplied tenant_slug at all (see Task 7), this is the actual fix —
+# both the network layer AND the application layer are correct now.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-internal-users-from-notification-service
+  namespace: itsm-dev
+spec:
+  selector:
+    matchLabels:
+      app: user-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/itsm-dev/sa/notification-service"]
+      to:
+        - operation:
+            paths: ["/internal/users/*"]
+    - from:
+        - source:
+            notRequestPrincipals: ["*"]
+      to:
+        - operation:
+            notPaths: ["/internal/users/*"]
+      # Everything that ISN'T /internal/* keeps working exactly as before
+      # (still gated by itsm-jwt-auth's RequestAuthentication + the existing
+      # deny-unauthenticated-api policy) — this rule exists only so adding
+      # this ALLOW policy doesn't accidentally start requiring a service
+      # -account principal on every other user-service route too, which is
+      # how Istio AuthorizationPolicy ALLOW rules work once any exist for a
+      # workload (default-deny for anything unmatched).

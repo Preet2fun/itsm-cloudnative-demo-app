@@ -22,6 +22,8 @@ const bcryptCost = 12
 
 // UserHandler handles all user CRUD endpoints.
 // It reads tenant identity from context (populated by middleware.TenantRequired).
+// An empty tenant ("") means the caller is platform staff — cross-tenant,
+// not scoped to any single Customer App tenant.
 type UserHandler struct {
 	repo   *repository.Repo
 	tracer trace.Tracer
@@ -32,6 +34,8 @@ func NewUserHandler(repo *repository.Repo, tracer trace.Tracer) *UserHandler {
 }
 
 // List godoc: GET /api/v1/users?limit=20&offset=0
+// Platform staff (no tenant context) see other platform staff.
+// Tenant-scoped callers see only their own tenant's users.
 func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "itsm.user.list")
 	defer span.End()
@@ -72,6 +76,8 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create godoc: POST /api/v1/users
+// The new user's tenant scope always matches the caller's own — a caller
+// can never create a user in a different tenant than themselves.
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "itsm.user.create")
 	defer span.End()
@@ -101,14 +107,20 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var tenantID *string
+	if slug != "" {
+		tenantID = &slug
+	}
+
 	user := &models.User{
 		Email:        req.Email,
 		PasswordHash: string(hash),
 		FullName:     req.FullName,
 		Role:         req.Role,
+		TenantID:     tenantID,
 	}
 
-	created, err := h.repo.Create(ctx, slug, user)
+	created, err := h.repo.Create(ctx, user)
 	if errors.Is(err, repository.ErrEmailTaken) {
 		writeError(w, http.StatusConflict, "email already registered")
 		return
@@ -123,6 +135,16 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	span.SetAttributes(attribute.String("user.id", created.ID.String()))
 	span.AddEvent("user_created")
 	writeJSON(w, http.StatusCreated, created.ToResponse())
+}
+
+// callerCanAccess reports whether a caller in tenant `callerTenant` (""
+// meaning platform staff) may act on a user whose own tenant is `target`
+// (nil meaning that user is themselves platform staff).
+func callerCanAccess(callerTenant string, target *string) bool {
+	if callerTenant == "" {
+		return true // platform staff can access anyone
+	}
+	return target != nil && *target == callerTenant
 }
 
 // GetByID godoc: GET /api/v1/users/{id}
@@ -140,7 +162,7 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 	span.SetAttributes(attribute.String("user.id", id.String()))
 
-	user, err := h.repo.FindByID(ctx, slug, id)
+	user, err := h.repo.FindByID(ctx, id)
 	if errors.Is(err, repository.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
@@ -149,6 +171,11 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "db error")
 		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	if !callerCanAccess(slug, user.TenantID) {
+		// 404, not 403 — don't confirm the ID exists in another tenant.
+		writeError(w, http.StatusNotFound, "user not found")
 		return
 	}
 
@@ -173,6 +200,22 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	existing, err := h.repo.FindByID(ctx, id)
+	if errors.Is(err, repository.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "user not found")
+		return
+	}
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "db error")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	if !callerCanAccess(slug, existing.TenantID) {
+		writeError(w, http.StatusNotFound, "user not found")
+		return
+	}
+
 	var req models.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
@@ -181,12 +224,12 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if req.Role != nil {
 		if !validRole(*req.Role) {
-			writeError(w, http.StatusBadRequest, "role must be admin, agent, or viewer")
+			writeError(w, http.StatusBadRequest, "invalid role")
 			return
 		}
 	}
 
-	updated, err := h.repo.Update(ctx, slug, id, &req)
+	updated, err := h.repo.Update(ctx, id, &req)
 	if errors.Is(err, repository.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
@@ -221,7 +264,23 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repo.Delete(ctx, slug, id); errors.Is(err, repository.ErrNotFound) {
+	existing, err := h.repo.FindByID(ctx, id)
+	if errors.Is(err, repository.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "user not found")
+		return
+	}
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "db error")
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	if !callerCanAccess(slug, existing.TenantID) {
+		writeError(w, http.StatusNotFound, "user not found")
+		return
+	}
+
+	if err := h.repo.Delete(ctx, id); errors.Is(err, repository.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
 	} else if err != nil {
@@ -264,7 +323,7 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.repo.FindByID(ctx, slug, id)
+	user, err := h.repo.FindByID(ctx, id)
 	if errors.Is(err, repository.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
@@ -272,6 +331,10 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		span.RecordError(err)
 		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	if !callerCanAccess(slug, user.TenantID) {
+		writeError(w, http.StatusNotFound, "user not found")
 		return
 	}
 
@@ -288,7 +351,7 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repo.UpdatePassword(ctx, slug, id, string(newHash)); err != nil {
+	if err := h.repo.UpdatePassword(ctx, id, string(newHash)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "db error")
 		writeError(w, http.StatusInternalServerError, "internal error")
@@ -300,26 +363,28 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 // InternalGetByID is the service-to-service endpoint used by Notification Service.
-// GET /internal/users/{id}?tenant_slug=tenant_a
-// No X-Tenant-ID middleware — protected by Istio mTLS in Phase 6.
+// GET /internal/users/{id}
+//
+// No X-Tenant-ID middleware, and no longer takes a caller-supplied
+// tenant_slug — that was the 2026-08-15 finding (client-controlled query
+// param, no real authorization). Authorization now comes entirely from the
+// Istio AuthorizationPolicy restricting which service accounts can reach
+// /internal/* at all (see infra/k8s/istio/authorization-policies/{dev,qa}/
+// authz-allow-internal-users.yaml) — this handler trusts that only
+// notification-service's mTLS identity can ever reach it, same trust
+// boundary every other mesh-internal-only endpoint in this codebase relies on.
 func (h *UserHandler) InternalGetByID(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "itsm.user.internal_get")
 	defer span.End()
-
-	slug := r.URL.Query().Get("tenant_slug")
-	if slug == "" {
-		writeError(w, http.StatusBadRequest, "tenant_slug query parameter is required")
-		return
-	}
-	span.SetAttributes(attribute.String("tenant.id", slug))
 
 	id, err := parseUUIDParam(r, "id")
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid user id")
 		return
 	}
+	span.SetAttributes(attribute.String("user.id", id.String()))
 
-	user, err := h.repo.FindByID(ctx, slug, id)
+	user, err := h.repo.FindByID(ctx, id)
 	if errors.Is(err, repository.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
@@ -363,7 +428,12 @@ func queryInt(r *http.Request, key string, defaultVal int) int {
 }
 
 func validRole(role string) bool {
-	return role == "admin" || role == "agent" || role == "viewer"
+	switch role {
+	case "admin", "agent", "viewer", "platform_admin", "platform_analyst":
+		return true
+	default:
+		return false
+	}
 }
 
 func validateCreateUser(req *models.CreateUserRequest) error {
@@ -377,7 +447,7 @@ func validateCreateUser(req *models.CreateUserRequest) error {
 		return errors.New("full_name is required")
 	}
 	if !validRole(req.Role) {
-		return errors.New("role must be admin, agent, or viewer")
+		return errors.New("invalid role")
 	}
 	return nil
 }
