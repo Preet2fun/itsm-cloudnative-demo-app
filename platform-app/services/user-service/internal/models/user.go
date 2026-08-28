@@ -6,13 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// User maps directly to the tenant_<slug>.users table.
+// User maps directly to the public.users table.
 type User struct {
 	ID           uuid.UUID `db:"id"`
 	Email        string    `db:"email"`
 	PasswordHash string    `db:"password_hash"`
 	FullName     string    `db:"full_name"`
-	Role         string    `db:"role"` // admin | agent | viewer
+	Role         string    `db:"role"`      // admin | agent | viewer | platform_admin | platform_analyst
+	TenantID     *string   `db:"tenant_id"` // nil = platform staff, cross-tenant
 	IsActive     bool      `db:"is_active"`
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
@@ -44,9 +45,8 @@ func (u *User) ToResponse() *UserResponse {
 // ── Request types ─────────────────────────────────────────────────────────────
 
 type LoginRequest struct {
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	TenantSlug string `json:"tenant_slug"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginResponse struct {
