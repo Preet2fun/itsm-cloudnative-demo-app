@@ -30,7 +30,7 @@ const jwtIssuer = "itsm-user-service"
 // ITSMClaims is the JWT payload for all tokens issued by the user-service.
 // Field names match what Istio outputClaimToHeaders expects (lowercase with underscores).
 type ITSMClaims struct {
-	TenantID string `json:"tenant_id"`
+	TenantID string `json:"tenant_id,omitempty"`
 	Role     string `json:"role"`
 	Email    string `json:"email"`
 	jwt.RegisteredClaims
@@ -87,7 +87,7 @@ func NewAuthHandler(repo *repository.Repo, cfg *config.Config, tracer trace.Trac
 // session_id, then POST /api/v1/auth/mfa/verify with the emailed code.
 //
 // POST /api/v1/auth/login
-// Body: { "email": "...", "password": "...", "tenant_slug": "tenant_a" }
+// Body: { "email": "...", "password": "..." }
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "itsm.user.login")
 	defer span.End()
@@ -98,21 +98,17 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Email == "" || req.Password == "" || req.TenantSlug == "" {
-		writeError(w, http.StatusBadRequest, "email, password, and tenant_slug are required")
+	if req.Email == "" || req.Password == "" {
+		writeError(w, http.StatusBadRequest, "email and password are required")
 		return
 	}
 
-	span.SetAttributes(
-		attribute.String("tenant.id", req.TenantSlug),
-		attribute.String("user.email", req.Email),
-	)
+	span.SetAttributes(attribute.String("user.email", req.Email))
 
-	user, err := h.repo.FindByEmail(ctx, req.TenantSlug, req.Email)
+	user, err := h.repo.FindByEmail(ctx, req.Email)
 	if errors.Is(err, repository.ErrNotFound) {
 		span.SetStatus(codes.Error, "user not found")
 		h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
-			attribute.String("tenant", req.TenantSlug),
 			attribute.String("result", "invalid_credentials"),
 		))
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
@@ -128,7 +124,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if !user.IsActive {
 		span.SetStatus(codes.Error, "user inactive")
 		h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
-			attribute.String("tenant", req.TenantSlug),
 			attribute.String("result", "inactive_account"),
 		))
 		writeError(w, http.StatusUnauthorized, "account is inactive")
@@ -138,7 +133,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		span.SetStatus(codes.Error, "wrong password")
 		h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
-			attribute.String("tenant", req.TenantSlug),
 			attribute.String("result", "invalid_credentials"),
 		))
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
@@ -146,17 +140,19 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionID := uuid.New().String()
-	if err := h.store.SaveSession(ctx, sessionID, user.ID.String(), req.TenantSlug, 10*time.Minute); err != nil {
+	if err := h.store.SaveSession(ctx, sessionID, user.ID.String(), 10*time.Minute); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "session store failed")
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
 
+	if user.TenantID != nil {
+		span.SetAttributes(attribute.String("tenant.id", *user.TenantID))
+	}
 	span.SetAttributes(attribute.String("user.role", user.Role))
 	span.AddEvent("credentials_valid")
 	h.loginAttempts.Add(ctx, 1, metric.WithAttributes(
-		attribute.String("tenant", req.TenantSlug),
 		attribute.String("result", "success"),
 	))
 
@@ -185,7 +181,7 @@ func (h *AuthHandler) MfaSend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, tenantSlug, err := h.store.GetSession(ctx, req.SessionID)
+	userID, err := h.store.GetSession(ctx, req.SessionID)
 	if errors.Is(err, sessionstore.ErrNotFound) {
 		span.SetStatus(codes.Error, "session not found")
 		writeError(w, http.StatusUnauthorized, "invalid or expired session")
@@ -198,7 +194,7 @@ func (h *AuthHandler) MfaSend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.repo.FindByID(ctx, tenantSlug, mustParseUUID(userID))
+	user, err := h.repo.FindByID(ctx, mustParseUUID(userID))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "user lookup failed")
@@ -206,10 +202,7 @@ func (h *AuthHandler) MfaSend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	span.SetAttributes(
-		attribute.String("tenant.id", tenantSlug),
-		attribute.String("user.role", user.Role),
-	)
+	span.SetAttributes(attribute.String("user.role", user.Role))
 
 	code, err := generateOTP()
 	if err != nil {
@@ -219,7 +212,7 @@ func (h *AuthHandler) MfaSend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.SaveOTP(ctx, tenantSlug, req.SessionID, code, 5*time.Minute); err != nil {
+	if err := h.store.SaveOTP(ctx, req.SessionID, code, 5*time.Minute); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "otp store failed")
 		writeError(w, http.StatusInternalServerError, "internal error")
@@ -229,11 +222,11 @@ func (h *AuthHandler) MfaSend(w http.ResponseWriter, r *http.Request) {
 	if h.cfg.SMTPHost == "" {
 		// Dev mode — no real email provider. This log line IS the delivery
 		// mechanism for local/dev-cluster testing (see design spec §4).
-		slog.Info("dev-mode: MFA OTP generated", "tenant", tenantSlug, "email", user.Email, "code", code)
+		slog.Info("dev-mode: MFA OTP generated", "email", user.Email, "code", code)
 	}
 	// else: real SMTP send — explicitly out of scope for Sprint 1 (design spec §8 non-goals).
 
-	h.mfaOtpSent.Add(ctx, 1, metric.WithAttributes(attribute.String("tenant", tenantSlug)))
+	h.mfaOtpSent.Add(ctx, 1)
 
 	writeJSON(w, http.StatusOK, map[string]string{"status": "sent"})
 }
@@ -258,11 +251,10 @@ func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, tenantSlug, err := h.store.GetSession(ctx, req.SessionID)
+	userID, err := h.store.GetSession(ctx, req.SessionID)
 	if errors.Is(err, sessionstore.ErrNotFound) {
 		span.SetStatus(codes.Error, "session not found")
 		h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
-			attribute.String("tenant", "unknown"),
 			attribute.String("result", "expired"),
 		))
 		writeError(w, http.StatusUnauthorized, "invalid or expired session")
@@ -275,13 +267,10 @@ func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	span.SetAttributes(attribute.String("tenant.id", tenantSlug))
-
-	storedCode, err := h.store.GetOTP(ctx, tenantSlug, req.SessionID)
+	storedCode, err := h.store.GetOTP(ctx, req.SessionID)
 	if errors.Is(err, sessionstore.ErrNotFound) {
 		span.SetStatus(codes.Error, "otp expired")
 		h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
-			attribute.String("tenant", tenantSlug),
 			attribute.String("result", "expired"),
 		))
 		writeError(w, http.StatusUnauthorized, "code expired — request a new one")
@@ -297,7 +286,6 @@ func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
 	if storedCode != req.Code {
 		span.SetStatus(codes.Error, "wrong code")
 		h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
-			attribute.String("tenant", tenantSlug),
 			attribute.String("result", "invalid_code"),
 		))
 		writeError(w, http.StatusUnauthorized, "invalid code")
@@ -306,11 +294,11 @@ func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
 
 	// Single-use — delete immediately after a correct match, before doing
 	// anything else that could fail and leave a valid code reusable.
-	if err := h.store.DeleteOTP(ctx, tenantSlug, req.SessionID); err != nil {
+	if err := h.store.DeleteOTP(ctx, req.SessionID); err != nil {
 		span.RecordError(err) // non-fatal — log via span, continue
 	}
 
-	user, err := h.repo.FindByID(ctx, tenantSlug, mustParseUUID(userID))
+	user, err := h.repo.FindByID(ctx, mustParseUUID(userID))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "user lookup failed")
@@ -318,7 +306,7 @@ func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, expiresAt, err := h.issueToken(user, tenantSlug)
+	token, expiresAt, err := h.issueToken(user)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "token issue failed")
@@ -333,7 +321,6 @@ func (h *AuthHandler) MfaVerify(w http.ResponseWriter, r *http.Request) {
 	span.SetAttributes(attribute.String("user.role", user.Role))
 	span.AddEvent("mfa_verify_success")
 	h.mfaVerifyAttempts.Add(ctx, 1, metric.WithAttributes(
-		attribute.String("tenant", tenantSlug),
 		attribute.String("result", "success"),
 	))
 
@@ -373,12 +360,17 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := &models.User{
-		ID:    mustParseUUID(claims.Subject),
-		Email: claims.Email,
-		Role:  claims.Role,
+	var tenantID *string
+	if claims.TenantID != "" {
+		tenantID = &claims.TenantID
 	}
-	token, expiresAt, err := h.issueToken(user, claims.TenantID)
+	user := &models.User{
+		ID:       mustParseUUID(claims.Subject),
+		Email:    claims.Email,
+		Role:     claims.Role,
+		TenantID: tenantID,
+	}
+	token, expiresAt, err := h.issueToken(user)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "token issue failed")
@@ -386,10 +378,10 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	span.SetAttributes(
-		attribute.String("tenant.id", claims.TenantID),
-		attribute.String("user.role", claims.Role),
-	)
+	if claims.TenantID != "" {
+		span.SetAttributes(attribute.String("tenant.id", claims.TenantID))
+	}
+	span.SetAttributes(attribute.String("user.role", claims.Role))
 	span.AddEvent("refresh_success")
 
 	writeJSON(w, http.StatusOK, &models.RefreshResponse{
@@ -400,11 +392,16 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-func (h *AuthHandler) issueToken(user *models.User, tenantSlug string) (string, time.Time, error) {
+func (h *AuthHandler) issueToken(user *models.User) (string, time.Time, error) {
 	expiresAt := time.Now().Add(time.Duration(h.cfg.JWTExpiryHours) * time.Hour)
 
+	tenantID := ""
+	if user.TenantID != nil {
+		tenantID = *user.TenantID
+	}
+
 	claims := ITSMClaims{
-		TenantID: tenantSlug,
+		TenantID: tenantID,
 		Role:     user.Role,
 		Email:    user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
