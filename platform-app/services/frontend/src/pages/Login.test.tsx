@@ -70,4 +70,25 @@ describe('Login page', () => {
     })
     expect(mockNavigate).not.toHaveBeenCalled()
   })
+
+  it('does not render a Workspace/tenant field', () => {
+    renderLogin()
+    expect(screen.queryByLabelText(/workspace/i)).not.toBeInTheDocument()
+  })
+
+  it('submits login without a tenant_slug field', async () => {
+    const loginSpy = vi.spyOn(api.authApi, 'login').mockResolvedValue({ mfa_required: true, session_id: 'sess-xyz' })
+
+    renderLogin()
+    fireEvent.change(screen.getByPlaceholderText('you@company.com'), { target: { value: 'alice.admin@globaltech.io' } })
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'Password1!' } })
+    fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
+
+    await waitFor(() => {
+      expect(loginSpy).toHaveBeenCalled()
+      const firstArg = loginSpy.mock.calls[0][0]
+      expect(firstArg).toEqual({ email: 'alice.admin@globaltech.io', password: 'Password1!' })
+      expect(firstArg).not.toHaveProperty('tenant_slug')
+    })
+  })
 })

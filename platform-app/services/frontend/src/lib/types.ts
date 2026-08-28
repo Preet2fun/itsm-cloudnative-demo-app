@@ -5,8 +5,8 @@
 export interface JWTClaims {
   sub: string;           // user ID
   email: string;
-  role: "admin" | "agent" | "viewer";
-  tenant_id: string;     // e.g. "tenant_acme"
+  role: "admin" | "agent" | "viewer" | "platform_admin" | "platform_analyst";
+  tenant_id?: string;    // absent for platform staff (cross-tenant)
   exp: number;           // Unix timestamp
 }
 
@@ -15,7 +15,6 @@ export interface JWTClaims {
 export interface LoginRequest {
   email: string;
   password: string;
-  tenant_slug: string;
 }
 
 export interface LoginResponse {
