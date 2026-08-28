@@ -1,4 +1,6 @@
-# See dev/authz-allow-internal-users.yaml for the full rationale.
+# See dev/authz-allow-internal-users.yaml for the full rationale, including
+# the final-review finding (C1) that changed this from action: ALLOW to
+# action: DENY, and the note that notification-service isn't deployed yet.
 
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
@@ -9,17 +11,11 @@ spec:
   selector:
     matchLabels:
       app: user-service
-  action: ALLOW
+  action: DENY
   rules:
     - from:
         - source:
-            principals: ["cluster.local/ns/itsm-qa/sa/notification-service"]
+            notPrincipals: ["cluster.local/ns/itsm-qa/sa/notification-service"]
       to:
         - operation:
             paths: ["/internal/users/*"]
-    - from:
-        - source:
-            notRequestPrincipals: ["*"]
-      to:
-        - operation:
-            notPaths: ["/internal/users/*"]

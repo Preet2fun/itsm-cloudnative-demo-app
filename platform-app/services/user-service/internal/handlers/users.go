@@ -53,6 +53,15 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		limit = 100
 	}
 
+	if slug == "" && !isPlatformStaff(role) {
+		// Final-review finding I2: an absent X-Tenant-ID must not, by
+		// itself, grant the platform-staff (cross-tenant) view — that
+		// would make "header missing" a fail-open path to every user in
+		// the system. Require a positive platform-staff role claim too.
+		writeError(w, http.StatusForbidden, "forbidden")
+		return
+	}
+
 	users, total, err := h.repo.List(ctx, slug, limit, offset)
 	if err != nil {
 		span.RecordError(err)
@@ -137,12 +146,22 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, created.ToResponse())
 }
 
-// callerCanAccess reports whether a caller in tenant `callerTenant` (""
-// meaning platform staff) may act on a user whose own tenant is `target`
-// (nil meaning that user is themselves platform staff).
-func callerCanAccess(callerTenant string, target *string) bool {
+// isPlatformStaff reports whether role is one of the two cross-tenant
+// platform roles. An empty tenant ("") is only a legitimate platform-staff
+// signal when paired with one of these roles — X-Tenant-ID being merely
+// absent (e.g. a misconfigured RequestAuthentication, or a route missing
+// TenantRequired) must never by itself grant cross-tenant access.
+func isPlatformStaff(role string) bool {
+	return role == "platform_admin" || role == "platform_analyst"
+}
+
+// callerCanAccess reports whether a caller in tenant `callerTenant` ("",
+// combined with a platform-staff `callerRole`, meaning platform staff) may
+// act on a user whose own tenant is `target` (nil meaning that user is
+// themselves platform staff).
+func callerCanAccess(callerTenant, callerRole string, target *string) bool {
 	if callerTenant == "" {
-		return true // platform staff can access anyone
+		return isPlatformStaff(callerRole) // platform staff can access anyone
 	}
 	return target != nil && *target == callerTenant
 }
@@ -153,7 +172,11 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	slug := middleware.GetTenantID(ctx)
-	span.SetAttributes(attribute.String("tenant.id", slug))
+	role := middleware.GetUserRole(ctx)
+	span.SetAttributes(
+		attribute.String("tenant.id", slug),
+		attribute.String("user.role", role),
+	)
 
 	id, err := parseUUIDParam(r, "id")
 	if err != nil {
@@ -173,7 +196,7 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
-	if !callerCanAccess(slug, user.TenantID) {
+	if !callerCanAccess(slug, role, user.TenantID) {
 		// 404, not 403 — don't confirm the ID exists in another tenant.
 		writeError(w, http.StatusNotFound, "user not found")
 		return
@@ -211,7 +234,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
-	if !callerCanAccess(slug, existing.TenantID) {
+	if !callerCanAccess(slug, role, existing.TenantID) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
 	}
@@ -275,7 +298,7 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
-	if !callerCanAccess(slug, existing.TenantID) {
+	if !callerCanAccess(slug, role, existing.TenantID) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
 	}
@@ -301,7 +324,11 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	slug := middleware.GetTenantID(ctx)
-	span.SetAttributes(attribute.String("tenant.id", slug))
+	role := middleware.GetUserRole(ctx)
+	span.SetAttributes(
+		attribute.String("tenant.id", slug),
+		attribute.String("user.role", role),
+	)
 
 	id, err := parseUUIDParam(r, "id")
 	if err != nil {
@@ -333,7 +360,7 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
-	if !callerCanAccess(slug, user.TenantID) {
+	if !callerCanAccess(slug, role, user.TenantID) {
 		writeError(w, http.StatusNotFound, "user not found")
 		return
 	}

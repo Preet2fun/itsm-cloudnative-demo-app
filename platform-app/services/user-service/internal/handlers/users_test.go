@@ -54,6 +54,15 @@ func requestWithTenant(method, path, tenant string, body []byte) *http.Request {
 	return req
 }
 
+// withRole sets X-User-Role on a request built by requestWithTenant.
+// Final-review finding I2: callerCanAccess's platform-staff branch now
+// requires this header to actually claim a platform role — a request with
+// no X-Tenant-ID and no X-User-Role is no longer treated as platform staff.
+func withRole(req *http.Request, role string) *http.Request {
+	req.Header.Set("X-User-Role", role)
+	return req
+}
+
 // serveThroughMiddleware wraps h with the real TenantRequired middleware so
 // context values match production exactly.
 func serveThroughMiddleware(h http.HandlerFunc, req *http.Request) *httptest.ResponseRecorder {
@@ -113,7 +122,7 @@ func TestList_PlatformCallerSeesOnlyPlatformStaff(t *testing.T) {
 	platformUser := mustCreateUser(t, repo, nil, "platform_analyst")
 	mustCreateUser(t, repo, strPtr("customer_c"), "agent")
 
-	req := requestWithTenant(http.MethodGet, "/api/v1/users", "", nil) // no X-Tenant-ID
+	req := withRole(requestWithTenant(http.MethodGet, "/api/v1/users", "", nil), "platform_analyst") // no X-Tenant-ID, platform role
 	w := serveThroughMiddleware(h.List, req)
 
 	if w.Code != http.StatusOK {
@@ -129,6 +138,18 @@ func TestList_PlatformCallerSeesOnlyPlatformStaff(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("List() for platform caller did not include the platform-staff user")
+	}
+}
+
+func TestList_EmptyTenantWithoutPlatformRoleReturns403(t *testing.T) {
+	// Final-review finding I2: same guard as GetByID, applied to List.
+	h, _ := testUserHandler(t)
+
+	req := requestWithTenant(http.MethodGet, "/api/v1/users", "", nil) // no X-Tenant-ID, no role
+	w := serveThroughMiddleware(h.List, req)
+
+	if w.Code != http.StatusForbidden {
+		t.Errorf("List() no-tenant-no-role status = %d, want %d, body = %s", w.Code, http.StatusForbidden, w.Body.String())
 	}
 }
 
@@ -179,11 +200,29 @@ func TestGetByID_PlatformCallerCanAccessAnyTenant(t *testing.T) {
 	target := mustCreateUser(t, repo, strPtr("customer_a"), "viewer")
 
 	req := requestWithTenant(http.MethodGet, "/api/v1/users/"+target.ID.String(), "", nil)
+	req = withRole(req, "platform_admin")
 	req = withChiURLParam(req, "id", target.ID.String())
 	w := serveThroughMiddleware(h.GetByID, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetByID() platform-caller status = %d, want %d, body = %s", w.Code, http.StatusOK, w.Body.String())
+	}
+}
+
+func TestGetByID_EmptyTenantWithoutPlatformRoleReturns404(t *testing.T) {
+	// Final-review finding I2: an absent X-Tenant-ID alone must not grant
+	// platform-staff access — X-User-Role must also actually claim a
+	// platform role. Before the fix, this request (no tenant, no role)
+	// would have succeeded against ANY user in the system.
+	h, repo := testUserHandler(t)
+	target := mustCreateUser(t, repo, strPtr("customer_a"), "viewer")
+
+	req := requestWithTenant(http.MethodGet, "/api/v1/users/"+target.ID.String(), "", nil)
+	req = withChiURLParam(req, "id", target.ID.String())
+	w := serveThroughMiddleware(h.GetByID, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("GetByID() no-tenant-no-role status = %d, want %d, body = %s", w.Code, http.StatusNotFound, w.Body.String())
 	}
 }
 

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -186,11 +185,7 @@ func (r *Repo) UpdatePassword(ctx context.Context, id uuid.UUID, newHash string)
 
 // isUniqueViolation returns true when err is a PostgreSQL unique constraint error (23505).
 func isUniqueViolation(err error) bool {
-	if err == nil {
-		return false
-	}
-	return errors.Is(err, &pgUniqueViolation{}) ||
-		fmt.Sprintf("%T", err) == "*pgconn.PgError" && containsCode(err, "23505")
+	return containsCode(err, "23505")
 }
 
 func containsCode(err error, code string) bool {
@@ -200,12 +195,4 @@ func containsCode(err error, code string) bool {
 		return pe.SQLState() == code
 	}
 	return false
-}
-
-// pgUniqueViolation is a sentinel so we can use errors.Is for type matching.
-type pgUniqueViolation struct{}
-
-func (*pgUniqueViolation) Error() string { return "unique violation" }
-func (*pgUniqueViolation) Is(target error) bool {
-	return containsCode(target, "23505")
 }
