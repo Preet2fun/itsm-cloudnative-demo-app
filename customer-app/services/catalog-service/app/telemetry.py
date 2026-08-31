@@ -30,7 +30,7 @@ def setup_telemetry(service_name: str, otlp_endpoint: str, env: str) -> None:
             BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True))
         )
         trace.set_tracer_provider(tp)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — exporter/gRPC init can fail in many ways; must never crash startup
         logger.warning("OTel trace exporter init failed (non-fatal): %s", exc)
         trace.set_tracer_provider(TracerProvider(resource=resource))
 
@@ -44,7 +44,7 @@ def setup_telemetry(service_name: str, otlp_endpoint: str, env: str) -> None:
             ],
         )
         metrics.set_meter_provider(mp)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — exporter/gRPC init can fail in many ways; must never crash startup
         logger.warning("OTel metric exporter init failed (non-fatal): %s", exc)
         metrics.set_meter_provider(MeterProvider(resource=resource))
 

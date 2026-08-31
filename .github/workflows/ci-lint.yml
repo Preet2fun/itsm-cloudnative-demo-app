@@ -28,6 +28,16 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           working-directory: platform-app/services/user-service
+      - name: gofmt check — order-service (Customer App)
+        run: |
+          unformatted=$(gofmt -l customer-app/services/order-service/)
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted files:"; echo "$unformatted"; exit 1
+          fi
+      - name: golangci-lint — order-service (Customer App)
+        uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: customer-app/services/order-service
 
   lint-python:
     name: Lint Python services
@@ -43,6 +53,8 @@ jobs:
         run: ruff check platform-app/services/asset-service/
       - name: ruff — incident-service
         run: ruff check platform-app/services/incident-service/
+      - name: ruff — catalog-service (Customer App)
+        run: ruff check customer-app/services/catalog-service/
 
   lint-typescript:
     name: Lint TypeScript (Synap UI)

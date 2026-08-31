@@ -3,13 +3,12 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import DateTime, ForeignKey, Numeric, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
-
 
 # ── SQLAlchemy ORM ─────────────────────────────────────────────────────────────
 
@@ -80,7 +79,7 @@ class RestaurantListResponse(BaseModel):
 
 class MenuItemCreate(BaseModel):
     name: str
-    price: float
+    price: float = Field(gt=0)
     is_available: bool = True
 
 

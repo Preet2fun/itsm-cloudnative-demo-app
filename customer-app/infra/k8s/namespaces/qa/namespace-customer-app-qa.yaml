@@ -1,0 +1,10 @@
+# Namespace: customer-app-qa
+# Hosts all Customer App services for the qa environment.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: customer-app-qa
+  labels:
+    env: qa
+    istio-injection: enabled

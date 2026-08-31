@@ -1,0 +1,11 @@
+# Namespace: customer-app-dev
+# Hosts all Customer App services for the dev environment.
+# Istio sidecar injection ENABLED — all pods get Envoy proxy.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: customer-app-dev
+  labels:
+    env: dev
+    istio-injection: enabled

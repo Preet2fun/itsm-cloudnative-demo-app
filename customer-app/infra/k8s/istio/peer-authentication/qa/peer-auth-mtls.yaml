@@ -1,0 +1,11 @@
+# PeerAuthentication — STRICT mTLS for all workloads in customer-app-qa.
+# Apply ONLY after all pods in customer-app-qa are confirmed 2/2 READY.
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: customer-app-mtls-strict
+  namespace: customer-app-qa
+spec:
+  mtls:
+    mode: STRICT

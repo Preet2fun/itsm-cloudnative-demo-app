@@ -1,0 +1,13 @@
+# DestinationRule — client-side mTLS for all services in customer-app-qa.
+# See dev/destination-rule.yaml for the full rationale.
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: customer-app-mtls-all
+  namespace: customer-app-qa
+spec:
+  host: "*.customer-app-qa.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

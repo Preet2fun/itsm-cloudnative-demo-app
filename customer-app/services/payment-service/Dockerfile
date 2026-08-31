@@ -35,10 +35,9 @@ ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 
 # MaxRAMPercentage sizes the JVM heap off the container's *memory limit*
-# (256Mi) rather than the host's total RAM, which is what the JVM defaults
-# to otherwise — without this, a container capped at 256Mi but scheduled on
-# a host with several GB free would still try to size its default heap off
-# the host, and get OOMKilled almost immediately. This mitigates but doesn't
-# eliminate the risk of running a JVM service in a 128Mi/256Mi envelope —
+# (512Mi, per values.yaml) rather than the host's total RAM, which is what
+# the JVM defaults to otherwise — without this, a container capped at 512Mi
+# but scheduled on a host with several GB free would still try to size its
+# default heap off the host, and get OOMKilled almost immediately. Still
 # needs live validation once deployed.
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-javaagent:/app/otel-javaagent.jar", "-jar", "/app/payment-service.jar"]

@@ -3,6 +3,7 @@ import json
 import logging
 
 import redis.asyncio as aioredis
+from redis.exceptions import RedisError
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ async def cache_get(tenant_slug: str, resource: str, operation: str, params: dic
     key = _cache_key(tenant_slug, resource, operation, params)
     try:
         return await _redis.get(key)
-    except Exception as exc:
+    except RedisError as exc:
         logger.warning("Redis GET failed (non-fatal): %s", exc)
         return None
 
@@ -46,7 +47,7 @@ async def cache_set(
     key = _cache_key(tenant_slug, resource, operation, params)
     try:
         await _redis.set(key, value, ex=ttl)
-    except Exception as exc:
+    except RedisError as exc:
         logger.warning("Redis SET failed (non-fatal): %s", exc)
 
 
@@ -56,5 +57,5 @@ async def cache_invalidate(tenant_slug: str, resource: str) -> None:
     try:
         async for key in _redis.scan_iter(pattern):
             await _redis.delete(key)
-    except Exception as exc:
+    except RedisError as exc:
         logger.warning("Redis invalidate failed (non-fatal): %s", exc)

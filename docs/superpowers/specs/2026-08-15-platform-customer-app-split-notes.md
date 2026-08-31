@@ -332,6 +332,75 @@ Endpoints: `GET/POST /api/v1/orders`, `GET /api/v1/orders/{id}`,
 `PUT /api/v1/orders/{id}/status` (status transitions only — no full edit,
 per "as simple as possible").
 
+## 7e. Completion pass (2026-08-27)
+
+By this point catalog-service, delivery-service, payment-service, the Helm
+chart, seed data, and DB migrations had all been built in prior sessions
+(not individually logged here) alongside order-service (§7d). This pass
+closed the remaining gaps found when checking overall status:
+
+- **JVM sizing fixed.** delivery-service/payment-service bumped from
+  128Mi/256Mi to 256Mi/512Mi (matching CLAUDE.md's AI-Service tier) — the
+  risk §7a flagged and deferred was real: `-XX:MaxRAMPercentage=75.0` against
+  a 256Mi limit left ~64Mi outside the heap for metaspace/thread
+  stacks/the OTel javaagent.
+- **CI wired.** All 4 services added to `ci-build.yml` (docker build,
+  matching the existing platform-app pattern exactly). Go/Python added to
+  `ci-lint.yml`'s existing jobs. No Java lint job added — no lint tooling
+  was configured for the JVM services and adding one (checkstyle/spotless)
+  would mean a new dependency, out of scope for this pass.
+- **Test coverage added for all 4 services** (previously payment-service
+  only): order-service (Go, `go test`), catalog-service (pytest + a new
+  `tests/` dir + `requirements-dev.txt`), delivery-service (JUnit, mirrors
+  payment-service's existing test). All verified actually passing, not just
+  written — see below for two real bugs this surfaced.
+- **Istio meshing added** — `customer-app/infra/k8s/{namespaces,istio/...}`
+  for both dev/qa: Namespace, PeerAuthentication (STRICT mTLS),
+  DestinationRule (ISTIO_MUTUAL), mirroring platform-app's pattern exactly.
+  **Deliberately did NOT add a JWT/RequestAuthentication layer** — Customer
+  App has no token issuer of its own and §5/§7a explicitly leave this open.
+  Instead added an `AuthorizationPolicy` (ALLOW, source namespace ==
+  customer-app-{dev,qa}) as the interim tenant-isolation control: without
+  it, STRICT mTLS alone still lets any meshed pod (e.g. a platform-app
+  service) reach these APIs and set an arbitrary `X-Tenant-ID` — every
+  service trusts that header once a request arrives (e.g.
+  order-service's `middleware.TenantRequired`). Effect: only a caller
+  running inside the customer-app namespace can reach these services today
+  — and no such caller (load-generator/synthetic-traffic script) has been
+  built yet, so nothing actually exercises multi-tenant isolation
+  end-to-end yet. Revisit this policy if/when Customer App gets its own
+  token issuance.
+- **Two real bugs found during independent verification, not just agent
+  self-report:**
+  1. Local machine's active JDK was 26, too new for Spring Boot 3.2.5's
+     pinned Mockito 5.7.0/byte-buddy 1.14.13 (inline-mock bytecode
+     instrumentation fails) — affected payment-service's pre-existing test
+     too, not just the new delivery-service one. Not a code defect; fixed
+     by running Maven with `JAVA_HOME` pointed at the already-installed
+     Homebrew `openjdk@21` (matches the Dockerfile's own build JDK) instead
+     of changing any dependency version.
+  2. catalog-service's `tests/conftest.py` monkeypatched
+     `app.telemetry.setup_telemetry` to a no-op, but real
+     `BatchSpanProcessor`/`PeriodicExportingMetricReader` background threads
+     still spun up and retried against `localhost:4317` for ~120s before
+     tests could exit — the patch didn't fully suppress SDK-internal
+     wiring. Fixed with the standard `OTEL_SDK_DISABLED=true` env var
+     (verified: 37 passed in 0.05s vs. 123s before). Also found and fixed
+     5 pre-existing ruff findings in catalog-service's `app/` (3×
+     over-broad `except Exception` in Redis cache calls narrowed to
+     `redis.exceptions.RedisError`; 2× in telemetry.py's exporter-init
+     fallbacks kept broad but given `# noqa: BLE001` — exporter/gRPC init
+     can fail in too many ways to narrow meaningfully — plus 2 mechanical
+     ruff --fix import-style corrections) that would have broken the
+     `ci-lint.yml` job just added.
+
+Still not done: no live cluster deployment/validation (no working
+kubernetes/postgres/docker MCP in this environment, and local `kubectl`
+points at an unrelated AWS EKS context) — everything above is
+build/lint/test-verified locally only, not cluster-verified. No
+synthetic-traffic/load-generator exists yet to actually produce multi-tenant
+signal data. `customer-app/docs/` is still empty (no deployment guide).
+
 ## 8. Process note
 
 User explicitly asked to pause here: no design proposal, no approach

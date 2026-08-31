@@ -1,0 +1,37 @@
+# AuthorizationPolicy — restrict customer-app-dev to intra-namespace callers.
+#
+# Customer App has no JWT/RequestAuthentication layer of its own (unlike
+# Platform App's user-service-issued JWTs) — see
+# docs/superpowers/specs/2026-08-15-platform-customer-app-split-notes.md §5/§7a,
+# where how Customer App authenticates callers is explicitly left open.
+#
+# Without this policy, STRICT mTLS alone still lets ANY meshed pod in the
+# cluster (e.g. a platform-app service) reach these APIs and set an arbitrary
+# X-Tenant-ID header — order-service/catalog-service/delivery-service/
+# payment-service all trust that header as-is once the request arrives
+# (see order-service's middleware.TenantRequired). That would break the one
+# non-negotiable requirement (§7b): real multi-tenant isolation.
+#
+# This ALLOW rule is scoped to source namespace == customer-app-dev, which
+# under Istio's semantics makes it a default-deny for everything else once
+# any ALLOW policy exists for these workloads. Effect: only a caller running
+# inside this namespace (e.g. a future synthetic-traffic/load-generator
+# workload) can call these services today. Platform App observes Customer
+# App via the shared OTel/observability pipeline, not by calling these REST
+# APIs directly, so this does not block the intended data flow.
+#
+# Revisit if/when Customer App gets its own token-issuance mechanism —
+# swap this for a RequestAuthentication + claim-based AuthorizationPolicy,
+# same shape as platform-app's itsm-jwt-auth / deny-unauthenticated-api.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-app-allow-intra-namespace
+  namespace: customer-app-dev
+spec:
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces: ["customer-app-dev"]

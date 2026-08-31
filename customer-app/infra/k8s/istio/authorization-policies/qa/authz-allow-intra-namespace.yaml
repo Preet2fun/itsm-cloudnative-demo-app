@@ -1,0 +1,14 @@
+# AuthorizationPolicy — restrict customer-app-qa to intra-namespace callers.
+# See dev/authz-allow-intra-namespace.yaml for the full rationale.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-app-allow-intra-namespace
+  namespace: customer-app-qa
+spec:
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces: ["customer-app-qa"]

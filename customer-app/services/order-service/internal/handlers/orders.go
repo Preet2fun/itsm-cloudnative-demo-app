@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -17,14 +18,23 @@ import (
 	"github.com/itsm-cloudnative/order-service/internal/repository"
 )
 
+// OrderRepository defines the persistence operations OrderHandler depends on.
+// It is satisfied by *repository.Repo; tests supply an in-memory fake instead.
+type OrderRepository interface {
+	List(ctx context.Context, slug string, limit, offset int) ([]*models.Order, int64, error)
+	FindByID(ctx context.Context, slug string, id uuid.UUID) (*models.Order, error)
+	Create(ctx context.Context, slug string, req *models.CreateOrderRequest) (*models.Order, error)
+	UpdateStatus(ctx context.Context, slug string, id uuid.UUID, status string) (*models.Order, error)
+}
+
 // OrderHandler handles all order endpoints.
 // It reads tenant identity from context (populated by middleware.TenantRequired).
 type OrderHandler struct {
-	repo   *repository.Repo
+	repo   OrderRepository
 	tracer trace.Tracer
 }
 
-func NewOrderHandler(repo *repository.Repo, tracer trace.Tracer) *OrderHandler {
+func NewOrderHandler(repo OrderRepository, tracer trace.Tracer) *OrderHandler {
 	return &OrderHandler{repo: repo, tracer: tracer}
 }
 

@@ -54,3 +54,47 @@ jobs:
           docker build \
             -t preet2fun/frontend:ci-${{ github.sha }} \
             platform-app/services/frontend/
+
+  build-order-service:
+    name: Build order-service (Customer App)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/order-service:ci-${{ github.sha }} \
+            customer-app/services/order-service/
+
+  build-catalog-service:
+    name: Build catalog-service (Customer App)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/catalog-service:ci-${{ github.sha }} \
+            customer-app/services/catalog-service/
+
+  build-delivery-service:
+    name: Build delivery-service (Customer App)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/delivery-service:ci-${{ github.sha }} \
+            customer-app/services/delivery-service/
+
+  build-payment-service:
+    name: Build payment-service (Customer App)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t preet2fun/payment-service:ci-${{ github.sha }} \
+            customer-app/services/payment-service/

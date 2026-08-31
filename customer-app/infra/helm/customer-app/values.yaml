@@ -92,13 +92,18 @@ deliveryService:
   secretName: customer-app-secrets
   env:
     DELIVERY_SERVICE_PORT: "8080"
+  # JVM (Spring Boot + OTel javaagent) needs more headroom than the Go/Python
+  # services above — sized to match CLAUDE.md's existing AI-Service tier
+  # (256Mi/512Mi) rather than the thin-service 128Mi/256Mi envelope, which
+  # left only ~64Mi outside the -XX:MaxRAMPercentage=75.0 heap for metaspace,
+  # thread stacks, and the OTel agent's own instrumentation overhead.
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 300m
-      memory: 256Mi
+      memory: 512Mi
   hpa:
     minReplicas: 1
     maxReplicas: 2
@@ -125,13 +130,14 @@ paymentService:
   secretName: customer-app-secrets
   env:
     PAYMENT_SERVICE_PORT: "8080"
+  # Same JVM sizing rationale as delivery-service above.
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 300m
-      memory: 256Mi
+      memory: 512Mi
   hpa:
     minReplicas: 1
     maxReplicas: 2
