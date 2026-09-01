@@ -85,3 +85,6 @@ logs/
 
 # ── Claude Code (local MCP config — contains machine-specific paths) ─────────
 .claude/settings.json
+
+# ── Local reference (cluster/machine state — not for the public repo) ────────
+INFRA-INVENTORY.md
