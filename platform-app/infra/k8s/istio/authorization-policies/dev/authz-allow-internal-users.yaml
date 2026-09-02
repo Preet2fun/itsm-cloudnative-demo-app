@@ -1,0 +1,46 @@
+# AuthorizationPolicy — restrict /internal/users/* to notification-service's
+# own mTLS identity. Closes the 2026-08-15 finding: InternalGetByID took
+# tenant_slug from an unauthenticated query param and had no real caller
+# authorization ("protected by Istio mTLS" only proves transport identity,
+# not who the caller is). Combined with users.go no longer accepting a
+# caller-supplied tenant_slug at all, this is the actual fix — both the
+# network layer AND the application layer are correct now.
+#
+# Final-review finding C1 (2026-08-28): the original version of this file
+# used action: ALLOW with two rules (internal-service-only for
+# /internal/users/*, and unauthenticated-only for everything else). Istio's
+# documented ALLOW semantics are: once ANY ALLOW policy exists for a
+# workload, that workload becomes default-deny for every request that
+# doesn't match one of its ALLOW rules. Since ordinary authenticated traffic
+# (a real user's JWT — which carries a request principal) matched NEITHER
+# rule, that draft would have denied every /api/v1/users* and
+# /api/v1/auth/refresh request the moment it was applied. Expressed as
+# DENY instead: DENY policies do not trigger default-deny, and this one
+# composes cleanly with the pre-existing deny-unauthenticated-api policy —
+# it only ever removes access (blocking /internal/users/* from anyone
+# except notification-service's own identity), never grants any.
+#
+# NOTE: as of 2026-08-28, no notification-service is deployed in this
+# cluster (no Helm chart, no ServiceAccount) and nothing in this repo calls
+# /internal/users/*, so the principal below matches no live workload yet —
+# this policy is forward-looking. When notification-service is built, give
+# its Deployment a dedicated ServiceAccount named "notification-service" so
+# its SPIFFE identity matches this policy.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-internal-users-from-notification-service
+  namespace: itsm-dev
+spec:
+  selector:
+    matchLabels:
+      app: user-service
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notPrincipals: ["cluster.local/ns/itsm-dev/sa/notification-service"]
+      to:
+        - operation:
+            paths: ["/internal/users/*"]

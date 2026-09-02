@@ -5,10 +5,12 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/itsm-cloudnative/user-service/internal/config"
@@ -66,9 +68,8 @@ func TestLoginReturnsMfaRequired(t *testing.T) {
 	h := testHandler(t)
 
 	body, _ := json.Marshal(models.LoginRequest{
-		Email:      "alice.admin@globaltech.io",
-		Password:   "Password1!",
-		TenantSlug: "tenant_a",
+		Email:    "alice.admin@globaltech.io",
+		Password: "Password1!",
 	})
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewReader(body))
 	w := httptest.NewRecorder()
@@ -94,9 +95,8 @@ func TestLoginInvalidCredentials(t *testing.T) {
 	h := testHandler(t)
 
 	body, _ := json.Marshal(models.LoginRequest{
-		Email:      "alice.admin@globaltech.io",
-		Password:   "wrong-password",
-		TenantSlug: "tenant_a",
+		Email:    "alice.admin@globaltech.io",
+		Password: "wrong-password",
 	})
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewReader(body))
 	w := httptest.NewRecorder()
@@ -112,9 +112,8 @@ func TestMfaSendSucceedsAfterLogin(t *testing.T) {
 	h := testHandler(t)
 
 	loginBody, _ := json.Marshal(models.LoginRequest{
-		Email:      "alice.admin@globaltech.io",
-		Password:   "Password1!",
-		TenantSlug: "tenant_a",
+		Email:    "alice.admin@globaltech.io",
+		Password: "Password1!",
 	})
 	loginReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewReader(loginBody))
 	loginW := httptest.NewRecorder()
@@ -135,7 +134,7 @@ func TestMfaSendSucceedsAfterLogin(t *testing.T) {
 	}
 
 	// The OTP must actually have been written to the store.
-	code, err := h.store.GetOTP(context.Background(), "tenant_a", loginResp.SessionID)
+	code, err := h.store.GetOTP(context.Background(), loginResp.SessionID)
 	if err != nil {
 		t.Fatalf("GetOTP() after MfaSend error = %v", err)
 	}
@@ -179,9 +178,8 @@ func TestMfaVerifyFullFlowSucceeds(t *testing.T) {
 	ctx := context.Background()
 
 	loginBody, _ := json.Marshal(models.LoginRequest{
-		Email:      "alice.admin@globaltech.io",
-		Password:   "Password1!",
-		TenantSlug: "tenant_a",
+		Email:    "alice.admin@globaltech.io",
+		Password: "Password1!",
 	})
 	loginReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewReader(loginBody))
 	loginW := httptest.NewRecorder()
@@ -193,7 +191,7 @@ func TestMfaVerifyFullFlowSucceeds(t *testing.T) {
 	sendReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/mfa/send", bytes.NewReader(sendBody))
 	h.MfaSend(httptest.NewRecorder(), sendReq)
 
-	code, err := h.store.GetOTP(ctx, "tenant_a", loginResp.SessionID)
+	code, err := h.store.GetOTP(ctx, loginResp.SessionID)
 	if err != nil {
 		t.Fatalf("GetOTP() error = %v", err)
 	}
@@ -231,9 +229,8 @@ func TestMfaVerifyWrongCode(t *testing.T) {
 	h := testHandler(t)
 
 	loginBody, _ := json.Marshal(models.LoginRequest{
-		Email:      "alice.admin@globaltech.io",
-		Password:   "Password1!",
-		TenantSlug: "tenant_a",
+		Email:    "alice.admin@globaltech.io",
+		Password: "Password1!",
 	})
 	loginReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewReader(loginBody))
 	loginW := httptest.NewRecorder()
@@ -268,4 +265,69 @@ func TestMfaVerifyUnknownSession(t *testing.T) {
 	if verifyW.Code != http.StatusUnauthorized {
 		t.Errorf("MfaVerify() with unknown session status = %d, want %d", verifyW.Code, http.StatusUnauthorized)
 	}
+}
+
+func TestMfaVerifyFullFlow_PlatformStaffTokenOmitsTenantClaim(t *testing.T) {
+	h := testHandler(t)
+	ctx := context.Background()
+
+	loginBody, _ := json.Marshal(models.LoginRequest{
+		Email:    "alice.admin@globaltech.io",
+		Password: "Password1!",
+	})
+	loginReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewReader(loginBody))
+	loginW := httptest.NewRecorder()
+	h.Login(loginW, loginReq)
+	if loginW.Code != http.StatusOK {
+		t.Fatalf("Login() status = %d, body = %s", loginW.Code, loginW.Body.String())
+	}
+	var loginResp models.MfaRequiredResponse
+	json.NewDecoder(loginW.Body).Decode(&loginResp)
+
+	sendBody, _ := json.Marshal(models.MfaSendRequest{SessionID: loginResp.SessionID})
+	sendReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/mfa/send", bytes.NewReader(sendBody))
+	h.MfaSend(httptest.NewRecorder(), sendReq)
+
+	code, err := h.store.GetOTP(ctx, loginResp.SessionID)
+	if err != nil {
+		t.Fatalf("GetOTP() error = %v", err)
+	}
+
+	verifyBody, _ := json.Marshal(models.MfaVerifyRequest{SessionID: loginResp.SessionID, Code: code})
+	verifyReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/mfa/verify", bytes.NewReader(verifyBody))
+	verifyW := httptest.NewRecorder()
+	h.MfaVerify(verifyW, verifyReq)
+
+	if verifyW.Code != http.StatusOK {
+		t.Fatalf("MfaVerify() status = %d, body = %s", verifyW.Code, verifyW.Body.String())
+	}
+	var verifyResp models.LoginResponse
+	json.NewDecoder(verifyW.Body).Decode(&verifyResp)
+
+	// Decode the JWT payload (no signature check needed — this test only
+	// cares whether the tenant_id claim key is present in the JSON at all).
+	parts := bytesSplitJWT(verifyResp.Token)
+	var claims map[string]any
+	if err := json.Unmarshal(parts, &claims); err != nil {
+		t.Fatalf("decode claims: %v", err)
+	}
+	if _, present := claims["tenant_id"]; present {
+		t.Errorf("platform-staff token has a tenant_id claim = %v, want omitted entirely", claims["tenant_id"])
+	}
+	if claims["role"] != "platform_admin" {
+		t.Errorf("claims[role] = %v, want platform_admin", claims["role"])
+	}
+}
+
+// bytesSplitJWT base64url-decodes a JWT's payload segment (index 1) without
+// verifying its signature — test-only helper, mirrors what jwt-debugger
+// tools do.
+func bytesSplitJWT(token string) []byte {
+	parts := strings.Split(token, ".")
+	payload := parts[1]
+	if m := len(payload) % 4; m != 0 {
+		payload += strings.Repeat("=", 4-m)
+	}
+	decoded, _ := base64.URLEncoding.DecodeString(payload)
+	return decoded
 }

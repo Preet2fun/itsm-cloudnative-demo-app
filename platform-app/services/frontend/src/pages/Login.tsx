@@ -15,7 +15,6 @@ export default function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [tenantSlug, setTenantSlug] = useState('tenant_a')
   const [error, setError] = useState<string | null>(null)
 
   const loginMutation = useMutation({
@@ -31,7 +30,7 @@ export default function Login() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
-    loginMutation.mutate({ email, password, tenant_slug: tenantSlug })
+    loginMutation.mutate({ email, password })
   }
 
   return (
@@ -75,16 +74,6 @@ export default function Login() {
           <p className="muted" style={{ margin: '0 0 26px', fontSize: 14 }}>Welcome back. Let's get your operations running.</p>
 
           <form onSubmit={handleSubmit} className="col gap-3">
-            <div>
-              <label className="field-label" htmlFor="tenant-slug">Workspace</label>
-              <input
-                id="tenant-slug"
-                className="input"
-                value={tenantSlug}
-                onChange={(e) => setTenantSlug(e.target.value)}
-                placeholder="tenant_a"
-              />
-            </div>
             <div>
               <label className="field-label" htmlFor="email">Work email</label>
               <input

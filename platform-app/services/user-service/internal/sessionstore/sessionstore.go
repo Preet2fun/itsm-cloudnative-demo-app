@@ -34,24 +34,20 @@ func (s *Store) Close() error {
 }
 
 type pendingSession struct {
-	UserID     string `json:"user_id"`
-	TenantSlug string `json:"tenant_slug"`
+	UserID string `json:"user_id"`
 }
 
 func sessionKey(sessionID string) string {
 	return "itsm:auth-session:" + sessionID
 }
 
-func otpKey(tenantSlug, sessionID string) string {
-	return "itsm:" + tenantSlug + ":otp:" + sessionID
+func otpKey(sessionID string) string {
+	return "itsm:auth-otp:" + sessionID
 }
 
-// SaveSession persists the pending-login user/tenant association, keyed by
-// sessionID. Not tenant-scoped in its key — tenant isn't resolvable from any
-// other request param at the mfa/send and mfa/verify call sites, so this
-// record is the thing that resolves it.
-func (s *Store) SaveSession(ctx context.Context, sessionID, userID, tenantSlug string, ttl time.Duration) error {
-	rec := pendingSession{UserID: userID, TenantSlug: tenantSlug}
+// SaveSession persists the pending-login user association, keyed by sessionID.
+func (s *Store) SaveSession(ctx context.Context, sessionID, userID string, ttl time.Duration) error {
+	rec := pendingSession{UserID: userID}
 	data, err := json.Marshal(rec)
 	if err != nil {
 		return err
@@ -59,21 +55,21 @@ func (s *Store) SaveSession(ctx context.Context, sessionID, userID, tenantSlug s
 	return s.client.Set(ctx, sessionKey(sessionID), data, ttl).Err()
 }
 
-// GetSession returns the userID and tenantSlug associated with sessionID.
+// GetSession returns the userID associated with sessionID.
 // Returns ErrNotFound if the session doesn't exist or has expired.
-func (s *Store) GetSession(ctx context.Context, sessionID string) (userID, tenantSlug string, err error) {
+func (s *Store) GetSession(ctx context.Context, sessionID string) (userID string, err error) {
 	data, err := s.client.Get(ctx, sessionKey(sessionID)).Result()
 	if errors.Is(err, redis.Nil) {
-		return "", "", ErrNotFound
+		return "", ErrNotFound
 	}
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	var rec pendingSession
 	if err := json.Unmarshal([]byte(data), &rec); err != nil {
-		return "", "", err
+		return "", err
 	}
-	return rec.UserID, rec.TenantSlug, nil
+	return rec.UserID, nil
 }
 
 // DeleteSession removes the pending-login record.
@@ -81,14 +77,14 @@ func (s *Store) DeleteSession(ctx context.Context, sessionID string) error {
 	return s.client.Del(ctx, sessionKey(sessionID)).Err()
 }
 
-// SaveOTP stores a one-time code for sessionID, scoped to tenantSlug.
-func (s *Store) SaveOTP(ctx context.Context, tenantSlug, sessionID, code string, ttl time.Duration) error {
-	return s.client.Set(ctx, otpKey(tenantSlug, sessionID), code, ttl).Err()
+// SaveOTP stores a one-time code for sessionID.
+func (s *Store) SaveOTP(ctx context.Context, sessionID, code string, ttl time.Duration) error {
+	return s.client.Set(ctx, otpKey(sessionID), code, ttl).Err()
 }
 
 // GetOTP returns the stored code. Returns ErrNotFound if missing/expired.
-func (s *Store) GetOTP(ctx context.Context, tenantSlug, sessionID string) (string, error) {
-	code, err := s.client.Get(ctx, otpKey(tenantSlug, sessionID)).Result()
+func (s *Store) GetOTP(ctx context.Context, sessionID string) (string, error) {
+	code, err := s.client.Get(ctx, otpKey(sessionID)).Result()
 	if errors.Is(err, redis.Nil) {
 		return "", ErrNotFound
 	}
@@ -100,6 +96,6 @@ func (s *Store) GetOTP(ctx context.Context, tenantSlug, sessionID string) (strin
 
 // DeleteOTP removes the code — call this immediately after a successful
 // match, since a code is single-use.
-func (s *Store) DeleteOTP(ctx context.Context, tenantSlug, sessionID string) error {
-	return s.client.Del(ctx, otpKey(tenantSlug, sessionID)).Err()
+func (s *Store) DeleteOTP(ctx context.Context, sessionID string) error {
+	return s.client.Del(ctx, otpKey(sessionID)).Err()
 }

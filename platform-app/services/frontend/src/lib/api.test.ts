@@ -21,7 +21,6 @@ describe('authApi', () => {
     const result = await authApi.login({
       email: 'alice.admin@globaltech.io',
       password: 'Password1!',
-      tenant_slug: 'tenant_a',
     })
 
     expect(result).toEqual(mockResponse)
