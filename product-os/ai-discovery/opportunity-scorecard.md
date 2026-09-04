@@ -19,6 +19,12 @@ the AI angle, then read the whole picture against the two gates.
 Score each 1–5 with a reason + the AI angle. Mostly 3+ leans Pursue; mostly ≤2
 leans Kill.
 
+*Where feedback data exists, [`../ai-feedback/`](../ai-feedback/) **signal-scan**
+grounds the scores with numbers: Magnitude = distinct accounts, Frequency =
+recurrence over the window, Severity = escalation language + sentiment split,
+Contrast = competitor mentions. Cite them `[Feedback: …]`. No data → score from
+judgement and mark it Assumed.*
+
 ---
 
 ## Part B — The AI-native check  *(gate, not a score)*

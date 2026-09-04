@@ -9,7 +9,9 @@ which strategic framing we're committing to.
 
 **Do:**
 1. **Users & JTBD** — primary and secondary personas; the job each is hiring this
-   feature to do; who is explicitly not a user.
+   feature to do; who is explicitly not a user. *When feedback data exists, run
+   [`ai-feedback/`](../../ai-feedback/) **cohort-compare** — the shared vs
+   differential vs unique split scopes the personas here and template §4.*
 2. **Scope**
    - **Goals** — few, priority-ordered, measurable where possible; guardrail
      metrics (what must not regress).

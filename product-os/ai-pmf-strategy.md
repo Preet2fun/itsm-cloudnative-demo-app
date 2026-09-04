@@ -65,19 +65,22 @@ capabilities — not one you reach by bolting AI onto an existing solution.
 `ai-design/`; Develop + Deploy → `ai-prd/` (the PRD's AI addendum: grounding,
 prompt strategy, hallucination guardrails, eval strategy) + engineering.
 
-### Phase 3 — Scale: the Launch Strategy Canvas
+### Phase 3 — Scale: the AI Launch Strategy Canvas
 
-Four readiness dimensions. **Only scale when all four are green.**
+Four lenses, three factors each, every factor scored **Green / Yellow / Red**.
+**Only scale when green.**
 
-| Dimension | Ready means |
-|---|---|
-| **Customer readiness** | Target segment is sizeable and growing · retention + organic usage frequency are real · the pain is big enough that users will pay |
-| **Product readiness** | The unfair advantage (data, model, or market access) is strong · reach + viral potential exist · the AI capability is genuinely differentiated vs competition |
-| **Company readiness** | The AI infrastructure can scale technically · GTM + sales process are validated · the team can absorb rapid growth and AI complexity |
-| **Competition readiness** | Few / weak competitors · barriers to entry for new AI entrants · manageable supplier power (dependence on model providers) |
+| Lens | Factors | Ready (Green) means |
+|---|---|---|
+| **Customer** | Segments · Retention · Pain | Segment sizeable and growing · needed often enough to be sticky · the pain is named, quantified, and budgeted-for |
+| **Product** | AI Reliability · Reach · Uniqueness | Evals green across diverse cases · real distribution / channel · a structural moat, not a copyable feature set |
+| **Company** | AI Infrastructure · GTM Viability · Supplier Power | Cost per run scales sustainably · a repeatable sales motion · no single model-provider lock-in |
+| **Competition** | Rivalry · Barriers to Entry · Brand Power | Few competitors positioned your way · high barriers for new AI entrants · real brand awareness |
 
-→ **Ockham:** `ai-product-strategy/` (roadmap sequencing, competitive strategy) +
-`gtm/` (launch plan). Scaling before all four are green is a named failure mode.
+→ **Full canvas, per-cell Green/Yellow/Red rubric, the scale-or-hold gate, and
+Ockham's current read:** [`ai-launch-strategy.md`](ai-launch-strategy.md).
+Owned by `ai-product-strategy/` + `gtm/`. Scaling with a gating cell still red is
+a named failure mode.
 
 ### Phase 4 — Optimize for sustainable growth
 
@@ -114,7 +117,8 @@ Rigor* dimension.
 2. **Adding AI on top of an existing workflow** instead of finding AI-native pain.
 3. **Waterfall thinking on a probabilistic system** — plan for iteration and
    evals, not a one-shot spec.
-4. **Premature scaling** — before all four readiness dimensions are green.
+4. **Premature scaling** — adding growth spend while a gating cell on the
+   [AI Launch Strategy Canvas](ai-launch-strategy.md) is still red.
 5. **Letting AI quality slip** as use cases diversify — the real scaling
    challenge is quality, not infrastructure.
 
@@ -136,11 +140,11 @@ Rigor* dimension.
 
 | Phase / concept | Owned by |
 |---|---|
-| Opportunity spotting · 5-question ranking · AI-native check | `ai-discovery/` (`opportunity-scorecard.md`) |
-| 4D **Discover** · problem validation | `ai-discovery/` stages 03–05 → Discovery Brief |
+| Opportunity spotting · 5-question ranking · AI-native check | `ai-discovery/` (`opportunity-scorecard.md`), grounded by `ai-feedback/` signal-scan |
+| 4D **Discover** · problem validation · customer-feedback evidence | `ai-discovery/` stages 03–05 + `ai-feedback/` (MCP or CSV) → Discovery Brief |
 | 4D **Design** | `ai-design/` |
 | 4D **Develop + Deploy** · dual metrics · grounding / prompts / evals | `ai-prd/` (AI addendum, stage 06) |
-| Launch Strategy Canvas · scale-when-green | `ai-product-strategy/` + `gtm/` |
+| AI Launch Strategy Canvas · scale-when-green gate | [`ai-launch-strategy.md`](ai-launch-strategy.md) → `ai-product-strategy/` + `gtm/` |
 | Data network effects · intelligence moats · trust compounding | `ai-product-strategy/moat-thesis.md` → `context-hub/` |
 | Dual-metric enforcement · probabilistic-behaviour check | PRD Reviewer — *AI Readiness* + *Metric & Data Rigor* dimensions |
 

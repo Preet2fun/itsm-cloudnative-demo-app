@@ -44,7 +44,7 @@ PRD is spent.
 | ICP, positioning, competitors, metric rules, agentic use cases, moat | `../context-hub/` |
 | Current strategy horizon | `../ai-product-strategy/` |
 | What already ships (and what was killed before) | `../knowledge-hub/` |
-| Signals — interviews, tickets, usage, churn, sales notes | whatever the user connects |
+| Signals — interviews, tickets, usage, churn, sales notes | whatever the user connects; run through [`../ai-feedback/`](../ai-feedback/) (MCP tool or CSV) when available — `signal-scan` + `pattern-classification` |
 
 If a source is unavailable, record the gap and keep going.
 

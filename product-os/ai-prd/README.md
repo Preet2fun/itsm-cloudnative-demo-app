@@ -56,7 +56,8 @@ Upstream: [`../ai-discovery/`](../ai-discovery/) (the Discovery Brief that
 becomes stage-01 input), [`../context-hub/`](../context-hub/) (company context,
 positioning, ICP, competitors, metric rules),
 [`../knowledge-hub/`](../knowledge-hub/) (shipped features + dependencies),
-[`../ai-product-strategy/`](../ai-product-strategy/).
+[`../ai-feedback/`](../ai-feedback/) (customer-feedback evidence for stages 05 &
+07), [`../ai-product-strategy/`](../ai-product-strategy/).
 Downstream: [`../ai-design/`](../ai-design/), engineering.
 When `lifecycle/` is built, this folder becomes the back half of
 `lifecycle/discovery/` (front half = [`../ai-discovery/`](../ai-discovery/)).

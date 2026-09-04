@@ -4,7 +4,9 @@
 exactly how solid each one is.
 
 **Inputs:** `01`–`06`; connected analytics / warehouse / logs / tickets; market
-sources from stage 04; `data-analysis/` if populated.
+sources from stage 04; `data-analysis/` if populated (quantitative);
+`ai-feedback/` lens output from stage 05 (customer-feedback counts, tagged
+`[Feedback: …]`).
 
 **Do:**
 1. For each claim the PRD will make (impact of the problem, addressable base,

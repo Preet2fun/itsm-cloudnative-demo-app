@@ -3,6 +3,11 @@
 Market and evidence base for product and GTM decisions. Numbers and sourced
 claims live here so other modules can cite instead of restate.
 
+**Quantitative half** of the evidence base — market sizing, pricing, analyst
+data, product metrics. The **qualitative half** (what customers *say* — themes,
+quotes, feedback volume) is [`../ai-feedback/`](../ai-feedback/). A PRD's §6
+pulls from both.
+
 ## Expected artifacts (built on direction)
 
 - `market-sizing.md` — TAM / SAM / SOM against the ICP (midsize enterprise, no

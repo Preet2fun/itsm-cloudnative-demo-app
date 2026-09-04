@@ -43,7 +43,8 @@ evidence, and force the honest version. The human decides.
 | Company context | `product-os/context-hub/` |
 | Shipped features + dependencies | `product-os/knowledge-hub/` |
 | Product strategy | `product-os/ai-product-strategy/` |
-| Quantitative evidence | analytics / warehouse / tickets / logs the user connects |
+| Customer feedback | `product-os/ai-feedback/` — an MCP feedback tool or a CSV, run through its lenses (VoC for stage 05, evidence for stage 07) |
+| Quantitative evidence | analytics / warehouse / tickets / logs the user connects; `product-os/data-analysis/` |
 | Market & competitor material | `context-hub/competitive-landscape.md` + web |
 
 If a source is unavailable, record it as a gap in the relevant stage and keep going.

@@ -9,6 +9,10 @@ Dropzone.ai); web (only widen the set if the user says so).
 *If from a Discovery Brief: its opportunity score already sized the competitive
 gap — this stage builds the detailed §6.2 table, it doesn't re-decide whether
 there's an opening.*
+*When feedback data exists, [`ai-feedback/`](../../ai-feedback/) **signal-scan**
+surfaces competitor mentions tied to the topic (its Contrast step) — real
+customer words on what the alternative does better; fold these into the "user
+complaint / signal" column, cited `[Feedback: …]`.*
 
 **Do:**
 1. For each relevant competitor, capture: the comparable **feature**,

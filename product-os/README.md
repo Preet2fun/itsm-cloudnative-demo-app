@@ -8,7 +8,9 @@ Built step by step, under direction. No speculative content, no offline research
 unless asked. [`context-hub/`](context-hub/) is upstream of everything —
 downstream docs don't silently contradict it.
 [`ai-pmf-strategy.md`](ai-pmf-strategy.md) is the AI-PMF framework the modules
-are built on (opportunity → 4D build → scale-when-green → compound).
+are built on (opportunity → 4D build → scale-when-green → compound);
+[`ai-launch-strategy.md`](ai-launch-strategy.md) is its Phase 3 as a working
+gate — the AI Launch Strategy Canvas and the scale-or-hold call.
 
 > Not the engineering roadmap. Delivery status lives in the GitHub Project
 > (root `CLAUDE.md` §11).
@@ -59,11 +61,16 @@ product-os/
 ├── knowledge-hub/          shipped features + how they work — empty, purpose defined
 ├── ai-discovery/           │  Discovery Agent (idea → Pursue/Park/Kill) — BUILT
 ├── ai-prd/                 │  PRD Agent + PRD Reviewer Agent — BUILT
+├── ai-feedback/            │  Customer Feedback Intelligence (MCP or CSV) — BUILT
 ├── ai-product-strategy/    ┤  standalone for now; each folds into a
 ├── ai-design/              │  lifecycle/ phase once that is built
 ├── gtm/                    │  (see "Standalone folders" below)
 └── data-analysis/          ┘
 ```
+
+Root docs: [`ai-pmf-strategy.md`](ai-pmf-strategy.md) ·
+[`ai-launch-strategy.md`](ai-launch-strategy.md) — cross-cutting frameworks, not
+modules.
 
 ### The two hubs
 
@@ -76,18 +83,19 @@ Both are persistent stores that outlive any single phase.
 
 ### Standalone folders
 
-`ai-discovery/`, `ai-prd/`, `ai-product-strategy/`, `ai-design/`, `gtm/`,
-`data-analysis/` are standalone **only until `lifecycle/` is built** — then each
-folds into the matching phase:
+`ai-discovery/`, `ai-prd/`, `ai-feedback/`, `ai-product-strategy/`, `ai-design/`,
+`gtm/`, `data-analysis/` are standalone **only until `lifecycle/` is built** —
+then each folds into the matching phase:
 
 | Folder | Folds into |
 |---|---|
 | `ai-discovery/` — **Discovery Agent** (idea → Pursue / Park / Kill → Discovery Brief) | `lifecycle/discovery/` (front half) |
 | `ai-prd/` — **PRD Agent + PRD Reviewer Agent** | `lifecycle/discovery/` (back half) |
+| `ai-feedback/` — **Customer Feedback Intelligence** (MCP tool or CSV → cited VoC evidence) | shared capability feeding `lifecycle/discovery/`, `planning/`, `release/` |
 | `ai-design/` | `lifecycle/design/` |
 | `gtm/` | `lifecycle/release/` |
 | `ai-product-strategy/` | feeds `lifecycle/discovery/` + `lifecycle/planning/` across phases |
-| `data-analysis/` | feeds every phase |
+| `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) |
 
 Chain: **`ai-discovery/` Pursue → Discovery Brief → `ai-prd/` stage 01 → PRD.**
 

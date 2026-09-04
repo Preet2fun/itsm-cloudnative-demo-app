@@ -42,7 +42,7 @@ above; the alternates are the PRD's fallback framings (`ai-prd/stages/02`).
 ## What we know vs what we're assuming
 | Verified | Source |
 |---|---|
-| … | `[Data: …]` / `[Source: …]` |
+| … | `[Feedback: …]` / `[Data: …]` / `[Source: …]` |
 
 | Still assuming (open) | Confidence | Impact if wrong |
 |---|---|---|

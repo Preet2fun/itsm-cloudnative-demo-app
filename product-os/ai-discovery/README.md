@@ -47,7 +47,9 @@ name.
 Upstream: [`../context-hub/`](../context-hub/) (ICP, positioning, the fixed
 competitor set, metric rules, agentic use cases, moat),
 [`../ai-product-strategy/`](../ai-product-strategy/) (the current horizon),
-[`../knowledge-hub/`](../knowledge-hub/) (does it already exist?).
+[`../knowledge-hub/`](../knowledge-hub/) (does it already exist?),
+[`../ai-feedback/`](../ai-feedback/) (signal-scan + pattern-classification on a
+feedback tool or CSV, when available).
 Downstream: [`../ai-prd/`](../ai-prd/) — a **Pursue** hands its Discovery Brief
 in as PRD stage 01. Park / Kill decisions and recurring signals feed
 `../ai-product-strategy/`.
