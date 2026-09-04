@@ -51,26 +51,22 @@ stores. Only part of this lives under `product-os/`:
 
 ```
 product-os/
-├── context-hub/            company context — SEEDED
-│   ├── company-brief.md
-│   ├── positioning.md
-│   ├── icp.md
-│   ├── competitive-landscape.md
-│   ├── agentic-use-cases.md
-│   └── ebpf-signal-thesis.md
-├── knowledge-hub/          shipped features + how they work — empty, purpose defined
-├── ai-discovery/           │  Discovery Agent (idea → Pursue/Park/Kill) — BUILT
-├── ai-prd/                 │  PRD Agent + PRD Reviewer Agent — BUILT
-├── ai-feedback/            │  Customer Feedback Intelligence (MCP or CSV) — BUILT
-├── ai-product-strategy/    ┤  standalone for now; each folds into a
-├── ai-design/              │  lifecycle/ phase once that is built
-├── gtm/                    │  (see "Standalone folders" below)
-└── data-analysis/          ┘
+├── context-hub/          company context — SEEDED (6 docs)
+├── knowledge-hub/        shipped features + how they work — empty, purpose defined
+├── ai-discovery/         Discovery Agent (idea → Pursue/Park/Kill) — BUILT
+├── ai-prd/               PRD Agent + PRD Reviewer Agent — BUILT
+├── ai-feedback/          Customer Feedback Intelligence (MCP or CSV) — BUILT
+├── gtm/                  Go-to-market — GTM-repository pattern (+ sample data) — BUILT
+├── ai-product-strategy/  standalone scaffold ┐
+├── ai-design/            standalone scaffold ┤ each folds into a lifecycle/
+└── data-analysis/        standalone scaffold ┘ phase once that is built
 ```
 
 Root docs: [`ai-pmf-strategy.md`](ai-pmf-strategy.md) ·
-[`ai-launch-strategy.md`](ai-launch-strategy.md) — cross-cutting frameworks, not
-modules.
+[`ai-launch-strategy.md`](ai-launch-strategy.md) — cross-cutting frameworks;
+[`messaging.md`](messaging.md) — the homepage & product message (5-second test).
+The BUILT standalone folders (`ai-discovery/`, `ai-prd/`, `ai-feedback/`, `gtm/`)
+also fold into `lifecycle/` — see "Standalone folders" below.
 
 ### The two hubs
 
@@ -93,7 +89,7 @@ then each folds into the matching phase:
 | `ai-prd/` — **PRD Agent + PRD Reviewer Agent** | `lifecycle/discovery/` (back half) |
 | `ai-feedback/` — **Customer Feedback Intelligence** (MCP tool or CSV → cited VoC evidence) | shared capability feeding `lifecycle/discovery/`, `planning/`, `release/` |
 | `ai-design/` | `lifecycle/design/` |
-| `gtm/` | `lifecycle/release/` |
+| `gtm/` — **ICP tiers · signal library · account scoring · plays · battlecards · playbooks** (GTM-repository pattern) | `lifecycle/release/` |
 | `ai-product-strategy/` | feeds `lifecycle/discovery/` + `lifecycle/planning/` across phases |
 | `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) |
 

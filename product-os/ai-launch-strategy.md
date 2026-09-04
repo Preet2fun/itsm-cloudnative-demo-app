@@ -145,8 +145,8 @@ value is that it names the pre-scale work precisely:
 | Product — AI Reliability | `ai-prd/` stage 06 + addendum E | eval results |
 | Product — Reach, Uniqueness | `ai-product-strategy/` | `context-hub/ebpf-signal-thesis.md`, `positioning.md` |
 | Company — AI Infrastructure | `ai-prd/` addendum F + engineering | cost + latency measurements |
-| Company — GTM Viability, Supplier Power | `gtm/` + `ai-product-strategy/` | design-partner pipeline; `ai-engine/` provider stance |
-| Competition — all three | `ai-product-strategy/` | `context-hub/competitive-landscape.md` |
+| Company — GTM Viability, Supplier Power | `gtm/` (`launch-plan.md`, `account-scoring.md`) + `ai-product-strategy/` | design-partner pipeline; `ai-engine/` provider stance |
+| Competition — all three | `ai-product-strategy/` + `gtm/battlecards/` | `context-hub/competitive-landscape.md` |
 
 Re-scored at each major launch — post-launch, `ai-feedback/`'s **launch-feedback**
 lens supplies the before/after read. A **Yellow → Red** move on any gating cell

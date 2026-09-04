@@ -1,5 +1,8 @@
 # Competitive Landscape
 
+Sales-ready battlecards (win/lose conditions, objection handling, detection) for
+each of these 7: [`../gtm/battlecards/`](../gtm/battlecards/).
+
 ## The fixed set — use these 7 for all research and references
 
 ### Observability / Ops

@@ -23,5 +23,7 @@ distribution · competitor-contrast notes · 3–5 quotes · Limitations.
 
 **Feeds:** `ai-discovery/` stages 01–03; scores `opportunity-scorecard.md`
 Magnitude (accounts), Frequency (recurrence over time), Severity (escalation +
-sentiment), Competition + Contrast (competitor mentions). Each figure tagged
+sentiment), Competition + Contrast (competitor mentions). Also feeds
+`gtm/signal-library.md` — the *consolidation / alert-fatigue post* Tier-2 signal
+routes through this lens (don't build a second detector). Each figure tagged
 `[Feedback: …]`.

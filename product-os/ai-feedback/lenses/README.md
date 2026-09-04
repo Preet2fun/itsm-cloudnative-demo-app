@@ -6,7 +6,7 @@ Do · Produce · Feeds.**
 
 | # | Lens | Question | Feeds |
 |---|---|---|---|
-| 1 | [signal-scan](signal-scan.md) | Is this pain real, growing, and whose? | `ai-discovery/` 01–03 · `opportunity-scorecard.md` (magnitude / frequency / severity / competition / contrast) |
+| 1 | [signal-scan](signal-scan.md) | Is this pain real, growing, and whose? | `ai-discovery/` 01–03 · `opportunity-scorecard.md` (magnitude / frequency / severity / competition / contrast) · `gtm/signal-library.md` (alert-fatigue signal) |
 | 2 | [pattern-classification](pattern-classification.md) | One loud account, a segment, or the whole market? | `ai-discovery/` stage 02 lean · stage 06 decision |
 | 3 | [prd-evidence-pack](prd-evidence-pack.md) | The structured VoC section for a PRD / proposal | `ai-prd/` stage 05 (VoC) + stage 07 (evidence) · Discovery Brief "what we know vs what we're assuming" |
 | 4 | [cohort-compare](cohort-compare.md) | Shared vs differential vs unique needs across segments | `ai-prd/` stage 02 + §4 (users / personas) · `ai-discovery/` stage 03 (affected personas) |

@@ -31,7 +31,7 @@ Only the ones that feed our cycle. Full table: [`lenses/README.md`](lenses/READM
 
 | Lens | Answers | Feeds |
 |---|---|---|
-| [signal-scan](lenses/signal-scan.md) | Is this pain real, growing, and whose? | `ai-discovery/` 01–03 · `opportunity-scorecard.md` |
+| [signal-scan](lenses/signal-scan.md) | Is this pain real, growing, and whose? | `ai-discovery/` 01–03 · `opportunity-scorecard.md` · `gtm/signal-library.md` |
 | [pattern-classification](lenses/pattern-classification.md) | One loud account, a segment, or the whole market? | `ai-discovery/` stage 02 lean · stage 06 decision |
 | [prd-evidence-pack](lenses/prd-evidence-pack.md) | The structured VoC section — volume, trend, segments, 5 quotes, impact | `ai-prd/` stage 05 + stage 07 · Discovery Brief |
 | [cohort-compare](lenses/cohort-compare.md) | Shared vs differential vs unique needs across segments | `ai-prd/` stage 02 + §4 · `ai-discovery/` stage 03 personas |
