@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
+	"sync/atomic"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -71,9 +73,14 @@ func serveThroughMiddleware(h http.HandlerFunc, req *http.Request) *httptest.Res
 	return w
 }
 
+var mustCreateUserSeq int64
+
 func mustCreateUser(t *testing.T, repo *repository.Repo, tenantID *string, role string) *models.User {
 	t.Helper()
-	suffix := t.Name()
+	// A counter disambiguates multiple calls within the same test (e.g. two
+	// "agent" users for different tenants) — t.Name()+role alone collided on
+	// the real email UNIQUE constraint once tests ran against a live DB.
+	suffix := t.Name() + "-" + strconv.FormatInt(atomic.AddInt64(&mustCreateUserSeq, 1), 10)
 	u, err := repo.Create(context.Background(), &models.User{
 		Email:        "users-test-" + suffix + "-" + role + "@example.com",
 		PasswordHash: "irrelevant",
