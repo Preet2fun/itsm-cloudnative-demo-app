@@ -24,13 +24,13 @@ reviewer, and fold the fixes back in.
    | §9 Experience & Prototype | 08, 09 |
    | §10 Data & Instrumentation | 06, 07 |
    | §11 Dependencies | 03 |
-   | §12 Pricing, Packaging & Entitlements | 10; thin at draft stage — unknowns → §15, name the packaging owner |
+   | §12 Pricing, Packaging & Business Case | §12.1 (Build cost/Operating cost/TAM-SAM-SOM/Revenue scenarios) ← 10, verbatim tables; §12.2 (packaging) thin at draft stage — unknowns → §15, name the packaging owner |
    | §13 Rollout & Launch Plan | 02 (phasing intent), 06 (launch criteria per stage), 10 (proceed / phased) |
    | §14 Risks | every stage's flagged risks + every Gated figure |
    | §15 Open Questions | every stage's open questions + every `[pre-build]` item (owner + "before build" due) |
    | §16 FAQs | *synthesised at assembly* — the reader's likely questions; no source stage |
    | §17 Evidence Appendix | 07 |
-   | AI addendum A–G | 06 (07 verifies its data claims) |
+   | AI addendum A–H | 06 (07 verifies its data claims) |
 
    - Carry every Gated figure into §14/§15. Cite every number.
 2. **Run the reviewer** — invoke `prd-reviewer-agent.md` against `prd.md`. It

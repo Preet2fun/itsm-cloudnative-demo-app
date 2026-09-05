@@ -13,7 +13,7 @@ it goes back and fixes that stage.
 | 03 | `03-knowledge-gathering.md` | What already ships; adjacent systems; prior attempts |
 | 04 | `04-market-competitor-research.md` | Competitor table + the opening for us |
 | 05 | `05-voice-of-customer.md` | Named demand signal; "said vs did"; gap flags |
-| 06 | `06-metrics-strategy.md` | North-star + metrics + failure criteria + events; **(AI-native) owns the full addendum A–G** — ML-necessity, grounding, prompts, guardrails, evals, HHH, autonomy |
+| 06 | `06-metrics-strategy.md` | North-star + metrics + failure criteria + events; **(AI-native) owns the full addendum A–H** — ML-necessity, grounding, prompts, guardrails, evals, HHH, autonomy, model selection |
 | 07 | `07-evidence-gathering.md` | Quantitative proof, each figure tagged; Evidence Appendix rows |
 | 08 | `08-visual-strategy.md` | Surfaces, screens, states, IA (Claude Design) |
 | 09 | `09-prototype-summary.md` | What was prototyped, status, what it validated |

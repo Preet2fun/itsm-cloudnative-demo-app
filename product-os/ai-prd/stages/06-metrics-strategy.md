@@ -45,9 +45,14 @@ template's AI-native addendum (A–G)**.
 13. **Agent capabilities & autonomy** (addendum G) — table: component · input ·
     output · autonomy level (*observe → suggest → act-with-approval → act*) ·
     human-in-the-loop trigger.
+14. **Model requirements & selection trade-offs** (addendum H) — per capability:
+    model / provider, context window, temperature, max output tokens, latency
+    target, cost per call. State why this model beats the next-best alternative
+    (accuracy / cost / latency) and the fallback if pricing or availability
+    changes.
 
 **Produce — `06-metrics-strategy.md`:** North-star · Metrics tables · Guardrails ·
-Failure criteria · Events. (AI-native) the full addendum A–G.
+Failure criteria · Events. (AI-native) the full addendum A–H.
 
 **Gate:** north-star is an outcome; failure criteria exist. For AI features: the
-ML-necessity check is done and addendum A–G is drafted.
+ML-necessity check is done and addendum A–H is drafted.

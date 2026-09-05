@@ -63,7 +63,7 @@ full contract; the table is the map.
 | 03 | Knowledge gathering | `stages/03-knowledge-gathering.md` | what already exists, adjacent systems touched, prior attempts |
 | 04 | Market & competitor research | `stages/04-market-competitor-research.md` | competitor table, "opportunity for us" |
 | 05 | Voice of customer | `stages/05-voice-of-customer.md` | named quotes / tickets / interviews; "said vs did"; gap flags |
-| 06 | Metrics & AI design strategy | `stages/06-metrics-strategy.md` | north-star + metrics + guardrails + failure criteria + events; **(AI-native) the full addendum A–G** — ML-necessity, grounding, prompts, hallucination guardrails, evals, HHH, autonomy |
+| 06 | Metrics & AI design strategy | `stages/06-metrics-strategy.md` | north-star + metrics + guardrails + failure criteria + events; **(AI-native) the full addendum A–H** — ML-necessity, grounding, prompts, hallucination guardrails, evals, HHH, autonomy, model selection |
 | 07 | Evidence gathering | `stages/07-evidence-gathering.md` | quantitative proof, each figure tagged; the Evidence Appendix |
 | 08 | Visual strategy | `stages/08-visual-strategy.md` | surfaces / screens / states / IA (drafted in Claude Design per root `CLAUDE.md` §10) |
 | 09 | Prototype summary | `stages/09-prototype-summary.md` | what was prototyped, status, what it validated (or "not run") |
@@ -99,11 +99,12 @@ When the feature's core value depends on a model, the PRD carries the template's
 - **Why Agentic AI** (in §2, not the addendum) — what unstructured data is
   involved; why rules fail; why an LLM is necessary; why not raw chat. Drafted at
   stage 01, sharpened at stage 11.
-- **Addendum A–G** — the ML-necessity check, grounding strategy, prompt strategy,
-  hallucination guardrails, evaluation strategy, production readiness (HHH), and
-  the agent-capabilities / autonomy table — all produced at **stage 06**
-  (`06-metrics-strategy.md`). Stage 07 verifies any data claims the eval strategy
-  makes; stage 11 assembles them into the template's addendum verbatim.
+- **Addendum A–H** — the ML-necessity check, grounding strategy, prompt strategy,
+  hallucination guardrails, evaluation strategy, production readiness (HHH), the
+  agent-capabilities / autonomy table, and model requirements & selection
+  trade-offs — all produced at **stage 06** (`06-metrics-strategy.md`). Stage 07
+  verifies any data claims the eval strategy makes; stage 11 assembles them into
+  the template's addendum verbatim.
 
 A FAIL on the ML-necessity check ("Is ML necessary?") means the feature should
 not ship as an AI feature — stop and flag it.

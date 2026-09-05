@@ -166,8 +166,18 @@ Event names, segments, dashboards. Note any "do not treat X as Y" traps.
 - **Internal:** services, design system, shared runtimes — each `[Spec: …]`.
 - **Blockers:** named, each with an owner and status.
 
-## 12. Pricing, Packaging & Entitlements
+## 12. Pricing, Packaging & Business Case
 
+### 12.1 Cost & Market Sizing
+- **Build cost** — team + duration; infra / model / tooling run cost.
+- **Operating cost** — monthly at a stated usage level; cost per active user /
+  per run; unit economics.
+- **Market size** — TAM / SAM / SOM against the ICP, each with basis and tag
+  (Measured / Assumed).
+- **Revenue scenarios** — conservative / target / optimistic: paying customers ·
+  ARPU · ARR, with the assumption behind each.
+
+### 12.2 Packaging & Entitlements
 How it's sold (bundle vs SKU); entitlement = which access + which role
 privileges; who owns final packaging. Capture unknowns in §15.
 
@@ -235,4 +245,10 @@ Plus launch criteria per stage (Alpha / Beta / GA) and Responsible AI
 | Component | Input | Output | Autonomy level | Human-in-the-loop trigger |
 |---|---|---|---|---|
 Autonomy levels: *observe → suggest → act-with-approval → act*.
+
+### H. Model requirements & selection trade-offs
+| Capability | Model / provider | Context window | Temperature | Max output tokens | Latency target | Cost per call |
+|---|---|---|---|---|---|---|
+Why this model beats the next-best alternative (accuracy / cost / latency), and
+the fallback if pricing or availability changes.
 ```

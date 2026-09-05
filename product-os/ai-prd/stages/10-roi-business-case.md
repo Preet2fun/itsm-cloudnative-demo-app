@@ -20,6 +20,8 @@ split between impact we can prove and impact we're assuming.
    proceed phased / don't).
 
 **Produce — `10-roi-business-case.md`:** Build cost · Operating cost · TAM/SAM/SOM
-· Revenue scenarios · Mini business case + recommendation.
+· Revenue scenarios · Mini business case + recommendation. Build cost / Operating
+cost / TAM-SAM-SOM / Revenue scenarios assemble verbatim into PRD §12.1; the mini
+business case + recommendation assembles into §5.
 
 **Gate:** measured vs gated impact are separated. Recommendation is explicit.

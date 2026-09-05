@@ -100,6 +100,9 @@ finding must quote the PRD line or name the missing thing.
 - HHH covered; disclaimers where the output could be acted on.
 - Probabilistic behaviour acknowledged — a ranked, evidence-backed output, not a
   single guess presented as fact.
+- Model requirements & selection trade-offs stated (addendum H) — model /
+  provider, context window, temperature, cost per call, and why it beats the
+  next-best alternative on accuracy / cost / latency.
 
 ---
 
