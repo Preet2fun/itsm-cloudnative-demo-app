@@ -52,18 +52,32 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
+          # startupProbe gates readiness/liveness until the JVM (Spring Boot +
+          # OTel javaagent, ~90-110s to bind the port on a 300m CPU limit) is
+          # actually up. Without it, liveness SIGKILLs the container mid-boot
+          # forever (confirmed live 2026-09-10, same as delivery-service).
+          startupProbe:
+            httpGet:
+              path: {{ .Values.paymentService.startupProbe.path }}
+              port: http
+            periodSeconds: {{ .Values.paymentService.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.paymentService.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.paymentService.startupProbe.timeoutSeconds }}
           readinessProbe:
             httpGet:
               path: {{ .Values.paymentService.readinessProbe.path }}
               port: http
             initialDelaySeconds: {{ .Values.paymentService.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.paymentService.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.paymentService.readinessProbe.timeoutSeconds }}
           livenessProbe:
             httpGet:
               path: {{ .Values.paymentService.livenessProbe.path }}
               port: http
             initialDelaySeconds: {{ .Values.paymentService.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.paymentService.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.paymentService.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.paymentService.livenessProbe.failureThreshold }}
           resources:
             requests:
               cpu: {{ .Values.paymentService.resources.requests.cpu }}

@@ -108,14 +108,29 @@ deliveryService:
     minReplicas: 1
     maxReplicas: 2
     targetCPUUtilizationPercentage: 70
+  # Spring Boot + the OTel javaagent on a 300m CPU limit take ~90-110s to bind
+  # the HTTP port (confirmed live 2026-09-10 — see the deployment guide's
+  # "delivery/payment CrashLoopBackOff" troubleshooting entry). The startupProbe
+  # gives the JVM up to 300s (30 × 10s) to come up; readiness/liveness are held
+  # off until it first succeeds, then run at normal cadence so a wedged pod is
+  # still caught quickly. timeoutSeconds is 3 (not the 1s default) because the
+  # health endpoint answers slowly while the JVM is still warming up.
+  startupProbe:
+    path: /api/v1/health
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
   readinessProbe:
     path: /api/v1/health
-    initialDelaySeconds: 15
+    initialDelaySeconds: 0
     periodSeconds: 10
+    timeoutSeconds: 3
   livenessProbe:
     path: /api/v1/health
-    initialDelaySeconds: 30
+    initialDelaySeconds: 0
     periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 3
 
 # ── Payment Service (Java) ──────────────────────────────────────────────────
 paymentService:
@@ -142,14 +157,24 @@ paymentService:
     minReplicas: 1
     maxReplicas: 2
     targetCPUUtilizationPercentage: 70
+  # Same rationale as delivery-service above — the JVM needs a startupProbe
+  # window so liveness doesn't SIGKILL it mid-boot.
+  startupProbe:
+    path: /api/v1/health
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
   readinessProbe:
     path: /api/v1/health
-    initialDelaySeconds: 15
+    initialDelaySeconds: 0
     periodSeconds: 10
+    timeoutSeconds: 3
   livenessProbe:
     path: /api/v1/health
-    initialDelaySeconds: 30
+    initialDelaySeconds: 0
     periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 3
 
 # ── Redis (dedicated to customer-app) ───────────────────────────────────────
 redis:

@@ -175,13 +175,30 @@ docker push preet2fun/payment-service:v0.1.1
 If you bump a tag again in the future, update `values.yaml` to match before
 `helm upgrade`, or the chart will keep referencing the old tag.
 
-**Known fixed issue (2026-09-10):** the original `delivery-service`/
+**Known fixed issue (2026-09-10, #1):** the original `delivery-service`/
 `payment-service` Dockerfiles created their `nonroot` user via Alpine's
 `adduser -S` with no fixed UID, which fails Kubernetes' `runAsNonRoot: true`
 check (`cannot verify user is non-root`) the moment an explicit `runAsUser`
 is set. Both Dockerfiles now pin UID/GID `65532` (matching the Go/Python
 services' distroless convention), and both Helm templates now set
 `runAsUser: 65532` to match.
+
+**Known fixed issue (2026-09-10, #2):** with the UID fix in place the Java
+containers still CrashLoopBackOff'd — exit code `137`, `describe` showing
+`Killing … failed liveness probe` and readiness/liveness `connection refused`.
+Cause: Spring Boot + the OTel javaagent take **~90–110s** to bind port 8080 on
+a 300m CPU limit (`Started …Application in 71s`, `process running for 103s`),
+but the liveness probe (`initialDelaySeconds: 30`, `periodSeconds: 20`,
+`failureThreshold: 3`) SIGKILLs the container at ~90s — before it ever listens,
+forever. Fixed by adding a **`startupProbe`** (`periodSeconds: 10`,
+`failureThreshold: 30` → 300s boot grace) to both Java services in
+`values.yaml` and their deployment templates; readiness/liveness now use
+`initialDelaySeconds: 0` since the startupProbe holds them off until the app is
+up, and all three probes get `timeoutSeconds: 3` (the 1s default flakes while
+the JVM warms). Java-only — the Go/Python services start in 1–3s and are
+untouched. *Optional follow-up:* raising the two Java services' CPU limit from
+`300m` to `500m–1000m` cuts cold start to ~20–30s (CLAUDE.md §4 treats CPU as
+the non-binding constraint); the startupProbe makes them stable either way.
 
 ---
 
@@ -197,6 +214,20 @@ helm upgrade --install customer-app infra/helm/customer-app \
 ```bash
 kubectl get pods -n customer-app-dev -w
 ```
+
+**`delivery-service` / `payment-service` take ~2–3 min to reach `1/1`** — the
+`startupProbe` is polling the still-booting JVM. `0/1 Running` with the restart
+count at `0` during that window is expected; only a *climbing* restart count is
+a problem (see Troubleshooting).
+
+**If the upgrade fails on `StatefulSet "redis" is invalid: … updates to
+statefulset spec … are forbidden`:** a chart change to `volumeClaimTemplates`
+can't be applied in place. Either re-run with
+`--set redis.persistence.storageClass=local-path` (renders the STS identical to
+what's live, so Helm skips it), or do it once properly:
+`kubectl delete statefulset redis -n customer-app-dev --cascade=orphan` (keeps
+`redis-0` and its PVC running) then re-run the upgrade — Helm recreates the STS
+and re-adopts the pod.
 
 Expected final state (all `1/1 Running`):
 ```
@@ -312,6 +343,28 @@ kubectl logs -n customer-app-dev -l app=<service-name> --previous
 - `could not connect to server` → Postgres unreachable from the cluster; check `172.16.12.226` firewall/network path from a cluster node, not just your workstation
 - catalog-service only: Redis connection errors are logged as warnings, not fatal (cache-aside degrades to always-MISS) — don't mistake this for a crash
 
+### `delivery-service` / `payment-service` CrashLoopBackOff, exit `137`, ~90s cycle
+**Not OOM** — an OOMKill shows `Reason: OOMKilled`; this shows `Reason: Error`
+with `Exit Code: 137`, plus events `Killing … failed liveness probe`.
+```bash
+kubectl describe pod -n customer-app-dev <pod> | grep -A6 'Last State'
+kubectl logs -n customer-app-dev <pod> --previous | grep -E 'Started .*Application|HikariPool'
+```
+The liveness probe is killing the JVM before it finishes starting. The chart
+ships a `startupProbe` on both Java services (`values.yaml`
+`deliveryService.startupProbe` / `paymentService.startupProbe`, 300s grace) to
+prevent this — if it regressed, confirm those keys still exist and the
+deployment templates still render a `startupProbe:` block
+(`helm template … | grep -A4 startupProbe`). One-off live patch without a chart
+change: `helm upgrade … --set deliveryService.livenessProbe.initialDelaySeconds=180 --set paymentService.livenessProbe.initialDelaySeconds=180`.
+
+### `helm upgrade` fails: `StatefulSet "redis" is invalid … forbidden`
+A chart change to redis's `volumeClaimTemplates` (e.g. `storageClassName`)
+can't be applied to a live StatefulSet. Fix: `kubectl delete statefulset redis
+-n customer-app-dev --cascade=orphan` (leaves `redis-0` + its PVC running),
+then re-run the upgrade — Helm recreates the STS and re-adopts the pod, no data
+loss. Or pin the live value: `--set redis.persistence.storageClass=local-path`.
+
 ### redis-0 `Pending`
 ```bash
 kubectl describe pod redis-0 -n customer-app-dev
@@ -337,6 +390,7 @@ there from Platform App's setup).
 ## Acceptance Checklist
 
 - [ ] `kubectl get pods -n customer-app-dev` — all 5 pods `1/1 Running`
+- [ ] `delivery-service` / `payment-service` reached `1/1` within ~3 min and hold `RESTARTS 0` (startupProbe working, not liveness-killed)
 - [ ] `kubectl get hpa -n customer-app-dev` — 4 HPAs, `min=1 max=2` each
 - [ ] `kubectl get pvc -n customer-app-dev` — `redis-data-redis-0` Bound
 - [ ] `GET /api/v1/health` returns `{"status":"ok",...}` on all 4 services
