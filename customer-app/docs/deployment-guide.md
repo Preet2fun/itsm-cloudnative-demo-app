@@ -200,6 +200,16 @@ untouched. *Optional follow-up:* raising the two Java services' CPU limit from
 `300m` to `500m–1000m` cuts cold start to ~20–30s (CLAUDE.md §4 treats CPU as
 the non-binding constraint); the startupProbe makes them stable either way.
 
+**Known fixed issue (2026-09-10, #3):** the OTel Java agent logged
+`ConfigurationException: OTLP endpoint must be a valid URL: otel-collector.itsm-dev:4317`
+/ `MalformedURLException: unknown protocol` on every boot and exported **zero**
+traces/metrics (agent fails open, so the app still ran). Cause: `values.yaml`
+`global.otelCollectorEndpoint` had no URL scheme — the Go/Python SDKs tolerate
+`host:port`, but the Java agent requires `http://` (or `https://`). Fixed to
+`http://otel-collector.itsm-dev:4317` in `values.yaml` and
+`http://otel-collector.itsm-qa:4317` in `values-qa.yaml` (plaintext http — the
+collector has no in-cluster TLS).
+
 ---
 
 ## Step 5 — Deploy with Helm
@@ -374,11 +384,19 @@ kubectl get pvc -n customer-app-dev
 
 ### Traces not appearing anywhere
 `values.yaml` points `OTEL_EXPORTER_OTLP_ENDPOINT` at
-`otel-collector.itsm-dev:4317` — Platform App's observability stack. If
+`http://otel-collector.itsm-dev:4317` — Platform App's observability stack. If
 [#40](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/40) is
 still open, that collector may not actually be running yet. This does not
 block this deploy — OTLP export failures are non-fatal background retries,
 not request-blocking. Tracked as Phase 7 of `customer-app/TODO.md`.
+
+Check the Java pods for `OTLP endpoint must be a valid URL` /
+`MalformedURLException: unknown protocol` at startup — that means the
+`http://` scheme is missing from `global.otelCollectorEndpoint` (see "Known
+fixed issue #3"); the agent then exports nothing at all. `kubectl logs -n
+customer-app-dev <delivery-or-payment-pod> | grep -i otel` to confirm the
+agent started clean (`opentelemetry-javaagent - version: …` with no
+`ConfigurationException` after it).
 
 ### `helm install` succeeds but `kubectl get hpa` shows nothing
 HPA requires the metrics-server to be running on the cluster — check

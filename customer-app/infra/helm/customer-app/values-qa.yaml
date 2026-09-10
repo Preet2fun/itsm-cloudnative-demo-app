@@ -4,7 +4,8 @@
 global:
   env: qa
   namespace: customer-app-qa
-  otelCollectorEndpoint: "otel-collector.itsm-qa:4317"
+  # http:// scheme is required by the OTel Java agent — see values.yaml.
+  otelCollectorEndpoint: "http://otel-collector.itsm-qa:4317"
 
 orderService:
   env:

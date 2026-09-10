@@ -6,10 +6,14 @@ global:
   env: dev
   namespace: customer-app-dev
   imageRegistry: "preet2fun/"
-  # Cross-namespace, in-cluster DNS — same short form (service.namespace:port,
-  # no .svc.cluster.local suffix) itsm-app's own values.yaml uses for its
-  # own pods, just reaching from customer-app-dev into itsm-dev.
-  otelCollectorEndpoint: "otel-collector.itsm-dev:4317"
+  # Cross-namespace, in-cluster DNS — short form (service.namespace:port, no
+  # .svc.cluster.local suffix), reaching from customer-app-dev into itsm-dev.
+  # The http:// scheme is REQUIRED: the OTel Java agent (delivery/payment)
+  # rejects a schemeless endpoint at startup with "OTLP endpoint must be a
+  # valid URL" / "unknown protocol" and disables all telemetry export
+  # (confirmed live 2026-09-10). Plaintext http (not https) because the
+  # collector listens without TLS in-cluster.
+  otelCollectorEndpoint: "http://otel-collector.itsm-dev:4317"
 
 # ── Order Service (Go) ──────────────────────────────────────────────────────
 orderService:
