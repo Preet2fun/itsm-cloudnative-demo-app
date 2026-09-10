@@ -41,16 +41,21 @@ what's actually left.
 - [x] Create `customer-app-secrets` in `customer-app-dev` namespace (Step 3) — done 2026-09-10, both keys verified by byte count
 - [x] Build + push images for all 4 services (Step 4) — done 2026-09-10 on the k8s server; all 4 confirmed live on Docker Hub (`preet2fun/{order,catalog,delivery,payment}-service:v0.1.0`). delivery-service's first build attempt silently failed mid-loop (no `set -e`), rebuilt standalone successfully on retry — transient, not structural.
 - [x] metrics-server installed (was missing — needed `--kubelet-insecure-tls` patch for kubeadm's self-signed kubelet certs). `kubectl top nodes` confirmed working 2026-09-10: workers at 29-30% actual memory usage, comfortable headroom for this deploy.
-- [x] `helm install` the chart into `customer-app-dev` (Step 5) — done 2026-09-10, but surfaced a real bug: `delivery-service`/`payment-service` failed with `CreateContainerConfigError` (`runAsNonRoot` + non-numeric Alpine `nonroot` user, kubelet can't verify non-root). Fixed: both Dockerfiles now pin UID/GID 65532 (matching order/catalog's distroless convention), both Helm templates set `runAsUser: 65532`, tags bumped to v0.1.1 for these two (IfNotPresent would've kept serving the cached broken image at the same tag). **Needs**: commit+push from Mac → `git pull` on k8s server → rebuild/push `delivery-service:v0.1.1` + `payment-service:v0.1.1` → `helm upgrade` again.
-- [ ] Verify: all 4 services + Redis pods `Running`, `kubectl get hpa` shows `min=1`/`max=2`, tenant isolation holds (customer_a=2 restaurants, customer_c=1) — Steps 6-7
+- [x] `helm install` the chart into `customer-app-dev` (Step 5) — done 2026-09-10. Surfaced 3 real bugs, all fixed + committed (`d6d771e`, `7afea6b`) and documented in the deployment guide as "Known fixed issue #1/#2/#3":
+  - **#1 `CreateContainerConfigError`** — `runAsNonRoot` + non-numeric Alpine `nonroot` user. Fixed: Dockerfiles pin UID/GID 65532, templates set `runAsUser: 65532`, tags bumped to `v0.1.1`.
+  - **#2 CrashLoopBackOff, exit 137** — Spring Boot + OTel javaagent take ~100s to bind on the 300m CPU limit; liveness SIGKILLed them at ~90s. Fixed: added `startupProbe` (300s grace) + `timeoutSeconds: 3` to both Java services.
+  - **#3 OTel agent config crash** — `global.otelCollectorEndpoint` had no `http://` scheme (Java agent rejects schemeless). Fixed in `values.yaml` + `values-qa.yaml`.
+- [x] Verify: all 5 pods `1/1 Running` 0 restarts, HPA `min=1`/`max=2` ×4, tenant isolation holds — done 2026-09-10. Health OK on all 4; `customer_a`=2 restaurants / `customer_c`=1; `customer_a`=4 orders. Note: Services expose `port: 80` (not the container port) — deployment guide Step 7 corrected. Note: `svc/order-service 8081:8080` fails; use `8081:80`.
+
+**Phase 1 DONE — move #34 and #27 to Done on the board.**
 
 ---
 
 ## Phase 2 — Multi-tenant isolation smoke test
 **GitHub: [#35](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/35)**
 
-- [ ] Documented test script: `customer_a` requests must never see `customer_b`'s restaurants/orders/deliveries/payments
-- [ ] Run it against the live Phase-1 deployment, capture the output as evidence
+- [x] Documented test script — `customer-app/scripts/tenant-isolation-smoke-test.sh` (read-only; list-scoping + direct-id 404 + empty-query checks across all 4 services, with a `customer_b` positive control). Written up in `customer-app/docs/tenant-isolation-evidence.md`.
+- [ ] Run it against the live `customer-app-dev` deployment, paste output into the evidence doc's "Captured run" section, then move #35 → Done.
 
 ---
 
