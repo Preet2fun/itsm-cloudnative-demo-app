@@ -270,12 +270,33 @@ The chart doesn't hardcode a StorageClass name — the PVC omits
 
 ## Step 7 — Test each service
 
+All 4 Services expose **`port: 80`** (`targetPort: http` → the container's
+8080/8000). Forward against `:80`, not the container port:
+
 ```bash
-kubectl port-forward -n customer-app-dev svc/order-service 8081:8080 &
-kubectl port-forward -n customer-app-dev svc/catalog-service 8082:8000 &
-kubectl port-forward -n customer-app-dev svc/delivery-service 8083:8080 &
-kubectl port-forward -n customer-app-dev svc/payment-service 8084:8080 &
+kubectl port-forward -n customer-app-dev svc/order-service    8081:80 &
+kubectl port-forward -n customer-app-dev svc/catalog-service  8082:80 &
+kubectl port-forward -n customer-app-dev svc/delivery-service 8083:80 &
+kubectl port-forward -n customer-app-dev svc/payment-service  8084:80 &
 ```
+
+Or skip port-forward entirely with an in-cluster throwaway pod (hits the
+Services by DNS on their default port 80):
+
+```bash
+kubectl run smoke --rm -i --restart=Never -n customer-app-dev \
+  --image=curlimages/curl:8.10.1 -- sh -c '
+for s in order-service catalog-service delivery-service payment-service; do
+  echo "== $s =="; curl -s http://$s/api/v1/health; echo
+done
+curl -s "http://catalog-service/api/v1/restaurants" -H "X-Tenant-ID: customer_a"; echo
+curl -s "http://catalog-service/api/v1/restaurants" -H "X-Tenant-ID: customer_c"; echo
+curl -s "http://order-service/api/v1/orders" -H "X-Tenant-ID: customer_a"; echo
+'
+```
+
+Verified passing 2026-09-10: 4× `{"status":"ok",...}`, `customer_a` → 2
+restaurants, `customer_c` → 1 (tenant isolation holds), `customer_a` → 4 orders.
 
 **catalog-service — restaurants + tenant isolation:**
 ```bash
