@@ -43,7 +43,7 @@ completion pass wired it in.
 | Docker + Docker Hub account (`preet2fun`) | `docker login` |
 | `migrate` CLI (golang-migrate) | `migrate -version` |
 | `psql` | `psql --version` |
-| `local-path` StorageClass already installed (Platform App Phase 5 installs this) | `kubectl get storageclass` → `local-path (default)` |
+| A default StorageClass exists on the cluster | `kubectl get storageclass` → some class marked `(default)` |
 | Network reachability to Postgres | `psql -h 172.16.12.226 -p 5432 -U itsm -d itsm -c 'select 1;'` |
 
 Run everything below from one machine that has all of the above — the repo
@@ -152,18 +152,36 @@ kubectl describe secret customer-app-secrets -n customer-app-dev
 
 ## Step 4 — Build and push Docker images
 
+Tags must match `infra/helm/customer-app/values.yaml` exactly — `order-service`
+and `catalog-service` are `v0.1.0`, `delivery-service` and `payment-service`
+are `v0.1.1` (bumped from `v0.1.0` after the `runAsNonRoot`/UID fix below;
+`imagePullPolicy: IfNotPresent` means a same-tag rebuild won't actually get
+pulled onto nodes that already cached the old image):
+
 ```bash
-for svc in order-service catalog-service delivery-service payment-service; do
-  docker build -t preet2fun/${svc}:v0.1.0 services/${svc}/
-  docker push preet2fun/${svc}:v0.1.0
-done
+docker build -t preet2fun/order-service:v0.1.0 services/order-service/
+docker push preet2fun/order-service:v0.1.0
+
+docker build -t preet2fun/catalog-service:v0.1.0 services/catalog-service/
+docker push preet2fun/catalog-service:v0.1.0
+
+docker build -t preet2fun/delivery-service:v0.1.1 services/delivery-service/
+docker push preet2fun/delivery-service:v0.1.1
+
+docker build -t preet2fun/payment-service:v0.1.1 services/payment-service/
+docker push preet2fun/payment-service:v0.1.1
 ```
 
-This matches the tags already set in `infra/helm/customer-app/values.yaml`
-(`v0.1.0` for all 4) — no `--set` image-tag overrides needed for this first
-deploy. If you rebuild with the same tag later, `imagePullPolicy:
-IfNotPresent` means running pods won't pick it up automatically — bump the
-tag or `kubectl rollout restart deployment/<name> -n customer-app-dev`.
+If you bump a tag again in the future, update `values.yaml` to match before
+`helm upgrade`, or the chart will keep referencing the old tag.
+
+**Known fixed issue (2026-09-10):** the original `delivery-service`/
+`payment-service` Dockerfiles created their `nonroot` user via Alpine's
+`adduser -S` with no fixed UID, which fails Kubernetes' `runAsNonRoot: true`
+check (`cannot verify user is non-root`) the moment an explicit `runAsUser`
+is set. Both Dockerfiles now pin UID/GID `65532` (matching the Go/Python
+services' distroless convention), and both Helm templates now set
+`runAsUser: 65532` to match.
 
 ---
 
@@ -200,8 +218,12 @@ kubectl get svc -n customer-app-dev
 kubectl get hpa -n customer-app-dev
 # Expected: 4 HPAs, each minReplicas=1 maxReplicas=2 — never higher, per root CLAUDE.md §4
 kubectl get pvc -n customer-app-dev
-# Expected: redis-data-redis-0   Bound   ...   1Gi   local-path
+# Expected: redis-data-redis-0   Bound   ...   1Gi   <your cluster's default StorageClass>
 ```
+
+The chart doesn't hardcode a StorageClass name — the PVC omits
+`storageClassName` entirely so Kubernetes provisions from whatever's marked
+`(default)` on the cluster.
 
 ---
 
@@ -295,7 +317,7 @@ kubectl logs -n customer-app-dev -l app=<service-name> --previous
 kubectl describe pod redis-0 -n customer-app-dev
 kubectl get pvc -n customer-app-dev
 ```
-- PVC `Pending` → `local-path` StorageClass missing/not default; see Platform App's Phase 5 guide for install steps
+- PVC `Pending` → no StorageClass marked `(default)` on the cluster (`kubectl get storageclass`); mark one default or set `redis.persistence.storageClass` explicitly in `values.yaml`
 
 ### Traces not appearing anywhere
 `values.yaml` points `OTEL_EXPORTER_OTLP_ENDPOINT` at

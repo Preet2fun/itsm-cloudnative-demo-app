@@ -35,12 +35,13 @@ what's actually left.
 **GitHub: [#34](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/34), [#27](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/27)**
 
 - [x] Write `customer-app/docs/deployment-guide.md` (prereqs, ordered steps, expected output, verification, rollback, troubleshooting, acceptance checklist — per root CLAUDE.md §9). Speced in the 2026-08-20 completion design but never written until now — verified against actual code/Helm values, not the old plan's proposal.
-- [ ] Run `customer-app/scripts/run-migrations.sh` against the live `DATABASE_URL` — **runs on the k8s server**, see deployment-guide.md Step 1
-- [ ] Run `customer-app/scripts/create-customer-tenants.sh SEED=true` (registers tenants + creates schemas + seeds data) — closes #27, see Step 2
-- [ ] Pre-deploy resource-budget check (Step 0) — go/no-go against real headroom (`INFRA-INVENTORY.md`, not the stale table in root CLAUDE.md §4 — Java services are already at 256Mi/512Mi in `values.yaml`, higher than that table shows)
-- [ ] Create `customer-app-secrets` in `customer-app-dev` namespace (Step 3)
-- [ ] Build + push images for all 4 services — **on the k8s server**, per user's choice (Step 4; manual push is fine for this phase, automation is Phase 8)
-- [ ] `helm install` the chart into `customer-app-dev` (Step 5)
+- [x] Pre-deploy resource-budget check (Step 0) — 3 nodes confirmed (1 control-plane + 2 workers, ~4vCPU/~3.85Gi each, matches CLAUDE.md §4). Workers at ~18-20% memory request / ~51% memory limit committed today. Request-level headroom is comfortable; limit-level (worst-case HPA-maxed burst, ~3.25Gi) is tight but not blocking. **Metrics-server is NOT installed** (`kubectl top nodes` fails) — HPA can't actually scale yet, decision deferred to right before Step 5/helm install.
+- [x] Run `customer-app/scripts/run-migrations.sh` against the live `DATABASE_URL` — done 2026-09-10, both migrations applied clean (`customer_tenants` table + `create_customer_tenant_schema()` verified)
+- [x] Run `customer-app/scripts/create-customer-tenants.sh SEED=true` — closes #27. Done 2026-09-10: all 3 tenants registered + schemas created + seeded, counts verified independently (customer_a 2/4/4/3/4, customer_b 1/3/2/1/2, customer_c 1/1/1/1/1 — restaurants/menu_items/orders/deliveries/payments)
+- [x] Create `customer-app-secrets` in `customer-app-dev` namespace (Step 3) — done 2026-09-10, both keys verified by byte count
+- [x] Build + push images for all 4 services (Step 4) — done 2026-09-10 on the k8s server; all 4 confirmed live on Docker Hub (`preet2fun/{order,catalog,delivery,payment}-service:v0.1.0`). delivery-service's first build attempt silently failed mid-loop (no `set -e`), rebuilt standalone successfully on retry — transient, not structural.
+- [x] metrics-server installed (was missing — needed `--kubelet-insecure-tls` patch for kubeadm's self-signed kubelet certs). `kubectl top nodes` confirmed working 2026-09-10: workers at 29-30% actual memory usage, comfortable headroom for this deploy.
+- [x] `helm install` the chart into `customer-app-dev` (Step 5) — done 2026-09-10, but surfaced a real bug: `delivery-service`/`payment-service` failed with `CreateContainerConfigError` (`runAsNonRoot` + non-numeric Alpine `nonroot` user, kubelet can't verify non-root). Fixed: both Dockerfiles now pin UID/GID 65532 (matching order/catalog's distroless convention), both Helm templates set `runAsUser: 65532`, tags bumped to v0.1.1 for these two (IfNotPresent would've kept serving the cached broken image at the same tag). **Needs**: commit+push from Mac → `git pull` on k8s server → rebuild/push `delivery-service:v0.1.1` + `payment-service:v0.1.1` → `helm upgrade` again.
 - [ ] Verify: all 4 services + Redis pods `Running`, `kubectl get hpa` shows `min=1`/`max=2`, tenant isolation holds (customer_a=2 restaurants, customer_c=1) — Steps 6-7
 
 ---

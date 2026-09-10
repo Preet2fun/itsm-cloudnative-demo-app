@@ -85,7 +85,7 @@ deliveryService:
   name: delivery-service
   image:
     repository: delivery-service
-    tag: "v0.1.0"
+    tag: "v0.1.1"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -123,7 +123,7 @@ paymentService:
   name: payment-service
   image:
     repository: payment-service
-    tag: "v0.1.0"
+    tag: "v0.1.1"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -159,7 +159,10 @@ redis:
   port: 6379
   persistence:
     size: 1Gi
-    storageClass: local-path
+    # Left blank on purpose — the PVC omits storageClassName entirely so
+    # Kubernetes uses whatever the cluster has marked as its default class,
+    # instead of this chart hardcoding a provisioner name.
+    storageClass: ""
   resources:
     requests:
       cpu: 50m

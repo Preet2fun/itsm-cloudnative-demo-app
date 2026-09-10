@@ -71,12 +71,22 @@ spec:
             limits:
               cpu: {{ .Values.paymentService.resources.limits.cpu }}
               memory: {{ .Values.paymentService.resources.limits.memory }}
+          # runAsUser matches the fixed UID the Dockerfile now assigns via
+          # `addgroup -g 65532`/`adduser -u 65532` — previously omitted
+          # because Alpine's plain `adduser -S` has no fixed UID, which made
+          # kubelet's runAsNonRoot check fail with "image has non-numeric
+          # user (nonroot), cannot verify user is non-root" (confirmed live
+          # 2026-09-10, same failure as delivery-service). readOnlyRootFilesystem
+          # still deliberately omitted — whether the JVM needs a writable path
+          # at runtime hasn't been live-tested yet.
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
+            runAsUser: 65532
             capabilities:
               drop:
                 - ALL
       securityContext:
         runAsNonRoot: true
+        runAsUser: 65532
 {{- end }}

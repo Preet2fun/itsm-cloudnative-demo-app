@@ -12,7 +12,7 @@ RUN mvn -q package -DskipTests
 # ── Stage 2: Run ─────────────────────────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine
 
-RUN addgroup -S nonroot && adduser -S nonroot -G nonroot
+RUN addgroup -g 65532 -S nonroot && adduser -u 65532 -S -D -H -G nonroot nonroot
 
 WORKDIR /app
 
