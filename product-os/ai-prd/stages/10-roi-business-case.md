@@ -4,7 +4,10 @@
 split between impact we can prove and impact we're assuming.
 
 **Inputs:** `04` (market), `06` (metrics), `07` (evidence); `context-hub/icp.md`;
-`data-analysis/` if populated.
+`data-analysis/` if populated — where telemetry exists,
+[`../../data-analysis/impact-estimation.md`](../../data-analysis/impact-estimation.md)
+gives a bottoms-up scenario set to cross-check against the top-down TAM/SAM/SOM
+below.
 
 **Do:**
 1. **Build cost** — rough team + duration; infra / model / tooling run cost.

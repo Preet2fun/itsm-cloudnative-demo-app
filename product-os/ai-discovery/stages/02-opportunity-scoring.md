@@ -5,7 +5,10 @@ angle — a structured lean, before deep research.
 
 **Inputs:** `01-idea-intake.md`;
 [`../opportunity-scorecard.md`](../opportunity-scorecard.md); `../context-hub/`
-(competitors, agentic use cases, eBPF thesis, ICP).
+(competitors, agentic use cases, eBPF thesis, ICP); where telemetry exists for
+an adjacent/existing flow,
+[`../../data-analysis/impact-estimation.md`](../../data-analysis/impact-estimation.md)
+grounds Magnitude/Frequency numerically instead of judgement.
 
 **Do:**
 1. Score the **five factors** (magnitude, frequency, severity, competition,

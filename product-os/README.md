@@ -57,9 +57,10 @@ product-os/
 ├── ai-prd/               PRD Agent + PRD Reviewer Agent — BUILT
 ├── ai-feedback/          Customer Feedback Intelligence (MCP or CSV) — BUILT
 ├── gtm/                  Go-to-market — GTM-repository pattern (+ sample data) — BUILT
-├── ai-product-strategy/  standalone scaffold ┐
-├── ai-design/            standalone scaffold ┤ each folds into a lifecycle/
-└── data-analysis/        standalone scaffold ┘ phase once that is built
+├── ai-product-strategy/  standalone scaffold ┐ each folds into a lifecycle/
+├── ai-design/            standalone scaffold ┘ phase once that is built
+└── data-analysis/        standalone, partially built — impact-estimation.md +
+                          experiment-analysis.md; rest scaffold
 ```
 
 Root docs: [`ai-pmf-strategy.md`](ai-pmf-strategy.md) ·
@@ -91,7 +92,7 @@ then each folds into the matching phase:
 | `ai-design/` | `lifecycle/design/` |
 | `gtm/` — **ICP tiers · signal library · account scoring · plays · battlecards · playbooks** (GTM-repository pattern) | `lifecycle/release/` |
 | `ai-product-strategy/` | feeds `lifecycle/discovery/` + `lifecycle/planning/` across phases |
-| `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) |
+| `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) — `impact-estimation.md` grounds `ai-discovery/` scoring + `ai-prd/` stage 10; `experiment-analysis.md` grounds `ai-prd/` Addendum E + `ai-launch-strategy.md`'s scale-when-green gate |
 
 Chain: **`ai-discovery/` Pursue → Discovery Brief → `ai-prd/` stage 01 → PRD.**
 
