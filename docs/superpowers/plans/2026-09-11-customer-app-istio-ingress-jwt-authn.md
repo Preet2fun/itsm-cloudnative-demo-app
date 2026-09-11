@@ -1124,6 +1124,22 @@ apostrophes in the file are inside live code (the rest are in `#` comments,
 which bash never quote-parses), confirmed by the syntax check passing clean
 afterward.
 
+**Second bug caught live during Task 8's manual verification, fixed here
+too:** the original `login()` used `curl --resolve "${RESOLVE_OPT}" ...
+"${BASE}/api/v1/auth/..."` — i.e. the same `customer-app.dev.local` host as
+the actual API calls. That's wrong: Istio routes by exact-host-match-wins, so
+once `customer-app-routing` claims the exact host `customer-app.dev.local`,
+requests carrying that Host header are routed *exclusively* by it and never
+fall through to platform-app's `itsm-routing` (`hosts: ["*"]`), which is the
+only VirtualService that defines `/api/v1/auth/*`. Live symptom: `curl`
+succeeded but returned an empty body, so every downstream `python3 -c
+'json.load(...)'` failed with `JSONDecodeError: Expecting value`. Fixed by
+giving `login()` its own `auth_base="http://${NODE_IP}:${GATEWAY_PORT}"` (no
+`--resolve`, bare node IP as Host — unclaimed, falls through to
+`itsm-routing`) while the `req()` calls used by every other assertion keep
+`--resolve "${RESOLVE_OPT}"` against `${GATEWAY_HOST}`. Also corrected in
+`docs/phase-03-istio-ingress-guide.md` Step 5 and its Troubleshooting section.
+
 - [ ] **Step 3: Commit**
 
 ```bash

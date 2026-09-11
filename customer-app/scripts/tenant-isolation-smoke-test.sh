@@ -85,16 +85,27 @@ check_absent() {
 # ── Login (dev MFA-code-via-logs; see user-service internal/handlers/auth.go) ─
 
 # login <email> <password>  ->  echoes a JWT on stdout
+#
+# Deliberately does NOT use $BASE / --resolve "${RESOLVE_OPT}" here.
+# customer-app-routing claims the exact host $GATEWAY_HOST, and Istio routes
+# by exact-host-match-wins - once a specific-host VirtualService exists for a
+# hostname, requests with that Host header are routed EXCLUSIVELY by it, never
+# falling through to platform-app's itsm-routing (hosts: ["*"]) even for
+# paths itsm-routing defines and customer-app-routing doesn't. /api/v1/auth/*
+# only exists in itsm-routing, so these calls must go to the bare node IP
+# (an unclaimed Host) instead, which itsm-routing's "*" still owns.
+# (Confirmed live 2026-09-11 - see phase-03-istio-ingress-guide.md.)
 login() {
   local email="$1" password="$2" tmp session_id code="" token attempt
+  local auth_base="http://${NODE_IP}:${GATEWAY_PORT}"
 
   tmp="$(mktemp)"
-  curl -s --resolve "${RESOLVE_OPT}" -o "$tmp" -X POST "${BASE}/api/v1/auth/login" \
+  curl -s -o "$tmp" -X POST "${auth_base}/api/v1/auth/login" \
     -H 'Content-Type: application/json' \
     -d "{\"email\":\"${email}\",\"password\":\"${password}\"}"
   session_id="$(python3 -c 'import sys,json; print(json.load(sys.stdin)["session_id"])' < "$tmp")"
 
-  curl -s --resolve "${RESOLVE_OPT}" -o /dev/null -X POST "${BASE}/api/v1/auth/mfa/send" \
+  curl -s -o /dev/null -X POST "${auth_base}/api/v1/auth/mfa/send" \
     -H 'Content-Type: application/json' \
     -d "{\"session_id\":\"${session_id}\"}"
 
@@ -109,7 +120,7 @@ login() {
   done
   [[ -n "${code}" ]] || { echo "ERROR: could not find an MFA code for ${email} in user-service logs (checked last 60s, 5 attempts)" >&2; exit 1; }
 
-  curl -s --resolve "${RESOLVE_OPT}" -o "$tmp" -X POST "${BASE}/api/v1/auth/mfa/verify" \
+  curl -s -o "$tmp" -X POST "${auth_base}/api/v1/auth/mfa/verify" \
     -H 'Content-Type: application/json' \
     -d "{\"session_id\":\"${session_id}\",\"code\":\"${code}\"}"
   token="$(python3 -c 'import sys,json; print(json.load(sys.stdin)["token"])' < "$tmp")"

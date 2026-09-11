@@ -15,7 +15,11 @@ userService:
   name: user-service
   image:
     repository: user-service    # full image = preet2fun/user-service:<tag>
-    tag: "v0.4.2"               # Sprint 1: email OTP MFA (v0.4.2: sessionstore redis.ParseURL fix for REDIS_URL with /0 db suffix)
+    tag: "v0.5.0"               # Identity-tenancy consolidation (2026-08-27 design, merged 8f4fc05): shared
+                                 # public.users table, email+password-only login (no tenant_slug field),
+                                 # tenant_id resolved server-side. Bumped 2026-09-11 — the running v0.4.1
+                                 # pod predated this merge entirely and still demanded tenant_slug at login
+                                 # ("no live DB verification" from the merge's own tracked caveat, closed here).
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1

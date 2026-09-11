@@ -91,26 +91,37 @@ curl -s -o /dev/null -w '%{http_code}\n' $RESOLVE \
 ```
 Expected: `403` then `401`.
 
-Get a real JWT for `customer_a` (dev-mode MFA code is logged, not emailed):
+Get a real JWT for `customer_a` (dev-mode MFA code is logged, not emailed).
+**Important:** `/api/v1/auth/*` only exists in platform-app's `itsm-routing`
+VirtualService (`hosts: ["*"]`). Istio routes by exact-host-match-wins — once
+`customer-app-routing` claims the exact host `customer-app.dev.local`,
+requests with that Host header are routed **exclusively** by it and never
+fall through to `itsm-routing`, even for paths it doesn't define. So auth
+calls must go to the **bare node IP** (an unclaimed Host), not
+`customer-app.dev.local` (confirmed live 2026-09-11 — the first attempt at
+this step returned an empty body and every downstream `json.load` failed
+until this was fixed):
 ```bash
-SESSION_ID=$(curl -s $RESOLVE -X POST http://customer-app.dev.local:30080/api/v1/auth/login \
+AUTH_BASE="http://${NODE_IP}:30080"
+
+SESSION_ID=$(curl -s -X POST ${AUTH_BASE}/api/v1/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"owner@customer-a.example","password":"<the SEED_PASSWORD you picked>"}' \
   | python3 -c 'import sys,json;print(json.load(sys.stdin)["session_id"])')
 
-curl -s $RESOLVE -X POST http://customer-app.dev.local:30080/api/v1/auth/mfa/send \
+curl -s -X POST ${AUTH_BASE}/api/v1/auth/mfa/send \
   -H 'Content-Type: application/json' -d "{\"session_id\":\"$SESSION_ID\"}" > /dev/null
 
 CODE=$(kubectl logs -n itsm-dev deploy/user-service --since=60s \
   | grep 'dev-mode: MFA OTP' | grep '"email":"owner@customer-a.example"' | tail -1 \
   | python3 -c 'import sys,json; print(json.loads(sys.stdin.readline())["code"])')
 
-JWT_A=$(curl -s $RESOLVE -X POST http://customer-app.dev.local:30080/api/v1/auth/mfa/verify \
+JWT_A=$(curl -s -X POST ${AUTH_BASE}/api/v1/auth/mfa/verify \
   -H 'Content-Type: application/json' \
   -d "{\"session_id\":\"$SESSION_ID\",\"code\":\"$CODE\"}" \
   | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
 
-# valid token -> 200, customer_a's own restaurants
+# valid token -> 200, customer_a's own restaurants (THIS one DOES use customer-app.dev.local)
 curl -s $RESOLVE -H "Authorization: Bearer $JWT_A" http://customer-app.dev.local:30080/api/v1/restaurants | python3 -m json.tool
 # Expected: total 2
 
@@ -159,12 +170,19 @@ Exactly the guard it's designed to hit — finish Step 2 first
 Confirm platform-app's `itsm-gateway` still exists: `kubectl get gateway -n itsm-dev`.
 This plan never modifies it, so this would mean something else changed it.
 
-### Login/MFA calls 404 or 403 through the gateway
-`/api/v1/auth/*` and `/api/v1/.well-known/*` are routed by platform-app's own
-`itsm-routing` VirtualService, not this one — confirm `kubectl get
-virtualservice -n itsm-dev itsm-routing` still exists and its `hosts` includes
-`"*"`, and that you used `customer-app.dev.local` (which resolves to the same
-gateway) not a bare node IP for these auth calls.
+### Login/MFA calls return an empty body (curl succeeds, JSON parsing fails)
+**Confirmed live 2026-09-11.** `/api/v1/auth/*` and `/api/v1/.well-known/*`
+are routed by platform-app's own `itsm-routing` VirtualService
+(`hosts: ["*"]`), not `customer-app-routing`. Istio routes by
+exact-host-match-wins: once `customer-app-routing` claims the exact host
+`customer-app.dev.local`, requests carrying that Host header are routed
+**exclusively** by it and never fall through to `itsm-routing`, even for
+paths only `itsm-routing` defines. Using `--resolve customer-app.dev.local:...`
+(or `-H "Host: customer-app.dev.local"`) for an auth call is therefore always
+wrong — use the **bare node IP** instead (`http://${NODE_IP}:30080/api/v1/auth/...`,
+no `--resolve`), which is an unclaimed Host and still falls to `itsm-routing`.
+Confirm `kubectl get virtualservice -n itsm-dev itsm-routing` still exists
+with `hosts: ["*"]` if this ever regresses.
 
 ### `seed-customer-user.sh` fails with "no bcrypt hash generator found"
 `apt-get install -y apache2-utils` on the master (or `pip install bcrypt` for
