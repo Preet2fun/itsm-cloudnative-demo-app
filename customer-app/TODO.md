@@ -55,7 +55,9 @@ what's actually left.
 **GitHub: [#35](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/35)**
 
 - [x] Documented test script — `customer-app/scripts/tenant-isolation-smoke-test.sh` (read-only; list-scoping + direct-id 404 + empty-query checks across all 4 services, with a `customer_b` positive control). Written up in `customer-app/docs/tenant-isolation-evidence.md`.
-- [ ] Run it against the live `customer-app-dev` deployment, paste output into the evidence doc's "Captured run" section, then move #35 → Done.
+- [x] Run against live `customer-app-dev` 2026-09-10 — **22/22 passed**, output captured in `customer-app/docs/tenant-isolation-evidence.md`.
+
+**Phase 2 DONE — move #35 to Done on the board.**
 
 ---
 

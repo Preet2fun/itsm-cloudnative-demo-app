@@ -1,0 +1,28 @@
+# AuthorizationPolicy - requires a valid JWT for customer-app's protected API
+# paths. Same shape (and same DENY-not-ALLOW reasoning) as platform-app's
+# deny-unauthenticated-api: DENY policies never trigger Istio's
+# any-ALLOW-means-default-deny behavior, so this only ever removes access -
+# it composes cleanly with Phase 4's future OPA CUSTOM policy.
+#
+# Supersedes authz-allow-intra-namespace.yaml (removed in the same change) -
+# that policy predates customer-app having its own JWT/RequestAuthentication
+# layer; see its own comment for why it had to go once this landed.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-app-deny-unauthenticated
+  namespace: customer-app-dev
+spec:
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notRequestPrincipals: ["*"]
+      to:
+        - operation:
+            paths:
+              - /api/v1/restaurants*
+              - /api/v1/orders*
+              - /api/v1/deliveries*
+              - /api/v1/payments*

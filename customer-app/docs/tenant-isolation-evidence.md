@@ -57,11 +57,46 @@ Exit code `0` = every assertion passed.
 
 ## Captured run
 
-<!-- PLACEHOLDER: paste the real output of the script run against
-     customer-app-dev here, with the date. -->
+`customer-app-dev`, 2026-09-10, images `delivery/payment:v0.1.1`,
+`order/catalog:v0.1.0`:
 
 ```
-(pending — run the script and paste output)
+==> Port-forwarding customer-app services in namespace 'customer-app-dev' (svc port 80)
+==> tenant-isolation-smoke-test  (A='customer_a' trying to reach B='customer_b')
+
+==> Phase A — customer_b sees its own data (proves the rows exist)
+  PASS  B restaurants list -> 200  (200)
+  PASS  B restaurant count  (1)
+  PASS  B orders list -> 200  (200)
+  PASS  B order count  (2)
+  PASS  B GET own restaurant by id -> 200  (200)
+  PASS  B GET own order by id -> 200  (200)
+  PASS  B GET own delivery by id -> 200  (200)
+  PASS  B GET own payment by id -> 200  (200)
+
+==> Phase B — customer_a must NOT see customer_b's data
+  PASS  A restaurant list is A's own count  (2)
+  PASS  A restaurant list excludes B's restaurant
+  PASS  A order list is A's own count  (4)
+  PASS  A order list excludes B order e385857a…
+  PASS  A order list excludes B order b6cefe3f…
+  PASS  A GET B's restaurant by id -> 404  (404)
+  PASS  A GET B's order by id -> 404  (404)
+  PASS  A GET B's delivery by id -> 404  (404)
+  PASS  A GET B's payment by id -> 404  (404)
+  PASS  A list deliveries for B's order -> HTTP 200  (200)
+  PASS  A list deliveries for B's order -> empty  (0)
+  PASS  A list payments for B's order -> HTTP 200  (200)
+  PASS  A list payments for B's order -> empty  (0)
+
+==> Phase C — customer_c list-count spot check
+  PASS  C restaurant count  (1)
+
+==> 22 passed, 0 failed
+==> Tenant isolation holds.
 ```
 
-**Result:** _pending_
+**Result: PASS** — 22/22 assertions. `customer_a` cannot read `customer_b`'s
+restaurants, orders, deliveries or payments by list or by direct id;
+`customer_b` and `customer_c` each see only their own rows. Tenant isolation
+via per-request `search_path` holds on the live deployment.

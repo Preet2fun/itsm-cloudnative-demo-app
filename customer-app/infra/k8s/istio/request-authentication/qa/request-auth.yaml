@@ -1,0 +1,24 @@
+# RequestAuthentication - JWT validation for all workloads in customer-app-qa.
+# Same shape as platform-app's itsm-jwt-auth - one identity engine
+# (user-service in itsm-dev) issues tokens for both apps AND every
+# environment (root CLAUDE.md S3) - the jwksUri below points at itsm-dev even
+# here; there is no separate itsm-qa user-service to point at instead.
+#
+# qa parity manifest — customer-app-qa doesn't exist as a live namespace yet,
+# so this is not applied by apply-istio-config.sh until it does.
+
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: customer-app-jwt-auth
+  namespace: customer-app-qa
+spec:
+  jwtRules:
+    - issuer: "itsm-user-service"
+      jwksUri: "http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json"
+      outputClaimToHeaders:
+        - header: "x-tenant-id"
+          claim: "tenant_id"
+        - header: "x-user-role"
+          claim: "role"
+      forwardOriginalToken: true

@@ -1,0 +1,29 @@
+# RequestAuthentication - JWT validation for all workloads in customer-app-dev.
+# Same shape as platform-app's itsm-jwt-auth - one identity engine
+# (user-service in itsm-dev) issues tokens for both apps (root CLAUDE.md S3).
+#
+# Behaviour:
+#   - Bearer token present & valid   -> Envoy injects X-Tenant-ID/X-User-Role
+#     from the tenant_id/role claims; forwards the original token too.
+#   - Bearer token present & invalid -> 401 before the request reaches the service.
+#   - No token -> passes through here; authz-deny-unauthenticated.yaml is what
+#     actually requires a token on the protected paths.
+#   - Platform-staff token (no tenant_id claim) -> X-Tenant-ID simply isn't
+#     injected; services then return 400 "X-Tenant-ID header is required" -
+#     cross-tenant staff browsing isn't supported yet (root CLAUDE.md S3, #47).
+
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: customer-app-jwt-auth
+  namespace: customer-app-dev
+spec:
+  jwtRules:
+    - issuer: "itsm-user-service"
+      jwksUri: "http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json"
+      outputClaimToHeaders:
+        - header: "x-tenant-id"
+          claim: "tenant_id"
+        - header: "x-user-role"
+          claim: "role"
+      forwardOriginalToken: true

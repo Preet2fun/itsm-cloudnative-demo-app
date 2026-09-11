@@ -1,0 +1,28 @@
+# AuthorizationPolicy - requires a valid JWT for customer-app's protected API
+# paths. Same shape (and same DENY-not-ALLOW reasoning) as platform-app's
+# deny-unauthenticated-api — see infra/k8s/istio/authorization-policies/dev/
+# authz-deny-unauthenticated.yaml for the full rationale.
+#
+# Supersedes authz-allow-intra-namespace.yaml (removed in the same change).
+#
+# qa parity manifest — customer-app-qa doesn't exist as a live namespace yet,
+# so this is not applied by apply-istio-config.sh until it does.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-app-deny-unauthenticated
+  namespace: customer-app-qa
+spec:
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notRequestPrincipals: ["*"]
+      to:
+        - operation:
+            paths:
+              - /api/v1/restaurants*
+              - /api/v1/orders*
+              - /api/v1/deliveries*
+              - /api/v1/payments*

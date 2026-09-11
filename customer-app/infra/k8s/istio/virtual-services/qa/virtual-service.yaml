@@ -1,0 +1,61 @@
+# VirtualService — path-based routing for customer-app through the shared
+# Istio IngressGateway. Bound cross-namespace to platform-app's itsm-gateway
+# (no dedicated Gateway resource) via a dedicated host, so this never
+# collides with itsm-routing's `hosts: ["*"]` + catch-all-to-frontend.
+#
+# qa parity manifest — customer-app-qa doesn't exist as a live namespace yet,
+# so this is not applied by apply-istio-config.sh until it does.
+#
+# Route map:
+#   /api/v1/restaurants*   -> catalog-service   (includes nested menu-items)
+#   /api/v1/orders*        -> order-service
+#   /api/v1/deliveries*    -> delivery-service
+#   /api/v1/payments*      -> payment-service
+#   (no catch-all - no frontend yet; unmatched paths get Istio's 404)
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: customer-app-routing
+  namespace: customer-app-qa
+spec:
+  hosts:
+    - "customer-app.qa.local"
+  gateways:
+    - itsm-dev/itsm-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /api/v1/restaurants
+      route:
+        - destination:
+            host: catalog-service
+            port:
+              number: 80
+
+    - match:
+        - uri:
+            prefix: /api/v1/orders
+      route:
+        - destination:
+            host: order-service
+            port:
+              number: 80
+
+    - match:
+        - uri:
+            prefix: /api/v1/deliveries
+      route:
+        - destination:
+            host: delivery-service
+            port:
+              number: 80
+
+    - match:
+        - uri:
+            prefix: /api/v1/payments
+      route:
+        - destination:
+            host: payment-service
+            port:
+              number: 80
