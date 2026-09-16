@@ -1,5 +1,17 @@
 # RequestAuthentication — JWT validation for all workloads in itsm-qa
 # Mirrors dev config; JWKS endpoint resolves to user-service in itsm-qa.
+#
+# KNOWN ISSUE, not yet fixed here (itsm-qa isn't deployed yet, so this isn't
+# live and there's no real qa key to pin): `jwksUri` will NOT work once this
+# is deployed, for the same reason dev's copy of this file was switched to an
+# inline `jwks` on 2026-09-16 — istiod (not the sidecars) fetches jwksUri to
+# build a `local_jwks` snapshot, and istiod's own fetch client doesn't go
+# through mesh mTLS. If user-service-qa also sits under STRICT
+# PeerAuthentication, istiod's plaintext fetch will get connection-reset and
+# every JWT will fail against Istio's internal placeholder key. Before
+# standing up itsm-qa: fetch user-service-qa's real public key from its own
+# /.well-known/jwks.json and switch this to `jwks` (inline), same shape as
+# itsm-dev/request-auth.yaml.
 
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication

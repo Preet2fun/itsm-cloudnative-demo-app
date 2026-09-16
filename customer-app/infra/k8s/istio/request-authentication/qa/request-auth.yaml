@@ -7,6 +7,10 @@
 # qa parity manifest — customer-app-qa doesn't exist as a live namespace yet,
 # so this is not applied by apply-istio-config.sh until it does.
 
+# See dev/request-auth.yaml for why this is `jwks` (inline) and not `jwksUri`
+# — istiod can't fetch jwksUri under user-service's STRICT mTLS, full stop.
+# Same key as dev, since this still points at itsm-dev's user-service (no
+# separate qa identity engine — see the file-header comment below).
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
@@ -15,7 +19,19 @@ metadata:
 spec:
   jwtRules:
     - issuer: "itsm-user-service"
-      jwksUri: "http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json"
+      jwks: |
+        {
+          "keys": [
+            {
+              "kty": "RSA",
+              "use": "sig",
+              "kid": "itsm-rs256-v1",
+              "alg": "RS256",
+              "n": "kIkOMxiwOIxCvF220iqlv1VOsUmV1IR8PSaAMhcihQj1sQBGlbdy4m3EhZmKx3kzfGxze-ayjKjzQXamE4lyrDUsGMahfzMsPUPOYpqecX0vSeME6veMrkFGYVA50i0-QHQuCwgedi_OKheA34tuMYF8u4g26siU_V6obR7J6jL4CbqxLSclu-hLHz0l2eNZJCOMiuuiz3JiCTJFIAM2cixx445TQLmvOTnxVv9ooItVz26sNfCR3govyvJbeRns0uIgMD7E7ld6lR5Gwehs1oo6lYyhd0jmHtqzI4mX50U_TpWMVFKAnS8qAD2RPq60HooGFQHLrwXIbWF0Zsu8Ew",
+              "e": "AQAB"
+            }
+          ]
+        }
       outputClaimToHeaders:
         - header: "x-tenant-id"
           claim: "tenant_id"
