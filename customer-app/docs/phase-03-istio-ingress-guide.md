@@ -89,7 +89,12 @@ curl -s -o /dev/null -w '%{http_code}\n' $RESOLVE http://customer-app.dev.local:
 curl -s -o /dev/null -w '%{http_code}\n' $RESOLVE \
   -H "Authorization: Bearer not-a-real-jwt" http://customer-app.dev.local:30080/api/v1/restaurants
 ```
-Expected: `403` then `401`.
+Expected: `403` then `401`. **Superseded by Phase 4 (OPA RBAC, #50):**
+once `customer-app-opa-rbac` is applied, the garbage-token case returns
+`403` too, not `401` — OPA's `ext_authz` check runs *before* `jwt_authn` in
+the filter chain, so a malformed token now fails OPA's own role extraction
+first and never reaches jwt_authn's signature check. Still correctly
+denied either way; see `tenant-isolation-evidence.md`'s Phase 4 section.
 
 Get a real JWT for `customer_a` (dev-mode MFA code is logged, not emailed).
 **Important:** `/api/v1/auth/*` only exists in platform-app's `itsm-routing`

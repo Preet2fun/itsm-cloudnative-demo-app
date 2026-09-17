@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/colors.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/typography.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/motion.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/base.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/styles.css">
+<script src="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/_ds_bundle.js"></script>
+<style>
+  html, body { margin:0; background:#050810; }
+  a { color:#2AA5F5; text-decoration:none; }
+  a:hover { color:#22E06B; }
+</style>
+</helmet>
+
+<div data-theme="dark" style="min-height:100vh; background:var(--bg-canvas); color:var(--text-primary); font-family:var(--font-ui); font-size:var(--text-body-md-size); line-height:var(--text-body-md-lh);">
+
+  <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh; display:grid; grid-template-columns:minmax(0,1.1fr) minmax(420px,0.9fr);">
+      <div class="aurora-dotgrid" style="display:flex; flex-direction:column; justify-content:space-between; gap:var(--space-12); padding:var(--space-10); border-right:1px solid var(--border-default); background:var(--bg-surface);">
+        <x-import component-from-global-scope="DesignSystem_f13b19.Wordmark" text="{{ brand }}" size="{{ 20 }}" hint-size="auto,24px"></x-import>
+        <div style="display:flex; flex-direction:column; gap:var(--space-5); max-width:460px;">
+          <div style="font-family:var(--font-display); font-size:var(--text-display-lg-size); line-height:var(--text-display-lg-lh); font-weight:var(--weight-bold); letter-spacing:var(--text-display-lg-track); text-wrap:pretty;">Every order, every location, one console.</div>
+          <div style="color:var(--text-secondary); font-size:var(--text-body-lg-size); line-height:var(--text-body-lg-lh); text-wrap:pretty;">Menus, orders, deliveries, and payment reconciliation for restaurant groups running more than one kitchen.</div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-3);">
+          <sc-for list="{{ authFacts }}" as="f" hint-placeholder-count="3">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Card" eyebrow="{{ f.label }}" padding="var(--space-4)" style="{{ f.cardStyle }}" hint-size="140px,76px">
+              <div style="font-family:var(--font-display); font-size:var(--text-heading-md-size); line-height:var(--text-heading-md-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-heading-md-track); font-variant-numeric:tabular-nums;">{{ f.value }}</div>
+            </x-import>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:center; padding:var(--space-10);">
+        <div style="width:100%; max-width:380px;">
+
+          <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+            <div data-screen-label="01 Login" style="display:flex; flex-direction:column; gap:var(--space-5);">
+              <div style="display:flex; flex-direction:column; gap:var(--space-2);">
+                <div style="font-family:var(--font-display); font-size:var(--text-heading-lg-size); line-height:var(--text-heading-lg-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-heading-lg-track);">Sign in</div>
+                <div style="color:var(--text-secondary);">We'll email a 6-digit code to confirm it's you.</div>
+              </div>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Field" label="Email" html-for="hearth-email" hint-size="100%,68px">
+                <x-import component-from-global-scope="DesignSystem_f13b19.Input" id="hearth-email" type="email" size="lg" auto-complete="username" default-value="rosa@northsidehospitality.com" hint-size="100%,40px"></x-import>
+              </x-import>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Field" label="Password" html-for="hearth-pw" hint-size="100%,68px">
+                <x-import component-from-global-scope="DesignSystem_f13b19.Input" id="hearth-pw" type="password" size="lg" auto-complete="current-password" default-value="correct-horse-battery" hint-size="100%,40px"></x-import>
+              </x-import>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="primary" size="lg" full-width="{{ true }}" disabled="{{ busy }}" on-click="{{ submitLogin }}" hint-size="100%,40px">{{ loginLabel }}</x-import>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:var(--text-body-sm-size);">
+                <a href="#">Forgot password</a>
+                <span style="color:var(--text-tertiary); font-family:var(--font-mono); font-size:var(--text-mono-sm-size);">POST /auth/login</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isVerify }}" hint-placeholder-val="{{ false }}">
+            <div data-screen-label="01b Verify code" style="display:flex; flex-direction:column; gap:var(--space-5);">
+              <div style="display:flex; flex-direction:column; gap:var(--space-2);">
+                <div style="font-family:var(--font-display); font-size:var(--text-heading-lg-size); line-height:var(--text-heading-lg-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-heading-lg-track);">Enter your code</div>
+                <div style="color:var(--text-secondary); text-wrap:pretty;">6-digit code sent to <span style="color:var(--text-primary);">{{ email }}</span>. It expires in 10 minutes.</div>
+              </div>
+              <div style="display:flex; gap:var(--space-2);">
+                <sc-for list="{{ digits }}" as="d" hint-placeholder-count="6">
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Input" value="{{ d.value }}" on-change="{{ d.onChange }}" on-key-down="{{ d.onKeyDown }}" invalid="{{ codeError }}" mono="{{ true }}" input-mode="numeric" max-length="{{ 1 }}" aria-label="{{ d.label }}" style="{{ d.style }}" hint-size="100%,56px"></x-import>
+                </sc-for>
+              </div>
+              <sc-if value="{{ codeError }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:var(--space-3); border-radius:var(--radius-sm); border:1px solid rgba(245,56,94,0.3); background:var(--danger-soft); color:var(--danger); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">That code didn't match. 2 attempts left before we send a new one.</div>
+              </sc-if>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="primary" size="lg" full-width="{{ true }}" disabled="{{ verifyDisabled }}" on-click="{{ submitCode }}" hint-size="100%,40px">{{ verifyLabel }}</x-import>
+              <div style="display:flex; flex-direction:column; gap:var(--space-3); padding-top:var(--space-3); border-top:1px solid var(--border-subtle);">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:var(--text-body-sm-size);">
+                  <span style="color:var(--text-secondary);">Didn't get it?</span>
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="ghost" size="sm" disabled="{{ cooldownActive }}" on-click="{{ resend }}" style="{{ resendStyle }}" hint-size="120px,28px">{{ resendLabel }}</x-import>
+                </div>
+                <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="ghost" size="sm" on-click="{{ backToLogin }}" style="{{ linkStyle }}" hint-size="180px,28px">Use a different account</x-import>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="margin-top:var(--space-7);">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="ghost" size="sm" on-click="{{ goFoundations }}" style="{{ subtleLinkStyle }}" hint-size="160px,28px">Design foundations</x-import>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isFoundations }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="00 Foundations" style="max-width:var(--max-marketing); margin:0 auto; padding:var(--space-8) var(--space-6) var(--space-16); display:flex; flex-direction:column; gap:var(--space-8);">
+      <div style="display:flex; align-items:center; gap:var(--space-4); flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
+          <div style="font-family:var(--font-mono); font-size:var(--text-mono-sm-size); color:var(--text-tertiary);">SCREEN 00</div>
+          <div style="font-family:var(--font-display); font-size:var(--text-display-md-size); line-height:var(--text-display-md-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-display-md-track);">Foundations &amp; primitives</div>
+        </div>
+        <div style="margin-left:auto;">
+          <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" on-click="{{ backToLogin }}" hint-size="140px,32px">Back to sign in</x-import>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+        <div style="font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary);">Surfaces &amp; semantics</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:var(--space-3);">
+          <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="10">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Card" padding="{{ 0 }}" style="{{ s.cardStyle }}" hint-size="150px,112px">
+              <div style="{{ s.chipStyle }}"></div>
+              <div style="padding:var(--space-3); display:flex; flex-direction:column; gap:var(--space-1);">
+                <div style="font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">{{ s.name }}</div>
+                <div style="font-family:var(--font-mono); font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--text-tertiary);">{{ s.value }}</div>
+              </div>
+            </x-import>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:var(--space-4); align-items:start;">
+        <x-import component-from-global-scope="DesignSystem_f13b19.Card" eyebrow="Type scale" hint-size="100%,260px">
+          <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+            <div style="font-family:var(--font-display); font-size:var(--text-display-lg-size); line-height:var(--text-display-lg-lh); font-weight:var(--weight-bold); letter-spacing:var(--text-display-lg-track);">Display lg 40/44</div>
+            <div style="font-family:var(--font-display); font-size:var(--text-heading-lg-size); line-height:var(--text-heading-lg-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-heading-lg-track);">Heading lg 24/30</div>
+            <div>Body md 14/20 — Inter Tight carries all UI text and table content.</div>
+            <div style="font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh); color:var(--text-secondary);">Body sm 13/18 — tables and dense panels.</div>
+            <div style="font-family:var(--font-mono); font-size:var(--text-mono-md-size); line-height:var(--text-mono-md-lh);">Mono md 13/18 — #ORD-4821</div>
+          </div>
+        </x-import>
+
+        <x-import component-from-global-scope="DesignSystem_f13b19.Card" eyebrow="Controls" hint-size="100%,260px">
+          <div style="display:flex; flex-direction:column; gap:var(--space-4);">
+            <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="primary" hint-size="88px,32px">Primary</x-import>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" hint-size="96px,32px">Secondary</x-import>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="ghost" hint-size="72px,32px">Ghost</x-import>
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" disabled="{{ true }}" hint-size="88px,32px">Disabled</x-import>
+            </div>
+            <x-import component-from-global-scope="DesignSystem_f13b19.Field" label="Input" hint="Shown on the storefront" html-for="spec-input" hint-size="100%,84px">
+              <x-import component-from-global-scope="DesignSystem_f13b19.Input" id="spec-input" default-value="Margherita" hint-size="100%,32px"></x-import>
+            </x-import>
+            <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+              <sc-for list="{{ allBadges }}" as="b" hint-placeholder-count="6">
+                <x-import component-from-global-scope="DesignSystem_f13b19.StatusBadge" tone="{{ b.tone }}" dot="{{ true }}" hint-size="auto,20px">{{ b.label }}</x-import>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+
+        <x-import component-from-global-scope="DesignSystem_f13b19.Card" padding="{{ 0 }}" hint-size="100%,260px">
+          <x-import component-from-global-scope="DesignSystem_f13b19.EmptyState" icon="{{ inboxIcon }}" title="No deliveries in flight" description="Couriers appear here the moment an order moves to out for delivery." action="{{ emptyAction }}" hint-size="100%,220px"></x-import>
+        </x-import>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:100vh; display:flex; flex-direction:column;">
+      <x-import component-from-global-scope="DesignSystem_f13b19.TopBar" product="{{ brand }}" environment="{{ locationName }}" environments="{{ locationNames }}" on-environment-change="{{ pickLocationByName }}" right="{{ topBarRight }}" hint-size="100%,56px"></x-import>
+
+      <div style="flex:1; display:flex; min-height:0;">
+        <x-import component-from-global-scope="DesignSystem_f13b19.Sidebar" sections="{{ navSections }}" active-id="{{ screen }}" on-navigate="{{ navigate }}" footer="{{ sidebarFooter }}" hint-size="240px,100%"></x-import>
+
+        <main style="flex:1; min-width:0; display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; gap:var(--space-4); padding:var(--space-3) var(--space-6); border-bottom:1px solid var(--border-subtle);">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Breadcrumbs" items="{{ crumbs }}" hint-size="auto,20px"></x-import>
+          </div>
+
+          <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+            <div data-screen-label="03 Dashboard" style="flex:1; padding:var(--space-6); max-width:var(--max-app); width:100%; box-sizing:border-box; display:flex; flex-direction:column; gap:var(--space-5);">
+              <div style="display:flex; align-items:flex-end; gap:var(--space-4); flex-wrap:wrap;">
+                <div style="display:flex; flex-direction:column; gap:var(--space-1);">
+                  <div style="font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary);">{{ today }}</div>
+                  <div style="font-family:var(--font-display); font-size:var(--text-display-md-size); line-height:var(--text-display-md-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-display-md-track);">Good afternoon, Rosa</div>
+                </div>
+                <div style="margin-left:auto; display:flex; gap:var(--space-2);">
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" hint-size="72px,32px">Today</x-import>
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="primary" hint-size="160px,32px">Pause online orders</x-import>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:var(--space-4);">
+                <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+                  <x-import component-from-global-scope="DesignSystem_f13b19.KpiTile" label="{{ k.label }}" value="{{ k.value }}" delta="{{ k.delta }}" delta-tone="{{ k.deltaTone }}" hint-size="100%,108px"></x-import>
+                </sc-for>
+              </div>
+
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px,1fr)); gap:var(--space-4); align-items:start;">
+                <div style="display:flex; flex-direction:column; gap:var(--space-3); min-width:0;">
+                  <div style="display:flex; align-items:center; gap:var(--space-3);">
+                    <div style="font-family:var(--font-display); font-size:var(--text-heading-sm-size); line-height:var(--text-heading-sm-lh); font-weight:var(--weight-semibold);">Orders in progress</div>
+                    <a href="#" style="margin-left:auto; font-size:var(--text-body-sm-size);">All orders</a>
+                  </div>
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Table" columns="{{ orderColumns }}" rows="{{ orderRows }}" density="comfortable" on-row-click="{{ openOrder }}" hint-size="100%,300px"></x-import>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:var(--space-4); min-width:0;">
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Card" title="Deliveries in flight" action="{{ allDeliveriesLink }}" hint-size="100%,220px">
+                    <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                      <sc-for list="{{ deliveries }}" as="d" hint-placeholder-count="3">
+                        <div style="display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-canvas);">
+                          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--space-1);">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ d.courier }}</div>
+                            <div style="font-family:var(--font-mono); font-size:var(--text-mono-sm-size); color:var(--text-tertiary);">{{ d.meta }}</div>
+                          </div>
+                          <x-import component-from-global-scope="DesignSystem_f13b19.StatusBadge" tone="{{ d.tone }}" dot="{{ true }}" hint-size="auto,20px">{{ d.status }}</x-import>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </x-import>
+
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Card" title="Payments today" hint-size="100%,200px">
+                    <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                      <sc-for list="{{ payments }}" as="p" hint-placeholder-count="3">
+                        <div style="display:flex; align-items:center; gap:var(--space-3);">
+                          <span style="{{ p.dotStyle }}"></span>
+                          <span style="flex:1; color:var(--text-secondary);">{{ p.label }}</span>
+                          <span style="font-variant-numeric:tabular-nums;">{{ p.value }}</span>
+                        </div>
+                      </sc-for>
+                      <div style="padding-top:var(--space-3); border-top:1px solid var(--border-subtle); display:flex; align-items:center; gap:var(--space-3);">
+                        <span style="flex:1; color:var(--text-secondary); font-size:var(--text-body-sm-size);">Needs reconciliation</span>
+                        <span style="font-family:var(--font-display); font-size:var(--text-heading-md-size); line-height:var(--text-heading-md-lh); font-weight:var(--weight-semibold); font-variant-numeric:tabular-nums;">{{ reconcileCount }}</span>
+                      </div>
+                    </div>
+                  </x-import>
+
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Card" eyebrow="Recent activity" hint-size="100%,180px">
+                    <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                      <sc-for list="{{ activity }}" as="a" hint-placeholder-count="4">
+                        <div style="display:flex; gap:var(--space-3); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                          <span style="font-family:var(--font-mono); font-size:var(--text-mono-sm-size); color:var(--text-tertiary); flex:0 0 64px;">{{ a.when }}</span>
+                          <span style="color:var(--text-secondary); text-wrap:pretty;">{{ a.what }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </x-import>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isStub }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1; padding:var(--space-6); display:flex; align-items:flex-start;">
+              <x-import component-from-global-scope="DesignSystem_f13b19.Card" eyebrow="{{ stubIteration }}" style="{{ stubCardStyle }}" hint-size="520px,220px">
+                <x-import component-from-global-scope="DesignSystem_f13b19.EmptyState" icon="{{ stubIcon }}" title="{{ stubTitle }}" description="{{ stubBody }}" action="{{ stubAction }}" style="{{ stubEmptyStyle }}" hint-size="100%,180px"></x-import>
+              </x-import>
+            </div>
+          </sc-if>
+        </main>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Hearth&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;verify&quot;,&quot;foundations&quot;,&quot;dashboard&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showResendCooldown&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: null, busy: false, codeError: false,
+    code: ['', '', '', '', '', ''], cooldown: 0, locationIdx: 0, dsReady: false
+  };
+  digitRefs = [0, 1, 2, 3, 4, 5].map(() => React.createRef());
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (this.state.cooldown > 0) this.setState(s => ({ cooldown: s.cooldown - 1 }));
+    }, 1000);
+    // The design-system bundle mounts from <helmet>; re-render once its globals land.
+    if (!window.DesignSystem_f13b19) {
+      this.poll = setInterval(() => {
+        if (window.DesignSystem_f13b19) { clearInterval(this.poll); this.setState({ dsReady: true }); }
+      }, 60);
+    }
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearInterval(this.poll); }
+
+  go(screen) { this.setState({ screen }); }
+
+  startLogin() {
+    this.setState({ busy: true });
+    setTimeout(() => this.setState({
+      busy: false, screen: 'verify', cooldown: 30, code: ['', '', '', '', '', ''], codeError: false
+    }), 450);
+  }
+
+  setDigit(i, raw) {
+    const v = (raw || '').replace(/\D/g, '').slice(-1);
+    const code = this.state.code.slice();
+    code[i] = v;
+    this.setState({ code, codeError: false });
+    if (v && i < 5) { const n = this.digitRefs[i + 1].current; if (n) n.focus(); }
+  }
+
+  digitKey(i, e) {
+    if (e.key === 'Backspace' && !this.state.code[i] && i > 0) {
+      const p = this.digitRefs[i - 1].current; if (p) p.focus();
+    }
+  }
+
+  submitCode() {
+    if (this.state.code.join('') === '000000') { this.setState({ codeError: true }); return; }
+    this.setState({ busy: true });
+    setTimeout(() => this.setState({ busy: false, screen: 'dashboard' }), 450);
+  }
+
+  renderVals() {
+    const DS = window.DesignSystem_f13b19 || {};
+    const el = React.createElement;
+    const icon = (name, size) => (DS.Icon ? el(DS.Icon, { name, size: size || 16 }) : null);
+
+    const s = this.state.screen ?? (this.props.startScreen || 'login');
+    const brand = this.props.brandName ?? 'Hearth';
+    const code = this.state.code;
+    const complete = code.every(d => d !== '');
+    const useCooldown = this.props.showResendCooldown ?? true;
+    const cooling = useCooldown && this.state.cooldown > 0;
+
+    const locationData = [
+      { name: 'Northside Trattoria', status: 'open' },
+      { name: 'Harbourline Kitchen', status: 'open' },
+      { name: 'Eastgate Counter', status: 'closed' }
+    ];
+    const current = locationData[this.state.locationIdx];
+
+    const navDefs = [
+      ['dashboard', 'Dashboard', 'gauge'],
+      ['orders', 'Orders', 'receipt-text'],
+      ['menu', 'Menu', 'book-open'],
+      ['deliveries', 'Deliveries', 'truck'],
+      ['payments', 'Payments', 'credit-card']
+    ];
+    const navSections = [{
+      label: 'Operate',
+      items: navDefs.map(([id, label, glyph]) => ({
+        id, label, icon: icon(glyph, 16),
+        badge: id === 'dashboard' ? null : el('span', {
+          style: { fontFamily: 'var(--font-mono)', fontSize: 'var(--text-caption-size)', color: 'var(--text-tertiary)' }
+        }, 'soon')
+      }))
+    }];
+
+    const stubCopy = {
+      orders: ['ITERATION 05', 'Orders list + detail', 'Filter by status and location, then drill into line items with the linked delivery and payment side by side. Specced in BUILD_PLAN.md, not built in this pass.', 'receipt-text'],
+      menu: ['ITERATION 06', 'Menu management', 'Per-location item list with inline price edits and an availability toggle that writes straight through. Specced in BUILD_PLAN.md, not built in this pass.', 'book-open'],
+      deliveries: ['ITERATION 07', 'Deliveries', 'Courier assignment and status tracking, one delivery per order. Specced in BUILD_PLAN.md, not built in this pass.', 'truck'],
+      payments: ['ITERATION 08', 'Payments and reconciliation', 'Match payments back to orders, surface failed captures, and clear the reconciliation queue. Specced in BUILD_PLAN.md, not built in this pass.', 'credit-card']
+    };
+    const stub = stubCopy[s];
+
+    const orderData = [
+      ['#ORD-4821', '2 × Margherita, Garlic knots', '$34.20', 'Preparing', 'info', '2m ago'],
+      ['#ORD-4820', 'Carbonara, House red', '$41.00', 'Out for delivery', 'warning', '9m ago'],
+      ['#ORD-4819', 'Lasagne ×3', '$57.50', 'Received', 'neutral', '11m ago'],
+      ['#ORD-4818', 'Calzone, Tiramisu', '$28.75', 'Delivered', 'success', '24m ago'],
+      ['#ORD-4817', 'Focaccia board', '$18.00', 'Cancelled', 'danger', '38m ago']
+    ];
+
+    const orderColumns = [
+      { key: 'id', label: 'Order', mono: true, muted: true },
+      { key: 'items', label: 'Items' },
+      { key: 'total', label: 'Total', numeric: true },
+      { key: 'status', label: 'Status', render: r => (DS.StatusBadge ? el(DS.StatusBadge, { tone: r.tone, dot: true }, r.status) : r.status) },
+      { key: 'placed', label: 'Placed', muted: true }
+    ];
+
+    const linkBtn = { color: '#2AA5F5', padding: 0, height: 'auto' };
+
+    return {
+      brand,
+      screen: s,
+      isAuth: s === 'login' || s === 'verify',
+      isLogin: s === 'login',
+      isVerify: s === 'verify',
+      isFoundations: s === 'foundations',
+      isApp: s === 'dashboard' || !!stub,
+      isDashboard: s === 'dashboard',
+      isStub: !!stub,
+      stubIteration: stub ? stub[0] : '',
+      stubTitle: stub ? stub[1] : '',
+      stubBody: stub ? stub[2] : '',
+      stubIcon: stub ? icon(stub[3], 32) : null,
+      stubCardStyle: { maxWidth: 520 },
+      stubEmptyStyle: { padding: 0 },
+      stubAction: DS.Button ? el(DS.Button, { variant: 'secondary', onClick: () => this.go('dashboard') }, 'Back to dashboard') : null,
+
+      email: 'rosa@northsidehospitality.com',
+      busy: this.state.busy,
+      codeError: this.state.codeError,
+      loginLabel: this.state.busy ? 'Sending code…' : 'Continue',
+      submitLogin: () => this.startLogin(),
+      authFacts: [
+        { label: 'Locations', value: '3', cardStyle: { minWidth: 140, background: 'var(--bg-canvas)' } },
+        { label: 'Orders today', value: '218', cardStyle: { minWidth: 140, background: 'var(--bg-canvas)' } },
+        { label: 'Uptime', value: '99.9%', cardStyle: { minWidth: 140, background: 'var(--bg-canvas)' } }
+      ],
+
+      digits: code.map((value, i) => ({
+        value, label: 'Digit ' + (i + 1),
+        onChange: e => this.setDigit(i, e.target.value),
+        onKeyDown: e => this.digitKey(i, e),
+        style: {
+          height: 'var(--space-14)', textAlign: 'center', fontSize: 'var(--text-heading-md-size)',
+          background: 'var(--bg-inset)', minWidth: 0
+        }
+      })),
+      verifyDisabled: !complete || this.state.busy,
+      verifyLabel: this.state.busy ? 'Verifying…' : 'Verify and sign in',
+      submitCode: () => this.submitCode(),
+      cooldownActive: cooling,
+      resendLabel: cooling ? 'Resend in ' + this.state.cooldown + 's' : 'Resend code',
+      resendStyle: { ...linkBtn, color: cooling ? 'var(--text-disabled)' : '#2AA5F5', fontVariantNumeric: 'tabular-nums' },
+      linkStyle: { ...linkBtn, alignSelf: 'flex-start' },
+      subtleLinkStyle: { ...linkBtn, color: 'var(--text-tertiary)', textDecoration: 'underline' },
+      resend: () => this.setState({ cooldown: 30, code: ['', '', '', '', '', ''], codeError: false }),
+      backToLogin: () => this.setState({ screen: 'login', code: ['', '', '', '', '', ''], codeError: false, cooldown: 0 }),
+      goFoundations: () => this.go('foundations'),
+
+      locationName: current.name,
+      locationNames: locationData.map(l => l.name),
+      pickLocationByName: name => this.setState({ locationIdx: Math.max(0, locationData.findIndex(l => l.name === name)) }),
+      navSections,
+      navigate: id => this.go(id),
+      crumbs: [{ label: 'Northside Hospitality' }, { label: current.name }, { label: (navDefs.find(n => n[0] === s) || [, 'Dashboard'])[1] }],
+      topBarRight: el('div', { style: { display: 'flex', alignItems: 'center', gap: 'var(--space-3)' } },
+        el('span', { style: { fontSize: 'var(--text-body-sm-size)', color: 'var(--text-secondary)' } }, 'Rosa Medina'),
+        DS.IconButton ? el(DS.IconButton, { label: 'Sign out', variant: 'secondary', onClick: () => this.setState({ screen: 'login', code: ['', '', '', '', '', ''], cooldown: 0 }) }, icon('power', 16)) : null
+      ),
+      sidebarFooter: el('div', { style: { display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-2)' } },
+        el('div', {
+          style: {
+            width: 'var(--control-md)', height: 'var(--control-md)', flex: '0 0 var(--control-md)',
+            borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 'var(--text-mono-sm-size)', fontWeight: 'var(--weight-semibold)'
+          }
+        }, 'RM'),
+        el('div', { style: { minWidth: 0 } },
+          el('div', { style: { fontSize: 'var(--text-body-sm-size)', lineHeight: 'var(--text-body-sm-lh)' } }, 'Rosa Medina'),
+          el('div', { style: { fontSize: 'var(--text-caption-size)', lineHeight: 'var(--text-caption-lh)', color: 'var(--text-tertiary)' } }, 'Admin')
+        )
+      ),
+
+      today: 'Thursday, 17 September',
+      kpis: [
+        { label: 'Orders today', value: '218', delta: '+14 vs last Thursday', deltaTone: 'up' },
+        { label: 'Net sales', value: '$6,420', delta: '+8.1% WoW', deltaTone: 'up' },
+        { label: 'In flight', value: '7', delta: '2 past ETA', deltaTone: 'neutral' },
+        { label: 'Failed payments', value: '3', delta: '$142 unreconciled', deltaTone: 'down' }
+      ],
+      orderColumns,
+      orderRows: orderData.map(([id, items, total, status, tone, placed]) => ({ id, items, total, status, tone, placed })),
+      openOrder: () => this.go('orders'),
+      allDeliveriesLink: DS.Button ? el(DS.Button, { variant: 'ghost', size: 'sm', style: linkBtn, onClick: () => this.go('deliveries') }, 'All deliveries') : null,
+      deliveries: [
+        { courier: 'Dani Okafor', meta: '#ORD-4820 · ETA 12 min', status: 'On route', tone: 'info' },
+        { courier: 'Sam Whitfield', meta: '#ORD-4814 · 6 min late', status: 'Delayed', tone: 'warning' },
+        { courier: 'Unassigned', meta: '#ORD-4819 · Awaiting courier', status: 'Pending', tone: 'neutral' }
+      ],
+      payments: [
+        { label: 'Paid', value: '$6,278', dotStyle: 'width:8px; height:8px; flex:0 0 8px; border-radius:var(--radius-full); background:var(--success);' },
+        { label: 'Pending capture', value: '$284', dotStyle: 'width:8px; height:8px; flex:0 0 8px; border-radius:var(--radius-full); background:var(--warning);' },
+        { label: 'Failed', value: '$142', dotStyle: 'width:8px; height:8px; flex:0 0 8px; border-radius:var(--radius-full); background:var(--danger);' }
+      ],
+      reconcileCount: '3',
+      activity: [
+        { when: '2m ago', what: 'Margherita marked unavailable at Eastgate Counter' },
+        { when: '18m ago', what: 'Payment for #ORD-4817 refunded in full' },
+        { when: '1h ago', what: 'Harbourline Kitchen opened for the day' },
+        { when: '3h ago', what: 'Lunch menu prices updated — 6 items' }
+      ],
+
+      swatches: [
+        ['Canvas', '#050810'], ['Surface', '#0B111C'], ['Elevated', '#141924'], ['Inset', '#030509'],
+        ['Text primary', '#F2F5FA'], ['Text secondary', '#8892A3'],
+        ['Success', '#22C55E'], ['Info', '#2AA5F5'], ['Warning', '#F5A524'], ['Danger', '#F5385E']
+      ].map(([name, value]) => ({
+        name, value,
+        cardStyle: { overflow: 'hidden' },
+        chipStyle: 'height:64px; background:' + value + '; border-bottom:1px solid var(--border-default);'
+      })),
+      allBadges: [
+        { label: 'Received', tone: 'neutral' }, { label: 'Preparing', tone: 'info' },
+        { label: 'Out for delivery', tone: 'warning' }, { label: 'Delivered', tone: 'success' },
+        { label: 'Cancelled', tone: 'danger' }, { label: 'Paid', tone: 'success' }
+      ],
+      inboxIcon: icon('inbox', 32),
+      emptyAction: DS.Button ? el(DS.Button, { variant: 'secondary' }, "View today's orders") : null
+    };
+  }
+}
+</script>
+</body>
+</html>

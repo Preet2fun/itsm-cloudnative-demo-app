@@ -1,0 +1,137 @@
+/* Hearth — token layer. Aurora design system, dark theme. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --gradient-signature: linear-gradient(90deg, #22E06B 0%, #21D0C4 50%, #2AA5F5 100%);
+
+  --bg-canvas: #050810;
+  --bg-surface: #0B111C;
+  --bg-elevated: #141924;
+  --bg-inset: #030509;
+
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.10);
+  --border-strong: rgba(255,255,255,0.18);
+
+  --text-primary: #F2F5FA;
+  --text-secondary: #8892A3;
+  --text-tertiary: #5C6675;
+  --text-disabled: #3E4653;
+  --text-inverse: #050810;
+
+  --success: #22C55E; --success-soft: rgba(34,197,94,0.12);
+  --info:    #2AA5F5; --info-soft:    rgba(42,165,245,0.12);
+  --warning: #F5A524; --warning-soft: rgba(245,165,36,0.14);
+  --danger:  #F5385E; --danger-soft:  rgba(245,56,94,0.14);
+  --neutral: #8892A3; --neutral-soft: rgba(136,146,163,0.12);
+
+  --neutral-100: #EEF1F6;
+  --focus-ring: #22E06B;
+  --dot-grid: rgba(255,255,255,0.05);
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-ui: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Spacing — 4px base */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px; --space-6: 24px;  --space-7: 28px;  --space-8: 32px;
+  --space-9: 36px; --space-10: 40px; --space-12: 48px; --space-14: 56px;
+  --space-16: 64px; --space-20: 80px; --space-24: 96px;
+
+  /* Radii */
+  --radius-xs: 2px;   /* chips, badges */
+  --radius-sm: 4px;   /* inputs, buttons */
+  --radius-md: 6px;   /* cards, panels */
+  --radius-lg: 8px;   /* dialogs, popovers */
+  --radius-full: 9999px;
+
+  /* Control heights */
+  --control-sm: 28px; --control-md: 32px; --control-lg: 40px;
+  --control-pad-sm: 10px; --control-pad-md: 12px; --control-pad-lg: 16px;
+
+  /* Layout */
+  --grid-gutter: 24px;
+  --max-app: 1440px;
+  --max-marketing: 1200px;
+  --max-reading: 760px;
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 56px;
+  --topbar-h: 56px;
+  --row-h-compact: 28px; --row-h: 36px; --row-h-comfortable: 44px;
+
+  /* Type scale */
+  --text-display-lg-size: 40px; --text-display-lg-lh: 44px;
+  --text-display-md-size: 32px; --text-display-md-lh: 36px;
+  --text-heading-lg-size: 24px; --text-heading-lg-lh: 30px;
+  --text-heading-md-size: 20px; --text-heading-md-lh: 26px;
+  --text-heading-sm-size: 16px; --text-heading-sm-lh: 22px;
+  --text-body-lg-size: 15px;    --text-body-lg-lh: 22px;
+  --text-body-md-size: 14px;    --text-body-md-lh: 20px;
+  --text-body-sm-size: 13px;    --text-body-sm-lh: 18px;
+  --text-label-size: 12px;      --text-label-lh: 16px;   --text-label-track: 0.02em;
+  --text-caption-size: 11px;    --text-caption-lh: 14px;
+  --text-mono-md-size: 13px;    --text-mono-md-lh: 18px;
+  --text-mono-sm-size: 12px;    --text-mono-sm-lh: 16px;
+
+  --weight-regular: 400; --weight-medium: 500; --weight-semibold: 600; --weight-bold: 700;
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emphasis: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg-canvas);
+}
+
+body {
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-md-size);
+  line-height: var(--text-body-md-lh);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: #2AA5F5; text-decoration: none; transition: color var(--duration-fast) var(--ease-standard); }
+a:hover { color: #22E06B; }
+
+button, input, select, textarea { font-family: inherit; }
+
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+table { border-collapse: collapse; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+.dotgrid {
+  background-image: radial-gradient(var(--dot-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: var(--gradient-signature);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.skeleton { animation: skeleton-pulse 1s var(--ease-standard) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,21 @@
+:root {
+  /* size / line-height / weight / tracking */
+  --text-display-xl-size: 56px; --text-display-xl-lh: 56px; --text-display-xl-weight: 700; --text-display-xl-track: -0.03em;
+  --text-display-lg-size: 40px; --text-display-lg-lh: 44px; --text-display-lg-weight: 700; --text-display-lg-track: -0.025em;
+  --text-display-md-size: 32px; --text-display-md-lh: 36px; --text-display-md-weight: 600; --text-display-md-track: -0.02em;
+  --text-heading-lg-size: 24px; --text-heading-lg-lh: 30px; --text-heading-lg-weight: 600; --text-heading-lg-track: -0.015em;
+  --text-heading-md-size: 20px; --text-heading-md-lh: 26px; --text-heading-md-weight: 600; --text-heading-md-track: -0.01em;
+  --text-heading-sm-size: 16px; --text-heading-sm-lh: 22px; --text-heading-sm-weight: 600; --text-heading-sm-track: -0.005em;
+  --text-body-lg-size: 15px;    --text-body-lg-lh: 22px;    --text-body-lg-weight: 400;
+  --text-body-md-size: 14px;    --text-body-md-lh: 20px;    --text-body-md-weight: 400;
+  --text-body-sm-size: 13px;    --text-body-sm-lh: 18px;    --text-body-sm-weight: 400;
+  --text-label-size: 12px;      --text-label-lh: 16px;      --text-label-weight: 500;  --text-label-track: 0.02em;
+  --text-caption-size: 11px;    --text-caption-lh: 14px;    --text-caption-weight: 400;
+  --text-mono-md-size: 13px;    --text-mono-md-lh: 18px;
+  --text-mono-sm-size: 12px;    --text-mono-sm-lh: 16px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+}

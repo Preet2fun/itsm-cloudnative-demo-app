@@ -75,9 +75,11 @@ what's actually left.
 ## Phase 4 — OPA Rego RBAC policy for customer-app
 **GitHub: [#50](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/50)**
 
-- [ ] Rego rules: role + HTTP method + path, mirroring platform-app's `infra/k8s/opa/` pattern
-- [ ] Policy test file (mirror platform-app's `authz_test.rego` precedent)
-- [ ] Verify live: a valid JWT with a role lacking permission is denied by OPA, not the service
+- [x] Rego rules: role + HTTP method + path, mirroring platform-app's `infra/k8s/opa/` pattern — **no new allow rules needed**: the existing unscoped `allow if { role == "admin" }` already covered customer-app's admin users. Extracted the policy into a standalone, testable `platform-app/infra/k8s/opa/authz.rego` (no such file existed on `main`), kept byte-for-byte in sync with `policy-configmap.yaml`. Two real bugs found + fixed live along the way (both affecting platform-app's own already-deployed policy too, not just customer-app): (1) OPA's `ext_authz` check runs *before* `jwt_authn` in Istio's filter chain, so the old `x-user-role` header read was always empty — fixed by reading the role from the JWT directly; (2) an automated security review correctly flagged the first fix's unverified JWT decode as HIGH severity — upgraded to `io.jwt.decode_verify` with the same pinned public key used in Phase 3's JWKS fix. Full writeup: `docs/superpowers/specs/2026-09-17-customer-app-opa-rbac-design.md`.
+- [x] Policy test file — `platform-app/infra/k8s/opa/authz_test.rego`, 27 tests (platform-app regression + customer-app + JWT-verification-specific cases including a tampered-signature rejection test), all passing.
+- [x] Verify live: a valid JWT with a role lacking permission is denied by OPA, not the service — verified live 2026-09-17: `role: viewer` JWT → `403` from OPA on `/api/v1/restaurants` (confirmed via OPA's own decision log, `"result":false`); existing `role: admin` JWTs for both tenants unaffected (`200`); full `tenant-isolation-smoke-test.sh` 25/25 after (one assertion updated: garbage token now correctly gets `403` from OPA instead of `401` from jwt_authn, since OPA runs first — still denied, just by a different layer).
+
+**Phase 4 DONE — #50 not yet moved to Done on the board (repo owner's call, per project policy on GitHub actions).**
 
 ---
 
@@ -87,19 +89,85 @@ what's actually left.
 Per root CLAUDE.md §10: customer-app is a clean greenfield frontend — stack,
 routing, and state approach get decided as part of this task.
 
-- [ ] Decide frontend stack
-- [ ] Draft first screen in Claude Design (e.g. restaurant/menu browsing)
-- [ ] Get design approved before writing implementation code
+- [x] Decide frontend stack — Vite + React 18 + TypeScript, React Router,
+      TanStack Query, Zustand, CSS-variable tokens. Confirmed in the design
+      handoff bundle below; matches platform-app's own frontend stack.
+- [x] Draft first screen in Claude Design — done via claude.ai/design
+      (outside this session, per the repo owner's own account), not the
+      in-session Claude Design canvas preview. Product named "Hearth"
+      (working name — alternatives on the table: "Counterpane", "Mise").
+      Bundle delivered to `customer-app/design_handoff/` — see
+      `customer-app/design_handoff/CLAUDE.md` for the full index. Login +
+      6-digit verify (this task's actual screen) is fully built and
+      interaction-complete in `design_handoff/design_handoff_hearth/reference/Login.jsx`,
+      plus three bonus screens ahead of schedule (Foundations, App shell,
+      Dashboard) and four more specced-only for later phases (Orders, Menu,
+      Deliveries, Payments).
+- [x] Get design approved before writing implementation code — approved
+      2026-09-17, including the one open design-system question it raised:
+      the brief asked for a distinct "warm editorial hospitality" look, but
+      the tool applied its pre-existing "Aurora" design system instead
+      (dark, Synap's own visual sibling). **Kept Aurora as-is** — repo
+      owner's explicit call. Two smaller open items carried into
+      `design_handoff/CLAUDE.md` rather than blocking here: no settings
+      screen yet (location open/closed isn't editable anywhere), and the
+      product name is still not finalized (one-line change whenever
+      decided).
+
+**Phase 5 DONE — #45 not yet moved to Done on the board (repo owner's call,
+per project policy on GitHub actions; #45 also covers Phase 6, so it likely
+stays open until that lands too).**
 
 ---
 
 ## Phase 6 — Build the first screen
 **GitHub: [#45](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/45) (same issue as Phase 5 — draft + build is one task)**
 
-- [ ] Scaffold the frontend project
-- [ ] Build the first screen to match the approved design draft
-- [ ] Verify live in a browser against the Phase-1/3 deployed backend
-- [ ] **Stop here and check in** — further screens become their own tasks once this lands, not created speculatively now (matches #45's own scope note and root CLAUDE.md §11's "one roadmap task at a time")
+- [x] Scaffold the frontend project — `customer-app/services/frontend/`,
+      Vite + React 18 + TypeScript, React Router, TanStack Query, Zustand,
+      CSS Modules over the Aurora token layer ported verbatim from the
+      design handoff. Mirrors platform-app's frontend conventions (same
+      `src/pages` + `src/lib` layout, same tsconfig/eslint/vitest setup,
+      `@/` path alias). `npm run build` / `type-check` / `lint` / `test` all
+      clean; 7 tests passing.
+- [x] Build the first screen to match the approved design draft — Login +
+      6-digit verify (`src/pages/Login.tsx`, `LoginVerify.tsx`,
+      shared `AuthLayout.tsx`), pixel-matched against
+      `design_handoff/design_handoff_hearth/reference/Login.jsx`. Wired to
+      the real `authApi` contract (`/api/v1/auth/login` →
+      `/api/v1/auth/mfa/send` → `/api/v1/auth/mfa/verify`), session owned by
+      a persisted Zustand store per the design handoff's state shape. Minor
+      deliberate deviations from the mockup, both because the real backend
+      doesn't back the mockup's copy: dropped the brand panel's fabricated
+      demo stats (218 orders / 99.9% uptime — Northside Hospitality fixture
+      data, not real) in favor of qualitative labels; dropped the "2
+      attempts left" claim on a bad code (`user-service` doesn't track/report
+      a remaining-attempts count) for a truthful generic retry message.
+      Placeholder post-login landing (`Welcome.tsx`) added only to prove the
+      flow end-to-end — explicitly not the real Dashboard, which is its own
+      later phase.
+- [x] Verify live in a browser against the Phase-1/3 deployed backend —
+      2026-09-17, full flow run for real through the browser against
+      `http://<node-ip>:30080` (dev-server proxy, see `.env.local.example`):
+      real login (`owner@customer-a.example`) → real
+      `/api/v1/auth/mfa/send` → dev-mode OTP pulled from
+      `kubectl logs -n itsm-dev deploy/user-service` → real
+      `/api/v1/auth/mfa/verify` → real 3-part JWT stored → landed
+      authenticated on `/` → sign-out correctly cleared the session and
+      returned to `/login`. Screenshots taken at each step. One credential
+      snag hit and fixed along the way: the first password tried didn't
+      match the live `owner@customer-a.example` row — re-ran
+      `scripts/seed-customer-user.sh` with a fresh `SEED_PASSWORD` to reset
+      it, not a bug in the new frontend or backend.
+- [x] **Stop here and check in** — further screens become their own tasks
+      once this lands, not created speculatively now (matches #45's own
+      scope note and root CLAUDE.md §11's "one roadmap task at a time").
+      Orders/Menu/Deliveries/Payments stay specced-only in
+      `design_handoff/design_handoff_hearth/BUILD_PLAN.md` until each
+      becomes its own phase.
+
+**Phase 6 DONE — #45 not yet moved to Done on the board (repo owner's call,
+per project policy on GitHub actions).**
 
 ---
 

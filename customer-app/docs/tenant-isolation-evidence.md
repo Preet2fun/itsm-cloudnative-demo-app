@@ -190,3 +190,55 @@ once real JWT validation is in front of the services. A caller cannot forge
 `X-Tenant-ID` to read another tenant's data — Envoy derives it from the
 validated JWT's `tenant_id` claim, and any client-sent copy of that header is
 overwritten, not trusted.
+
+---
+
+## Phase 4 — OPA RBAC (closes #50)
+
+Adds a second authz layer on top of Phase 3's JWT validation: a role
+lacking permission is now denied by OPA before the request reaches any
+service, not just an invalid/missing token. Full design and the two bugs
+found+fixed along the way (`ext_authz` running before `jwt_authn`;
+upgrading from unverified to verified JWT decode after an automated
+security review) are in
+`docs/superpowers/specs/2026-09-17-customer-app-opa-rbac-design.md`.
+
+### Captured run
+
+`customer-app-dev`, 2026-09-17, after applying
+`customer-app-opa-rbac` and the corrected `policy-configmap.yaml`
+(`io.jwt.decode_verify`, real signature check):
+
+```
+=== login as staff (viewer role, temporary test user) ===
+=== expect 403 (OPA denies viewer role) ===
+403
+
+=== login as owner (admin role) ===
+=== expect 200, total 2 (admin unaffected) ===
+{
+    "restaurants": [...],
+    "total": 2
+}
+
+=== full smoke test - expect 25/25 ===
+==> Phase 0 — mesh rejects missing/invalid tokens
+  PASS  no token -> 403  (403)
+  PASS  garbage token -> 403 (OPA rejects before jwt_authn can)  (403)
+
+==> Phase A — customer_b sees its own data (proves the rows exist)
+  PASS  B restaurants list -> 200  (200)
+  PASS  B restaurant count  (1)
+  [... 21 more PASS lines, admin-JWT tenant isolation unaffected ...]
+
+==> 25 passed, 0 failed
+```
+
+**Result: PASS.** A `role: viewer` JWT is denied (`403`) by OPA before
+reaching catalog-service — confirmed via OPA's own decision log
+(`"result":false`) — while the existing `role: admin` JWTs for both tenants
+are unaffected, and full tenant isolation still holds. The one behavior
+change from Phase 3: a garbage/malformed token now gets `403` instead of
+`401`, because OPA's `ext_authz` check runs *before* `jwt_authn` in the
+filter chain and rejects it first — still correctly denied, just by a
+different layer (`tenant-isolation-smoke-test.sh` updated to match).

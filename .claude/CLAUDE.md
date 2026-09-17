@@ -3,13 +3,14 @@
 This file is loaded automatically by Claude Code at the start of every session.
 Every rule here is non-negotiable. Read it fully before writing a single line of code.
 
-This repo also contains two directory-scoped `CLAUDE.md` files that load
+This repo also contains three directory-scoped `CLAUDE.md` files that load
 automatically alongside this one when you're working inside their trees:
-`ai-engine/CLAUDE.md` and `platform-app/design_handoff_synap/CLAUDE.md`. Where
-either references "root `CLAUDE.md` §N", that section number in **this** file
-must keep meaning the same thing — §3 (Architecture Decisions) and §5 (OTel
-Instrumentation) are load-bearing for `ai-engine/CLAUDE.md`'s cross-references.
-Don't renumber them without updating that file too.
+`ai-engine/CLAUDE.md`, `platform-app/design_handoff_synap/CLAUDE.md`, and
+`customer-app/design_handoff/CLAUDE.md`. Where any references "root
+`CLAUDE.md` §N", that section number in **this** file must keep meaning the
+same thing — §3 (Architecture Decisions) and §5 (OTel Instrumentation) are
+load-bearing for `ai-engine/CLAUDE.md`'s cross-references. Don't renumber
+them without updating that file too.
 
 ---
 

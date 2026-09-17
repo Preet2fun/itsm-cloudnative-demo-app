@@ -1,0 +1,39 @@
+/* Minimal resets + shared primitives. Components style themselves via tokens. */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-md-size);
+  line-height: var(--text-body-md-lh);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+a { color: var(--text-primary); text-decoration: none; border-bottom: 1px solid var(--border-strong); }
+a:hover { color: var(--text-primary); border-bottom-color: var(--grad-stop-1); }
+
+/* 24px dot grid overlay for canvases */
+.aurora-dotgrid {
+  background-image: radial-gradient(var(--dot-grid) 1px, transparent 1px);
+  background-size: var(--dot-grid-size) var(--dot-grid-size);
+}
+
+/* Signature gradient text — wordmarks and hero final phrase only */
+.aurora-gradient-text {
+  background: var(--gradient-signature);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+
+@keyframes aurora-pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.45 } }
+@keyframes aurora-spin { to { transform: rotate(360deg) } }

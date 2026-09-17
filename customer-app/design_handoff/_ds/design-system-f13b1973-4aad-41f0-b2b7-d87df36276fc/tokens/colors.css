@@ -1,0 +1,92 @@
+:root {
+  /* Signature gradient — the identity mark. Max one element per screen. */
+  --grad-stop-1: #22E06B; /* signal green */
+  --grad-stop-2: #21D0C4; /* pulse teal */
+  --grad-stop-3: #2AA5F5; /* horizon blue */
+  --gradient-signature: linear-gradient(90deg, #22E06B 0%, #21D0C4 50%, #2AA5F5 100%); /* @kind color */
+
+  /* Neutral ramp — one scale, both themes */
+  --neutral-0:   #FFFFFF;
+  --neutral-50:  #F7F8FB;
+  --neutral-100: #EEF1F6;
+  --neutral-200: #DEE3EC;
+  --neutral-300: #C2CAD6;
+  --neutral-400: #8892A3;
+  --neutral-500: #5C6675;
+  --neutral-600: #3E4653;
+  --neutral-700: #242A34;
+  --neutral-800: #141924;
+  --neutral-900: #0B111C;
+  --neutral-950: #050810;
+
+  /* Semantic — strong (fg/border) + soft (fill) */
+  --success: #22C55E; --success-soft: rgba(34,197,94,0.12);
+  --info:    #2AA5F5; --info-soft:    rgba(42,165,245,0.12);
+  --warning: #F5A524; --warning-soft: rgba(245,165,36,0.14);
+  --danger:  #F5385E; --danger-soft:  rgba(245,56,94,0.14);
+  --neutral: #8892A3; --neutral-soft: rgba(136,146,163,0.12);
+
+  /* Severity aliases */
+  --sev-p1: var(--danger);
+  --sev-p2: var(--warning);
+  --sev-p3: var(--info);
+  --sev-p4: var(--neutral);
+  --sev-ok: var(--success);
+
+  /* Data-viz categorical — always walk in order */
+  --viz-1: #2AA5F5;
+  --viz-2: #22E06B;
+  --viz-3: #F5A524;
+  --viz-4: #B98AFF;
+  --viz-5: #21D0C4;
+  --viz-6: #F5385E;
+  --viz-7: #FFD84D;
+  --viz-8: #6B8CFF;
+
+  --focus-ring: #22E06B;
+}
+
+/* Dark theme — default */
+:root, [data-theme="dark"] {
+  --bg-canvas:   #050810;
+  --bg-surface:  #0B111C;
+  --bg-elevated: #141924;
+  --bg-inset:    #030509;
+
+  --border-subtle:  rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.10);
+  --border-strong:  rgba(255,255,255,0.18);
+
+  --text-primary:   #F2F5FA;
+  --text-secondary: #8892A3;
+  --text-tertiary:  #5C6675;
+  --text-disabled:  #3E4653;
+  --text-inverse:   #050810;
+
+  --dot-grid: rgba(255,255,255,0.05);
+  --backdrop: rgba(5,8,16,0.6);
+  --viz-heat-from: #141924;
+  --viz-heat-to:   #2AA5F5;
+}
+
+[data-theme="light"] {
+  --bg-canvas:   #F7F8FB;
+  --bg-surface:  #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-inset:    #EEF1F6;
+
+  --border-subtle:  rgba(11,17,28,0.06);
+  --border-default: rgba(11,17,28,0.10);
+  --border-strong:  rgba(11,17,28,0.18);
+
+  --text-primary:   #0B111C;
+  --text-secondary: #3E4653;
+  --text-tertiary:  #5C6675;
+  --text-disabled:  #C2CAD6;
+  --text-inverse:   #FFFFFF;
+
+  --dot-grid: rgba(11,17,28,0.04);
+  --backdrop: rgba(11,17,28,0.4);
+  --viz-heat-from: #EEF1F6;
+  --viz-heat-to:   #0B4A7A;
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth — reference prototype</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js" crossorigin></script>
+
+<!-- mockData.js is an ES module; re-exposed on window so the Babel-compiled scripts can read it. -->
+<script type="module">
+  import * as mock from './mockData.js';
+  window.HearthMock = mock;
+  window.dispatchEvent(new Event('hearth-mock-ready'));
+</script>
+
+<script>
+  // Load order matters: icons -> screens -> app. Each file publishes onto window.
+  const files = ['icons.jsx', 'Login.jsx', 'AppShell.jsx', 'Dashboard.jsx', 'Foundations.jsx', 'app.jsx'];
+  const boot = async () => {
+    for (const name of files) {
+      const source = await fetch(name).then(r => r.text());
+      const { code } = Babel.transform(source, { presets: ['react'], filename: name });
+      const s = document.createElement('script');
+      s.textContent = code;
+      document.body.appendChild(s);
+    }
+  };
+  if (window.HearthMock) boot();
+  else window.addEventListener('hearth-mock-ready', boot, { once: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: oklch(97% 0.012 75);
+      --panel-bg: oklch(24% 0.035 50);
+      --text: oklch(24% 0.02 50);
+      --text-muted: oklch(46% 0.02 55);
+      --accent: oklch(55% 0.13 40);
+      --accent-hover: oklch(47% 0.13 40);
+      --accent-soft: oklch(93% 0.03 45);
+      --border: oklch(89% 0.014 70);
+      --white: oklch(99% 0.004 80);
+      --cream-ink: oklch(90% 0.03 70);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+    button:hover { background: var(--accent-hover) !important; }
+    .otp-box:focus { outline: none; border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-soft); }
+  </style>
+</helmet>
+
+<div style="display:flex; width:1440px; height:900px; background:var(--bg); color:var(--text); font-family:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow:hidden;">
+
+  <!-- Brand panel (consistent with Main.dc.html) -->
+  <div style="flex:0 0 44%; position:relative; background:var(--panel-bg); color:var(--white); display:flex; flex-direction:column; justify-content:space-between; padding:56px 64px; overflow:hidden;">
+
+    <svg width="520" height="520" viewBox="0 0 520 520" style="position:absolute; right:-160px; bottom:-140px; opacity:0.5;">
+      <circle cx="260" cy="260" r="259" fill="none" stroke="oklch(30% 0.04 50)" stroke-width="1"></circle>
+      <circle cx="260" cy="260" r="190" fill="none" stroke="oklch(30% 0.04 50)" stroke-width="1"></circle>
+      <circle cx="260" cy="260" r="120" fill="none" stroke="oklch(30% 0.04 50)" stroke-width="1"></circle>
+    </svg>
+
+    <div style="display:flex; flex-direction:column; gap:56px; position:relative;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2c-1.2 2.4-3.6 4-3.6 7.2 0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6C15.6 6 13.2 4.4 12 2Z" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"></path>
+          <path d="M6.5 13c-.8 1.6-1.3 3-1.3 4.4C5.2 20.6 8.2 22 12 22s6.8-1.4 6.8-4.6c0-1.4-.5-2.8-1.3-4.4-.7 2-2.8 3.4-5.5 3.4s-4.8-1.4-5.5-3.4Z" stroke="var(--cream-ink)" stroke-width="1.6" stroke-linejoin="round"></path>
+        </svg>
+        <span style="font-family:'Newsreader', Georgia, serif; font-size:22px; font-weight:500; letter-spacing:0.01em;">Hearth</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px; max-width:400px;">
+        <h1 style="margin:0; font-family:'Newsreader', Georgia, serif; font-weight:500; font-size:40px; line-height:1.18; letter-spacing:-0.01em;">Almost there.</h1>
+        <p style="margin:0; font-size:16px; line-height:1.6; color:var(--cream-ink);">A one-time code keeps every account tied to one owner, even when a dozen staff share the same login screen at the front counter.</p>
+      </div>
+
+      <div style="display:flex; align-items:flex-start; gap:14px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none; margin-top:2px;">
+          <rect x="4" y="10" width="16" height="10" rx="2" stroke="var(--accent)" stroke-width="1.6"></rect>
+          <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="var(--accent)" stroke-width="1.6"></path>
+        </svg>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <span style="font-size:14px; font-weight:600;">Two-step sign-in</span>
+          <span style="font-size:13px; color:var(--cream-ink);">Password plus a code sent to your email.</span>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin:0; font-size:12px; color:oklch(65% 0.02 55); position:relative;">Built for multi-location restaurant groups.</p>
+  </div>
+
+  <!-- Form panel -->
+  <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:64px;">
+    <div style="width:100%; max-width:380px; display:flex; flex-direction:column; gap:32px;">
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h2 style="margin:0; font-family:'Newsreader', Georgia, serif; font-weight:500; font-size:28px; color:var(--text);">Check your email</h2>
+        <p style="margin:0; font-size:14px; color:var(--text-muted); line-height:1.5;">We sent a 6-digit code to <strong style="color:var(--text); font-weight:600;">o****r@customer-a.example</strong>.</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <label style="font-size:13px; font-weight:600; color:var(--text);">Verification code</label>
+        <div style="display:flex; gap:10px;">
+          <input class="otp-box" maxlength="1" value="4" style="width:52px; height:60px; text-align:center; font-size:22px; font-weight:600; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+          <input class="otp-box" maxlength="1" value="2" style="width:52px; height:60px; text-align:center; font-size:22px; font-weight:600; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+          <input class="otp-box" maxlength="1" value="9" style="width:52px; height:60px; text-align:center; font-size:22px; font-weight:600; font-family:inherit; border:1px solid var(--accent); border-radius:8px; background:var(--white); color:var(--text); box-shadow:0 0 0 3px var(--accent-soft);">
+          <input class="otp-box" maxlength="1" style="width:52px; height:60px; text-align:center; font-size:22px; font-weight:600; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+          <input class="otp-box" maxlength="1" style="width:52px; height:60px; text-align:center; font-size:22px; font-weight:600; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+          <input class="otp-box" maxlength="1" style="width:52px; height:60px; text-align:center; font-size:22px; font-weight:600; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+        </div>
+      </div>
+
+      <button style="width:100%; padding:13px; font-size:14px; font-weight:600; font-family:inherit; color:var(--white); background:var(--accent); border:none; border-radius:8px; cursor:pointer;">Verify &amp; sign in</button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+        <a href="#">Use a different account</a>
+        <span style="color:var(--text-muted);">Resend code in <strong style="color:var(--text);">0:47</strong></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

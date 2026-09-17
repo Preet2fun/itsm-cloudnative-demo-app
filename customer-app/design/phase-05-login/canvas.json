@@ -1,0 +1,17 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 900, "page": "page-1" },
+    { "file": "MfaVerify.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 900, "page": "page-1" },
+    { "file": "AltCoolMinimal.dc.html", "x": 0, "y": 0, "w": 640, "h": 480, "page": "page-2" },
+    { "file": "AltBoldModern.dc.html", "x": 760, "y": 0, "w": 640, "h": 480, "page": "page-2" }
+  ],
+  "annotations": [
+    { "id": "login-flow-note", "x": 0, "y": -140, "w": 480, "text": "Recommended direction: Warm Editorial Hospitality.\nCream + terracotta + deep brown, Newsreader/Public Sans.\nDistinct from Synap's cool slate/indigo tech look; same email+password -> 6-digit code flow as platform-app.", "page": "page-1" },
+    { "id": "alt-directions-note", "x": 0, "y": -100, "w": 700, "text": "Two alternate directions considered and set aside — kept here for comparison, not built out further.", "page": "page-2" }
+  ],
+  "pages": [
+    { "id": "page-1", "name": "Login Flow" },
+    { "id": "page-2", "name": "Alternate Directions" }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

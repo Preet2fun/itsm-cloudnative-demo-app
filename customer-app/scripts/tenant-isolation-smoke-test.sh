@@ -142,7 +142,13 @@ req "${BASE}/api/v1/restaurants"
 check "no token -> 403" "$HTTP_CODE" "403"
 
 req "${BASE}/api/v1/restaurants" -H "Authorization: Bearer not-a-real-jwt"
-check "garbage token -> 401" "$HTTP_CODE" "401"
+# 403, not 401: Phase 4 (OPA RBAC) added an ext_authz CUSTOM
+# AuthorizationPolicy, which Istio runs BEFORE jwt_authn in the filter
+# chain (confirmed live 2026-09-17). A malformed token now fails OPA's own
+# role extraction first (403, "not allowed") and never reaches jwt_authn's
+# "invalid signature" check (401, "who are you") - the request is still
+# correctly denied either way, just by a different layer than in Phase 3.
+check "garbage token -> 403 (OPA rejects before jwt_authn can)" "$HTTP_CODE" "403"
 
 echo
 # ── Phase A — positive control: B sees its own data ─────────────────────────

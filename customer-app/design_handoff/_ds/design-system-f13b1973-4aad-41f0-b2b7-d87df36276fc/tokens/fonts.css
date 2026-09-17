@@ -1,0 +1,11 @@
+/* Aurora webfonts.
+   Source DESIGN.md specifies Space Grotesk (display) and Inter Tight (UI/body).
+   Mono is unspecified ("swap in whichever OSS monospace you prefer") — JetBrains Mono
+   is used here: slashed zero, distinct 1/l/I, terminal-grade italic. SUBSTITUTION, see readme. */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-ui: "Inter Tight", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}

@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: oklch(97% 0.012 75);
+      --panel-bg: oklch(24% 0.035 50);
+      --panel-bg-2: oklch(20% 0.03 50);
+      --text: oklch(24% 0.02 50);
+      --text-muted: oklch(46% 0.02 55);
+      --accent: oklch(55% 0.13 40);
+      --accent-hover: oklch(47% 0.13 40);
+      --accent-soft: oklch(93% 0.03 45);
+      --border: oklch(89% 0.014 70);
+      --white: oklch(99% 0.004 80);
+      --cream-ink: oklch(90% 0.03 70);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+    input::placeholder { color: oklch(65% 0.015 60); }
+    input:focus { outline: none; border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-soft); }
+    button:hover { background: var(--accent-hover) !important; }
+  </style>
+</helmet>
+
+<div style="display:flex; width:1440px; height:900px; background:var(--bg); color:var(--text); font-family:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow:hidden;">
+
+  <!-- Brand panel -->
+  <div style="flex:0 0 44%; position:relative; background:var(--panel-bg); color:var(--white); display:flex; flex-direction:column; justify-content:space-between; padding:56px 64px; overflow:hidden;">
+
+    <!-- decorative texture -->
+    <svg width="520" height="520" viewBox="0 0 520 520" style="position:absolute; right:-160px; bottom:-140px; opacity:0.5;">
+      <circle cx="260" cy="260" r="259" fill="none" stroke="oklch(30% 0.04 50)" stroke-width="1"></circle>
+      <circle cx="260" cy="260" r="190" fill="none" stroke="oklch(30% 0.04 50)" stroke-width="1"></circle>
+      <circle cx="260" cy="260" r="120" fill="none" stroke="oklch(30% 0.04 50)" stroke-width="1"></circle>
+    </svg>
+
+    <div style="display:flex; flex-direction:column; gap:56px; position:relative;">
+      <!-- Logomark + wordmark -->
+      <div style="display:flex; align-items:center; gap:12px;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2c-1.2 2.4-3.6 4-3.6 7.2 0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6C15.6 6 13.2 4.4 12 2Z" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"></path>
+          <path d="M6.5 13c-.8 1.6-1.3 3-1.3 4.4C5.2 20.6 8.2 22 12 22s6.8-1.4 6.8-4.6c0-1.4-.5-2.8-1.3-4.4-.7 2-2.8 3.4-5.5 3.4s-4.8-1.4-5.5-3.4Z" stroke="var(--cream-ink)" stroke-width="1.6" stroke-linejoin="round"></path>
+        </svg>
+        <span style="font-family:'Newsreader', Georgia, serif; font-size:22px; font-weight:500; letter-spacing:0.01em;">Hearth</span>
+      </div>
+
+      <!-- Headline -->
+      <div style="display:flex; flex-direction:column; gap:20px; max-width:400px;">
+        <h1 style="margin:0; font-family:'Newsreader', Georgia, serif; font-weight:500; font-size:40px; line-height:1.18; letter-spacing:-0.01em;">Run the whole restaurant from one place.</h1>
+        <p style="margin:0; font-size:16px; line-height:1.6; color:var(--cream-ink);">Menus, orders, deliveries and payments for every location — one login for your whole team, one system that keeps them in sync.</p>
+      </div>
+
+      <!-- Feature list -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none; margin-top:2px;">
+            <path d="M7 3v8m0 0c-1.7 0-3-1.3-3-3V3m3 8v10M17 3c-1.9 0-3.5 1.6-3.5 3.5S15.1 10 17 10v11" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <span style="font-size:14px; font-weight:600;">Menus &amp; orders in sync</span>
+            <span style="font-size:13px; color:var(--cream-ink);">One catalog, every channel, every location.</span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none; margin-top:2px;">
+            <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"></path>
+            <circle cx="7" cy="18" r="1.8" stroke="var(--accent)" stroke-width="1.6"></circle>
+            <circle cx="17.5" cy="18" r="1.8" stroke="var(--accent)" stroke-width="1.6"></circle>
+          </svg>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <span style="font-size:14px; font-weight:600;">Deliveries, tracked live</span>
+            <span style="font-size:13px; color:var(--cream-ink);">Know where every order is, in real time.</span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none; margin-top:2px;">
+            <rect x="3" y="5" width="18" height="14" rx="2" stroke="var(--accent)" stroke-width="1.6"></rect>
+            <path d="M3 9.5h18" stroke="var(--accent)" stroke-width="1.6"></path>
+          </svg>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <span style="font-size:14px; font-weight:600;">Payments, reconciled automatically</span>
+            <span style="font-size:13px; color:var(--cream-ink);">Every order tied to its payout, no spreadsheets.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin:0; font-size:12px; color:oklch(65% 0.02 55); position:relative;">Built for multi-location restaurant groups.</p>
+  </div>
+
+  <!-- Form panel -->
+  <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:64px;">
+    <div style="width:100%; max-width:380px; display:flex; flex-direction:column; gap:36px;">
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h2 style="margin:0; font-family:'Newsreader', Georgia, serif; font-weight:500; font-size:28px; color:var(--text);">Welcome back</h2>
+        <p style="margin:0; font-size:14px; color:var(--text-muted);">Sign in to your Hearth account.</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="font-size:13px; font-weight:600; color:var(--text);">Email</label>
+          <input type="email" placeholder="you@restaurant.com" style="width:100%; padding:12px 14px; font-size:14px; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="font-size:13px; font-weight:600; color:var(--text);">Password</label>
+            <a href="#" style="font-size:13px;">Forgot password?</a>
+          </div>
+          <input type="password" placeholder="••••••••" style="width:100%; padding:12px 14px; font-size:14px; font-family:inherit; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text);">
+        </div>
+      </div>
+
+      <button style="width:100%; padding:13px; font-size:14px; font-weight:600; font-family:inherit; color:var(--white); background:var(--accent); border:none; border-radius:8px; cursor:pointer;">Sign in</button>
+
+      <p style="margin:0; font-size:13px; color:var(--text-muted); text-align:center;">Need a Hearth account? <a href="#">Contact your restaurant group's admin.</a></p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
