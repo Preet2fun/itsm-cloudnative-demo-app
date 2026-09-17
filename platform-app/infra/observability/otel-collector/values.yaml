@@ -18,7 +18,7 @@ resources:
 
 podAnnotations:
   prometheus.io/scrape: "true"
-  prometheus.io/port: "8888"
+  prometheus.io/port: "8889"
   prometheus.io/path: "/metrics"
 
 config:
@@ -32,18 +32,26 @@ config:
   processors:
     batch: {}
   exporters:
-    otlp:
+    # Named otlp_grpc, not otlp — the chart renamed this exporter to
+    # disambiguate from otlp_http; 0.173.1 auto-rewrites the old name with a
+    # deprecation warning, this avoids relying on that rewrite.
+    otlp_grpc:
       endpoint: jaeger.itsm-dev.svc.cluster.local:4317
       tls:
         insecure: true
     prometheus:
-      endpoint: 0.0.0.0:8888
+      # 8889, not 8888 — 8888 is this chart's own internal self-telemetry
+      # metrics port (service.telemetry.metrics.address defaults there; see
+      # the "metrics" entry in `ports:` below). Binding our app-metrics
+      # exporter to the same port crashes the collector at startup with
+      # "address already in use" — confirmed live 2026-09-17.
+      endpoint: 0.0.0.0:8889
   service:
     pipelines:
       traces:
         receivers: [otlp]
         processors: [batch]
-        exporters: [otlp]
+        exporters: [otlp_grpc]
       metrics:
         receivers: [otlp]
         processors: [batch]
@@ -58,6 +66,10 @@ ports:
     enabled: true
     containerPort: 8888
     servicePort: 8888
+  app-metrics:
+    enabled: true
+    containerPort: 8889
+    servicePort: 8889
   jaeger-compact:
     enabled: false
   jaeger-thrift:

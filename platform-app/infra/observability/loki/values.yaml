@@ -23,6 +23,19 @@ singleBinary:
   replicas: 1
   persistence:
     enabled: false
+  # persistence.enabled: false does NOT make this chart fall back to an
+  # emptyDir automatically — confirmed live 2026-09-17 the rendered
+  # StatefulSet has no volume at all for Loki's data dir, so `mkdir
+  # /var/loki` fails against the read-only root filesystem (ruler-storage
+  # module surfaces this first, but it's the whole data path). Ephemeral
+  # per this project's storage constraint, so an explicit emptyDir here
+  # rather than a PVC.
+  extraVolumes:
+    - name: loki-data
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: loki-data
+      mountPath: /var/loki
   resources:
     requests:
       cpu: 100m
@@ -49,5 +62,20 @@ monitoring:
     enabled: false
   selfMonitoring:
     enabled: false
-  lokiCanary:
-    enabled: false
+
+# lokiCanary, resultsCache, chunksCache are top-level keys in this chart,
+# NOT nested under monitoring: — confirmed live 2026-09-17 via
+# `helm show values grafana/loki --version 7.3.0`. The old
+# `monitoring.lokiCanary.enabled: false` was a silent no-op (unknown key,
+# chart default `true` won), which is why 3 loki-canary pods were running
+# despite this file "disabling" them.
+lokiCanary:
+  enabled: false
+
+# Both memcached-based caches are on by default and unaddressed otherwise —
+# ephemeral/no-PVC design + this cluster's tight memory headroom means we
+# don't want either running in dev.
+resultsCache:
+  enabled: false
+chunksCache:
+  enabled: false

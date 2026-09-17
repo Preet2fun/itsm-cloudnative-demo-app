@@ -124,7 +124,12 @@ config:
   processors:
     batch: {}
   exporters:
-    otlp:
+    # Named otlp_grpc, not otlp — the chart renamed this exporter to
+    # disambiguate from otlp_http; 0.173.1 auto-rewrites the old name with a
+    # deprecation warning, this avoids relying on that rewrite. (Hit live
+    # 2026-09-17: the first successful install printed this deprecation
+    # warning, fixed proactively before it becomes a hard break.)
+    otlp_grpc:
       endpoint: jaeger.itsm-dev.svc.cluster.local:4317
       tls:
         insecure: true
@@ -135,7 +140,7 @@ config:
       traces:
         receivers: [otlp]
         processors: [batch]
-        exporters: [otlp]
+        exporters: [otlp_grpc]
       metrics:
         receivers: [otlp]
         processors: [batch]
@@ -197,7 +202,7 @@ helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
   -f "${OBS_DIR}/otel-collector/values.yaml"
 ```
 
-- [ ] **Step 3: Hand this to the repo owner to run on kubernetes-master, first as a dry run**
+- [x] **Step 3: Hand this to the repo owner to run on kubernetes-master, first as a dry run**
 
 ```bash
 cd /home/motadata/itsm-cloudnative-demo-app/platform-app
@@ -210,7 +215,7 @@ Expected: rendered manifests, no error. If a key is rejected, run
 `helm show values open-telemetry/opentelemetry-collector --version 0.173.1`
 and fix the values file to match, then retry.
 
-- [ ] **Step 4: Apply for real and verify**
+- [x] **Step 4: Apply for real and verify**
 
 ```bash
 bash scripts/install-observability-stack.sh
@@ -337,7 +342,7 @@ echo "==> [2/7] Jaeger"
 kubectl apply -f "${OBS_DIR}/jaeger/jaeger.yaml"
 ```
 
-- [ ] **Step 3: Hand to the repo owner to apply and verify**
+- [x] **Step 3: Hand to the repo owner to apply and verify**
 
 ```bash
 cd /home/motadata/itsm-cloudnative-demo-app/platform-app
@@ -416,7 +421,7 @@ helm upgrade --install prometheus prometheus-community/prometheus \
   -f "${OBS_DIR}/prometheus/values.yaml"
 ```
 
-- [ ] **Step 3: Hand to the repo owner — dry run first, matching Task 1's pattern**
+- [x] **Step 3: Hand to the repo owner — dry run first, matching Task 1's pattern**
 
 ```bash
 cd /home/motadata/itsm-cloudnative-demo-app/platform-app
@@ -430,7 +435,7 @@ rejected as an unknown key, run
 `helm show values prometheus-community/prometheus --version 29.30.0 | grep -B2 -A2 enabled`
 to find the current sub-chart key names and fix the values file.
 
-- [ ] **Step 4: Apply for real and confirm the actual Service name**
+- [x] **Step 4: Apply for real and confirm the actual Service name**
 
 ```bash
 bash scripts/install-observability-stack.sh
@@ -541,7 +546,7 @@ helm upgrade --install loki grafana/loki \
   -f "${OBS_DIR}/loki/values.yaml"
 ```
 
-- [ ] **Step 3: Hand to the repo owner — dry run first**
+- [x] **Step 3: Hand to the repo owner — dry run first**
 
 ```bash
 cd /home/motadata/itsm-cloudnative-demo-app/platform-app
@@ -556,7 +561,7 @@ file's key paths to match what 7.3.0 actually expects; the *intent*
 (single-binary mode, filesystem storage, no read/write/backend replicas,
 short retention) stays the same regardless of exact key names.
 
-- [ ] **Step 4: Apply for real and verify**
+- [x] **Step 4: Apply for real and verify**
 
 ```bash
 bash scripts/install-observability-stack.sh
@@ -614,7 +619,7 @@ helm upgrade --install promtail grafana/promtail \
   -f "${OBS_DIR}/promtail/values.yaml"
 ```
 
-- [ ] **Step 3: Hand to the repo owner — dry run first**
+- [x] **Step 3: Hand to the repo owner — dry run first**
 
 ```bash
 cd /home/motadata/itsm-cloudnative-demo-app/platform-app
@@ -627,7 +632,7 @@ If `config.snippets.extraRelabelConfigs` is rejected, run
 and fix the key path — the intent (drop everything except
 itsm-dev/customer-app-dev namespaces) stays the same.
 
-- [ ] **Step 4: Apply for real and verify — this is the one most likely to hit the STRICT-mTLS issue from Global Constraints**
+- [x] **Step 4: Apply for real and verify — this is the one most likely to hit the STRICT-mTLS issue from Global Constraints**
 
 ```bash
 bash scripts/install-observability-stack.sh
@@ -749,7 +754,7 @@ If `datasources` is rejected, run
 `helm show values grafana/grafana --version 10.5.15 | grep -B2 -A20 "^datasources:"`
 and fix the structure to match.
 
-- [ ] **Step 4: Apply for real and verify all three datasources connect**
+- [x] **Step 4: Apply for real and verify all three datasources connect**
 
 ```bash
 bash scripts/install-observability-stack.sh
@@ -849,7 +854,7 @@ echo "  http://jaeger.dev.local:30080"
 echo "  http://prometheus.dev.local:30080"
 ```
 
-- [ ] **Step 3: Hand to the repo owner to apply and do the full-stack reachability check**
+- [x] **Step 3: Hand to the repo owner to apply and do the full-stack reachability check**
 
 ```bash
 cd /home/motadata/itsm-cloudnative-demo-app/platform-app
