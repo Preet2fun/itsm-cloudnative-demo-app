@@ -2,6 +2,12 @@ mode: deployment
 replicaCount: 1
 fullnameOverride: "otel-collector"
 
+# Required since chart 0.89.0 — no default image anymore. contrib, not the
+# plain/k8s distro, because our pipeline uses the `prometheus` exporter,
+# which is a contrib-only component.
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+
 resources:
   requests:
     cpu: 100m

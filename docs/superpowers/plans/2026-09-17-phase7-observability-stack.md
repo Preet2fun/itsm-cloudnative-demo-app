@@ -92,6 +92,14 @@ mode: deployment
 replicaCount: 1
 fullnameOverride: "otel-collector"
 
+# Required since chart 0.89.0 — no default image anymore. contrib, not the
+# plain/k8s distro, because our pipeline uses the `prometheus` exporter,
+# which is a contrib-only component. (Hit live 2026-09-17: chart 0.173.1
+# refused to install with "'image.repository' must be set" until this was
+# added.)
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+
 resources:
   requests:
     cpu: 100m
@@ -678,8 +686,11 @@ resources:
 persistence:
   enabled: false
 
-adminUser: admin
-adminPassword: hearth-demo-admin
+# No adminUser/adminPassword here on purpose — leaving both unset makes the
+# chart auto-generate a random admin password into a Secret (`grafana`,
+# keys admin-user/admin-password) instead of a plaintext, predictable value
+# committed to git. Retrieve it with:
+#   kubectl get secret grafana -n itsm-dev -o jsonpath='{.data.admin-password}' | base64 -d
 
 datasources:
   datasources.yaml:
@@ -700,11 +711,12 @@ datasources:
         access: proxy
 ```
 
-`adminPassword` set as a plain literal here matches this repo's existing
-practice for dev-only demo credentials (the DB password, the JWT dev
-secrets are all plaintext in-repo too) — this is a `itsm-dev` demo
-instance behind the same trust boundary as everything else, not a
-production credential.
+Deliberately *not* following this repo's existing plaintext-dev-credential
+pattern (the DB password, JWT dev secrets) here — a caught-in-review call:
+those are all reused, expected values other code already depends on
+matching; a Grafana admin password has no such constraint, costs nothing to
+auto-generate instead, and a predictable admin password checked into git is
+still a real credential exposure even on an internal demo cluster.
 
 - [x] **Step 2: Remove the now-redundant placeholders and add this component's section**
 
@@ -742,8 +754,9 @@ and fix the structure to match.
 ```bash
 bash scripts/install-observability-stack.sh
 kubectl get pods -n itsm-dev -l app.kubernetes.io/name=grafana -w
+GRAFANA_PW="$(kubectl get secret grafana -n itsm-dev -o jsonpath='{.data.admin-password}' | base64 -d)"
 kubectl port-forward -n itsm-dev svc/grafana 3000:80 &
-curl -s -u admin:hearth-demo-admin http://localhost:3000/api/datasources | python3 -m json.tool
+curl -s -u "admin:${GRAFANA_PW}" http://localhost:3000/api/datasources | python3 -m json.tool
 kill %1
 ```
 Expected: `2/2 Running`, and the datasources call returns all 3 (Prometheus,
