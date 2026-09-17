@@ -38,6 +38,15 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- @WithSpan annotation type + Span/Context classes only — the
+             OTel javaagent already attached via -javaagent does the actual
+             span creation via bytecode instrumentation at runtime. -->
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+            <version>2.31.1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

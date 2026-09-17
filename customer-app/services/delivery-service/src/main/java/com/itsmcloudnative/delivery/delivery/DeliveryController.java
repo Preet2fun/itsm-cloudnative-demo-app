@@ -1,6 +1,8 @@
 package com.itsmcloudnative.delivery.delivery;
 
 import com.itsmcloudnative.delivery.tenant.TenantContext;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +28,10 @@ public class DeliveryController {
         return Map.of("status", "ok", "service", "delivery-service");
     }
 
+    @WithSpan("customer.delivery.list")
     @GetMapping("/deliveries")
     public List<Delivery> listByOrder(@RequestParam UUID orderId) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         try {
             return repo.findByOrderId(TenantContext.get(), orderId);
         } catch (SQLException e) {
@@ -35,8 +39,10 @@ public class DeliveryController {
         }
     }
 
+    @WithSpan("customer.delivery.create")
     @PostMapping("/deliveries")
     public ResponseEntity<Delivery> create(@RequestBody CreateDeliveryRequest req) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         if (req.orderId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "order_id is required");
         }
@@ -48,8 +54,10 @@ public class DeliveryController {
         }
     }
 
+    @WithSpan("customer.delivery.get")
     @GetMapping("/deliveries/{id}")
     public Delivery getById(@PathVariable UUID id) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         try {
             return repo.findById(TenantContext.get(), id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "delivery not found"));
@@ -58,8 +66,10 @@ public class DeliveryController {
         }
     }
 
+    @WithSpan("customer.delivery.update_status")
     @PutMapping("/deliveries/{id}/status")
     public Delivery updateStatus(@PathVariable UUID id, @RequestBody UpdateStatusRequest req) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         if (!Delivery.VALID_STATUSES.contains(req.status())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid status");
         }

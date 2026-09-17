@@ -1,6 +1,8 @@
 package com.itsmcloudnative.payment.payment;
 
 import com.itsmcloudnative.payment.tenant.TenantContext;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +29,10 @@ public class PaymentController {
         return Map.of("status", "ok", "service", "payment-service");
     }
 
+    @WithSpan("customer.payment.list")
     @GetMapping("/payments")
     public List<Payment> listByOrder(@RequestParam UUID orderId) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         try {
             return repo.findByOrderId(TenantContext.get(), orderId);
         } catch (SQLException e) {
@@ -43,8 +47,10 @@ public class PaymentController {
      * per the payments table's CHECK constraint but is never produced by
      * this service — it's schema headroom, not a reachable state here.
      */
+    @WithSpan("customer.payment.create")
     @PostMapping("/payments")
     public ResponseEntity<Payment> create(@RequestBody CreatePaymentRequest req) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         if (req.orderId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "order_id is required");
         }
@@ -61,8 +67,10 @@ public class PaymentController {
         }
     }
 
+    @WithSpan("customer.payment.get")
     @GetMapping("/payments/{id}")
     public Payment getById(@PathVariable UUID id) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         try {
             return repo.findById(TenantContext.get(), id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "payment not found"));
@@ -77,8 +85,10 @@ public class PaymentController {
      * immediately on create, so there's no "authorize then capture" flow to
      * model, and un-refunding or un-failing a payment isn't realistic.
      */
+    @WithSpan("customer.payment.update_status")
     @PutMapping("/payments/{id}/status")
     public Payment updateStatus(@PathVariable UUID id, @RequestBody UpdateStatusRequest req) {
+        Span.current().setAttribute("tenant.id", TenantContext.get());
         if (!Payment.VALID_STATUSES.contains(req.status())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid status");
         }
