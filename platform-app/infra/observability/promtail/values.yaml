@@ -1,0 +1,20 @@
+fullnameOverride: "promtail"
+
+resources:
+  requests:
+    cpu: 30m
+    memory: 64Mi
+  limits:
+    cpu: 50m
+    memory: 128Mi
+
+config:
+  clients:
+    - url: http://loki.itsm-dev.svc.cluster.local:3100/loki/api/v1/push
+  snippets:
+    pipelineStages:
+      - cri: {}
+    extraRelabelConfigs:
+      - source_labels: [__meta_kubernetes_namespace]
+        regex: "itsm-dev|customer-app-dev"
+        action: keep

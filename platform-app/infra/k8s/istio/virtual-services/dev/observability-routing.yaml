@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana-routing
+  namespace: itsm-dev
+spec:
+  hosts:
+    - "grafana.dev.local"
+  gateways:
+    - itsm-gateway
+  http:
+    - route:
+        - destination:
+            host: grafana.itsm-dev.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger-routing
+  namespace: itsm-dev
+spec:
+  hosts:
+    - "jaeger.dev.local"
+  gateways:
+    - itsm-gateway
+  http:
+    - route:
+        - destination:
+            host: jaeger.itsm-dev.svc.cluster.local
+            port:
+              number: 16686
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus-routing
+  namespace: itsm-dev
+spec:
+  hosts:
+    - "prometheus.dev.local"
+  gateways:
+    - itsm-gateway
+  http:
+    - route:
+        - destination:
+            host: prometheus-server.itsm-dev.svc.cluster.local
+            port:
+              number: 80

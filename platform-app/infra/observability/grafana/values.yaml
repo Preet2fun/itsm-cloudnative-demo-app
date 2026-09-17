@@ -1,0 +1,36 @@
+fullnameOverride: "grafana"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+persistence:
+  enabled: false
+
+# No adminUser/adminPassword here on purpose — leaving both unset makes the
+# chart auto-generate a random admin password into a Secret (`grafana`,
+# keys admin-user/admin-password) instead of a plaintext, predictable value
+# committed to git. Retrieve it with:
+#   kubectl get secret grafana -n itsm-dev -o jsonpath='{.data.admin-password}' | base64 -d
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server.itsm-dev.svc.cluster.local
+        access: proxy
+        isDefault: true
+      - name: Loki
+        type: loki
+        url: http://loki.itsm-dev.svc.cluster.local:3100
+        access: proxy
+      - name: Jaeger
+        type: jaeger
+        url: http://jaeger.itsm-dev.svc.cluster.local:16686
+        access: proxy
