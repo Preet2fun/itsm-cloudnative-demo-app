@@ -100,3 +100,93 @@ Exit code `0` = every assertion passed.
 restaurants, orders, deliveries or payments by list or by direct id;
 `customer_b` and `customer_c` each see only their own rows. Tenant isolation
 via per-request `search_path` holds on the live deployment.
+
+---
+
+## Phase 3 re-run — JWT-based, through the mesh (closes #49)
+
+Same script, same assertions, but now driven by real `customer_a`/`customer_b`
+JWTs through `http://customer-app.dev.local:30080` instead of direct
+port-forwards with a raw `X-Tenant-ID` header — this is the actual trust path
+once Istio ingress + JWT authn (Phase 3) is live: Envoy validates the JWT and
+injects `X-Tenant-ID`/`X-User-Role` itself; the header a caller sends is never
+trusted directly (see the header-spoof-defense assertions in Phase C below).
+
+### A real bug was found and fixed along the way
+
+The first attempt at this re-run got 401 on every authenticated request,
+including `customer_b` reading its own data — not a tenant-isolation failure,
+a JWT-validation failure. Root cause (confirmed via istiod's own logs,
+`kubectl logs -n istio-system deploy/istiod | grep jwks`): **istiod itself**
+(not the sidecars) fetches a `RequestAuthentication`'s `jwksUri` to bake a
+`local_jwks` snapshot into every workload's Envoy config, and istiod's own
+fetch client does not participate in the mesh's mTLS. Since `user-service`
+sits under `STRICT` `PeerAuthentication` (`itsm-mtls-strict`), istiod's
+plaintext fetch got connection-reset every time, so it silently fell back to
+Istio's internal placeholder ("fake JWKS") — a key nothing had ever signed
+anything with. Every legitimately-issued JWT failed with 401
+`Jwt verification fails` against that fake key, for both `customer-app-jwt-auth`
+*and* platform-app's own `itsm-jwt-auth` (same issuer/jwksUri pair — this was
+a live, silent bug on platform-app's side too, not just customer-app's).
+
+Fix: switched both `RequestAuthentication` resources from `jwksUri` to a
+static inline `jwks` (the real public key, pasted in). Tradeoff, documented
+in both manifests: this key does not auto-update if `user-service`'s signing
+key is ever rotated — whoever rotates `JWT_PRIVATE_KEY` must update the pinned
+key in `customer-app/infra/k8s/istio/request-authentication/{dev,qa}/request-auth.yaml`
+and `platform-app/infra/k8s/istio/request-authentication/dev/request-auth.yaml`
+by hand. `itsm-qa`'s copy is left on `jwksUri` with a documenting comment,
+since that namespace isn't deployed yet and there's no real qa key to pin.
+
+### Captured run
+
+`customer-app-dev`, 2026-09-17, through `http://customer-app.dev.local:30080`
+with real JWTs for `owner@customer-a.example` / `owner@customer-b.example`:
+
+```
+==> Logging in as owner@customer-a.example and owner@customer-b.example
+    got JWT_A (712 chars), JWT_B (712 chars)
+
+==> Phase 0 — mesh rejects missing/invalid tokens
+  PASS  no token -> 403  (403)
+  PASS  garbage token -> 401  (401)
+
+==> Phase A — customer_b sees its own data (proves the rows exist)
+  PASS  B restaurants list -> 200  (200)
+  PASS  B restaurant count  (1)
+  PASS  B orders list -> 200  (200)
+  PASS  B order count  (2)
+  PASS  B GET own restaurant by id -> 200  (200)
+  PASS  B GET own order by id -> 200  (200)
+  PASS  B GET own delivery by id -> 200  (200)
+  PASS  B GET own payment by id -> 200  (200)
+
+==> Phase B — customer_a must NOT see customer_b's data
+  PASS  A restaurant list is A's own count  (2)
+  PASS  A restaurant list excludes B's restaurant
+  PASS  A order list is A's own count  (4)
+  PASS  A order list excludes B order e385857a…
+  PASS  A order list excludes B order b6cefe3f…
+  PASS  A GET B's restaurant by id -> 404  (404)
+  PASS  A GET B's order by id -> 404  (404)
+  PASS  A GET B's delivery by id -> 404  (404)
+  PASS  A GET B's payment by id -> 404  (404)
+  PASS  A list deliveries for B's order -> HTTP 200  (200)
+  PASS  A list deliveries for B's order -> empty  (0)
+  PASS  A list payments for B's order -> HTTP 200  (200)
+  PASS  A list payments for B's order -> empty  (0)
+
+==> Phase C — header-spoof defense
+  PASS  A + spoofed X-Tenant-ID:customer_b -> still 200  (200)
+  PASS  A + spoofed X-Tenant-ID:customer_b -> still A's count (2)  (2)
+
+==> 25 passed, 0 failed
+==> Tenant isolation holds through the mesh.
+```
+
+**Result: PASS** — 25/25 assertions, including the Phase 0 mesh-rejection
+checks (403/401) and the Phase C header-spoof-defense checks that only exist
+once real JWT validation is in front of the services. A caller cannot forge
+`X-Tenant-ID` to read another tenant's data — Envoy derives it from the
+validated JWT's `tenant_id` claim, and any client-sent copy of that header is
+overwritten, not trusted.

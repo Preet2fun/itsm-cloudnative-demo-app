@@ -12,7 +12,7 @@
 > RCA work and platform-app's own identity/OPA threads are tracked
 > separately and intentionally left off this list.
 
-Last synced: 2026-09-10
+Last synced: 2026-09-17
 
 ---
 
@@ -64,12 +64,11 @@ what's actually left.
 ## Phase 3 — Istio ingress + JWT authn wiring
 **GitHub: [#49](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/49)**
 
-Today nothing outside the `customer-app-{dev,qa}` namespace can reach these
-services — there's no path in for a browser, curl, or the future frontend.
+- [x] `RequestAuthentication` pointing at user-service's JWKS endpoint (shared identity issuer) — live in `customer-app-dev`, 2026-09-11. **Had to be switched from `jwksUri` to a static inline `jwks` on 2026-09-17** — istiod can't fetch a `jwksUri` behind `STRICT` mTLS (see `docs/tenant-isolation-evidence.md`'s "Phase 3 re-run" section for the full root-cause writeup). This also fixed the same bug on platform-app's own `itsm-jwt-auth`.
+- [x] `Gateway` + `VirtualService` for customer-app routes (dev + qa) — bound to the existing shared `itsm-dev/itsm-gateway` (no new Gateway needed); dev applied and verified live, qa is manifests-only parity (no `customer-app-qa` namespace yet).
+- [x] Verify: a valid shared-identity JWT (tenant_id = a `customer_tenants` slug) reaches order-service through the mesh with `X-Tenant-ID`/`X-User-Role` correctly injected — verified live 2026-09-17 (403/401/200 + header-spoof-defense curls, plus `tenant-isolation-smoke-test.sh` at 25/25).
 
-- [ ] `RequestAuthentication` pointing at user-service's JWKS endpoint (shared identity issuer)
-- [ ] `Gateway` + `VirtualService` for customer-app routes (dev + qa)
-- [ ] Verify: a valid shared-identity JWT (tenant_id = a `customer_tenants` slug) reaches order-service through the mesh with `X-Tenant-ID`/`X-User-Role` correctly injected
+**Phase 3 functionally DONE — #49 not yet moved to Done on the board (left for repo owner).**
 
 ---
 

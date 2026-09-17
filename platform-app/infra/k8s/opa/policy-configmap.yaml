@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: opa-policy
   namespace: itsm-dev
+# The Rego policy below is kept byte-for-byte in sync with
+# platform-app/infra/k8s/opa/authz.rego (the opa-test-able copy). Edit both.
 data:
   authz.rego: |
     package envoy.authz

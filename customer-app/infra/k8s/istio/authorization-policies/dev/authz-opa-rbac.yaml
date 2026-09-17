@@ -1,0 +1,30 @@
+# AuthorizationPolicy — Layer 2 RBAC: delegates to the shared OPA instance
+# (itsm-dev/opa) via the "opa-authz" provider already registered mesh-wide
+# in platform-app/infra/istio/istio-operator.yaml. Same provider
+# platform-app's own opa-authz AuthorizationPolicy (itsm-dev) uses — see
+# docs/superpowers/specs/2026-09-17-customer-app-opa-rbac-design.md for why
+# a dedicated customer-app OPA instance wasn't needed.
+#
+# No new Rego rules exist for customer-app specifically: the existing
+# unscoped `allow if { role == "admin" }` in
+# platform-app/infra/k8s/opa/authz.rego already covers customer-app's admin
+# users, and no existing rule matches these paths for any other role, so
+# they're already denied by default.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-app-opa-rbac
+  namespace: customer-app-dev
+spec:
+  action: CUSTOM
+  provider:
+    name: opa-authz
+  rules:
+    - to:
+        - operation:
+            paths:
+              - /api/v1/restaurants*
+              - /api/v1/orders*
+              - /api/v1/deliveries*
+              - /api/v1/payments*

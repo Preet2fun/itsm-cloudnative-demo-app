@@ -61,19 +61,22 @@ if [[ -n "${NOT_READY}" ]]; then
   exit 1
 fi
 
-echo "    [1/5] Applying DestinationRule..."
+echo "    [1/6] Applying DestinationRule..."
 kubectl apply -f "${ISTIO_DIR}/destination-rules/${ENV}/destination-rule.yaml"
 
-echo "    [2/5] Applying VirtualService..."
+echo "    [2/6] Applying VirtualService..."
 kubectl apply -f "${ISTIO_DIR}/virtual-services/${ENV}/virtual-service.yaml"
 
-echo "    [3/5] Applying RequestAuthentication..."
+echo "    [3/6] Applying RequestAuthentication..."
 kubectl apply -f "${ISTIO_DIR}/request-authentication/${ENV}/request-auth.yaml"
 
-echo "    [4/5] Applying deny-unauthenticated AuthorizationPolicy..."
+echo "    [4/6] Applying deny-unauthenticated AuthorizationPolicy..."
 kubectl apply -f "${ISTIO_DIR}/authorization-policies/${ENV}/authz-deny-unauthenticated.yaml"
 
-echo "    [5/5] All pods 2/2 confirmed - applying PeerAuthentication STRICT mTLS..."
+echo "    [5/6] Applying OPA RBAC AuthorizationPolicy..."
+kubectl apply -f "${ISTIO_DIR}/authorization-policies/${ENV}/authz-opa-rbac.yaml"
+
+echo "    [6/6] All pods 2/2 confirmed - applying PeerAuthentication STRICT mTLS..."
 kubectl apply -f "${ISTIO_DIR}/peer-authentication/${ENV}/peer-auth-mtls.yaml"
 
 echo ""
