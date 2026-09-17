@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HNSW vs IVF-Flat: Choosing the Right Vector Index for Similarity Search</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js" integrity="sha384-WmdflGW9aGfoBdHc4rRyWzYuAjEmDwMdGdiPNacbwfGKxBW/SO6guzuQ76qjnSlr" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --bg-panel: #ffffff;
+    --ink: #1c1c1e;
+    --ink-dim: #55555a;
+    --border: #e4e1da;
+    --accent: #8a4fff;
+    --accent-dim: #efe7ff;
+    --hnsw: #2f6fed;
+    --hnsw-bg: #eaf1fe;
+    --ivf: #de6b1f;
+    --ivf-bg: #fdf1e6;
+    --pq: #1a9e73;
+    --pq-bg: #e7f7f0;
+    --code-bg: #f1efe9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16161a;
+      --bg-panel: #1f1f24;
+      --ink: #eceae6;
+      --ink-dim: #a6a3ab;
+      --border: #34333b;
+      --accent: #b28bff;
+      --accent-dim: #2a2340;
+      --hnsw: #7aa6ff;
+      --hnsw-bg: #1c2740;
+      --ivf: #f0a35f;
+      --ivf-bg: #3a2a17;
+      --pq: #6bd6ac;
+      --pq-bg: #16352a;
+      --code-bg: #26252c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.65;
+    margin: 0;
+    padding-block: 3rem 5rem;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding-inline: 20px; }
+  header.hero {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: .6rem;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 4vw, 2.3rem);
+    line-height: 1.2;
+    margin: 0 0 .8rem;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--ink-dim); font-size: 1.05rem; max-width: 60ch; }
+  .meta { margin-top: 1.2rem; font-size: .85rem; color: var(--ink-dim); }
+  .meta a { color: var(--accent); }
+  h2 {
+    font-size: 1.4rem;
+    margin: 3rem 0 1rem;
+    padding-top: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+  }
+  h2 .tag {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+  }
+  .tag.hnsw { background: var(--hnsw-bg); color: var(--hnsw); }
+  .tag.ivf { background: var(--ivf-bg); color: var(--ivf); }
+  .tag.pq { background: var(--pq-bg); color: var(--pq); }
+  h3 { font-size: 1.05rem; margin: 1.8rem 0 .6rem; }
+  p { margin: .8rem 0; }
+  code {
+    background: var(--code-bg);
+    padding: .12rem .4rem;
+    border-radius: 5px;
+    font-size: .9em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  ul, ol { padding-left: 1.3rem; }
+  li { margin: .35rem 0; }
+  .card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.3rem 1.5rem;
+    margin: 1.2rem 0;
+  }
+  .card.callout {
+    border-left: 4px solid var(--accent);
+  }
+  .diagram {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem;
+    margin: 1.3rem 0;
+    overflow-x: auto;
+  }
+  .diagram figcaption {
+    font-size: .82rem;
+    color: var(--ink-dim);
+    text-align: center;
+    margin-top: .5rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: .92rem;
+  }
+  caption { text-align: left; font-size: .82rem; color: var(--ink-dim); margin-bottom: .4rem; }
+  th, td {
+    border: 1px solid var(--border);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--code-bg); font-weight: 700; }
+  .overflow-x { overflow-x: auto; }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  .pill-row { display: flex; flex-wrap: wrap; gap: .5rem; margin: .8rem 0; }
+  .pill {
+    font-size: .8rem;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+  }
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: .85rem;
+    color: var(--ink-dim);
+  }
+  footer a { color: var(--accent); }
+  .sources li { margin: .5rem 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">ai-engine / rag — research note</div>
+  <h1>HNSW vs IVF-Flat: Choosing the Right Vector Index for Similarity Search</h1>
+  <p class="subtitle">
+    Prep notes for the vector-index decision behind <code>ai-engine</code>'s
+    memory layer (see <code>AI-platform-Architecture/ai-platform-architecture.md</code>'s
+    "RAG for Knowledge Retrieval" line, and the not-yet-started Phase 7d AI
+    Chatbot / RAG item in the root <code>README.md</code>). Covers the two
+    workhorse ANN index families — graph-based (HNSW) and cluster-based
+    (IVF) — plus IVF's compressed sibling, IVF-PQ.
+  </p>
+  <div class="meta">Sources: see <a href="#sources">Sources</a> at the bottom.</div>
+</header>
+
+<section>
+  <h2>Why an index at all?</h2>
+  <p>
+    Exact nearest-neighbor search over embeddings means comparing a query
+    vector against <em>every</em> stored vector — fine for a few thousand
+    rows, unworkable past a few million. Approximate Nearest Neighbor (ANN)
+    indexes trade a small amount of recall for large speedups by
+    restricting the search to a promising subset of the data. The two
+    dominant strategies structure that subset differently:
+  </p>
+  <div class="pill-row">
+    <span class="pill"><strong>HNSW</strong> — build a navigable graph, walk it</span>
+    <span class="pill"><strong>IVF-Flat</strong> — cluster first, search only the nearest clusters</span>
+    <span class="pill"><strong>IVF-PQ</strong> — IVF's clustering + compressed vectors</span>
+  </div>
+</section>
+
+<section>
+  <h2><span class="tag hnsw">Graph-based</span> HNSW</h2>
+  <p>
+    Hierarchical Navigable Small World graphs build a multi-layer graph
+    where every vector is a node connected to nearby nodes. Higher layers
+    form a coarse, sparse representation of the space; lower layers capture
+    fine-grained relationships, with layer 0 containing every point.
+  </p>
+
+  <figure class="diagram">
+    <pre class="mermaid">
+graph TB
+  subgraph L2["Layer 2 — sparse, coarse skeleton"]
+    A2((A))
+    E2((E))
+    A2 --- E2
+  end
+  subgraph L1["Layer 1 — medium density"]
+    A1((A))
+    B1((B))
+    E1((E))
+    A1 --- B1
+    B1 --- E1
+  end
+  subgraph L0["Layer 0 — dense, every point lives here"]
+    A0((A))
+    B0((B))
+    C0((C))
+    D0((D))
+    E0((E))
+    A0 --- B0
+    B0 --- C0
+    C0 --- D0
+    D0 --- E0
+    A0 --- E0
+    B0 --- D0
+  end
+  entry(("entry point")) --> A2
+  A2 -. descend .-> A1
+  A1 -. descend .-> A0
+    </pre>
+    <figcaption>
+      Search enters at the top layer near <code>entry</code>, greedily walks
+      toward the query at each layer, then drops down a level and repeats —
+      refining the candidate on the way down until layer 0 gives the final
+      neighbor set.
+    </figcaption>
+  </figure>
+
+  <h3>Query algorithm</h3>
+  <ol>
+    <li>Start at the designated entry point, in the top layer.</li>
+    <li>Greedily move to the neighboring node closest to the query.</li>
+    <li>When no neighbor improves on the current node, descend one layer.</li>
+    <li>Repeat until layer 0, where the search returns the final nearest
+      neighbors found.</li>
+  </ol>
+
+  <h3>Parameters</h3>
+  <div class="overflow-x">
+  <table>
+    <thead><tr><th>Parameter</th><th>Controls</th></tr></thead>
+    <tbody>
+      <tr><td><code>M</code></td><td>Graph connectivity — how many edges each node keeps. Higher <code>M</code> → better recall, more memory.</td></tr>
+      <tr><td><code>efConstruction</code></td><td>Search breadth used <em>while building</em> the graph. Higher → better graph quality, slower build.</td></tr>
+      <tr><td><code>efSearch</code></td><td>Search breadth used <em>at query time</em>. Higher → better recall, slower query.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <strong>Strengths</strong>
+      <ul>
+        <li>Very high recall, often close to brute-force accuracy</li>
+        <li>Real-time insertions and deletions — no retraining pass needed</li>
+        <li>Handles dynamic, continuously evolving datasets well</li>
+      </ul>
+    </div>
+    <div class="card">
+      <strong>Limitations</strong>
+      <ul>
+        <li>Higher memory footprint — the graph edges themselves cost space</li>
+        <li>Slower index construction than cluster-based approaches</li>
+        <li>Three interacting parameters to tune (<code>M</code>, <code>efConstruction</code>, <code>efSearch</code>)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="tag ivf">Cluster-based</span> IVF-Flat</h2>
+  <p>
+    Inverted File with Flat storage clusters the dataset with k-means up
+    front. Each cluster centroid gets an inverted list of the vectors
+    assigned to it — "flat" because vectors inside a list are stored in
+    full precision, unquantized.
+  </p>
+
+  <figure class="diagram">
+    <pre class="mermaid">
+flowchart LR
+  Q["Query vector"] --> C{"Compare against\nall cluster centroids"}
+  C --> P1(("centroid 1"))
+  C --> P2(("centroid 2"))
+  C --> P3(("centroid 3"))
+  C --> P4(("centroid 4"))
+  P2 -->|"selected — nprobe = 2"| S1["scan full vectors\nin cluster 2"]
+  P4 -->|"selected — nprobe = 2"| S2["scan full vectors\nin cluster 4"]
+  P1 -.skipped.-> X1[ ]
+  P3 -.skipped.-> X2[ ]
+  S1 --> R["merge candidates → top-k"]
+  S2 --> R
+    </pre>
+    <figcaption>
+      <code>nprobe</code> controls how many of the nearest clusters get
+      fully scanned — the rest are skipped entirely, which is where the
+      speedup comes from.
+    </figcaption>
+  </figure>
+
+  <h3>Query algorithm</h3>
+  <ol>
+    <li>Compare the query vector against every cluster centroid.</li>
+    <li>Select the <code>nprobe</code> closest centroids.</li>
+    <li>Exhaustively search only the vectors inside those selected clusters.</li>
+  </ol>
+
+  <h3>Parameters</h3>
+  <div class="overflow-x">
+  <table>
+    <thead><tr><th>Parameter</th><th>Controls</th></tr></thead>
+    <tbody>
+      <tr><td><code>nlist</code></td><td>Number of clusters created during the k-means training phase.</td></tr>
+      <tr><td><code>nprobe</code></td><td>Number of clusters actually searched per query — the main speed/recall dial.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <strong>Strengths</strong>
+      <ul>
+        <li>Fast queries once clusters and <code>nprobe</code> are tuned</li>
+        <li>Moderate memory use — no graph edges, no compression overhead</li>
+        <li>Scales well to very large, largely-static datasets</li>
+      </ul>
+    </div>
+    <div class="card">
+      <strong>Limitations</strong>
+      <ul>
+        <li>Needs an upfront k-means training pass over representative data</li>
+        <li>Inserting/deleting after training is inefficient — clusters go stale</li>
+        <li>Recall is directly gated by <code>nprobe</code>: too low and true neighbors sitting in unsearched clusters get missed</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="tag pq">Compressed IVF</span> IVF-PQ</h2>
+  <p>
+    IVF-PQ keeps IVF-Flat's clustering step and adds Product Quantization
+    (PQ) to shrink how much space each vector takes — trading some
+    precision for a large memory reduction, which matters once the
+    collection is large enough that storing every vector at full precision
+    gets expensive.
+  </p>
+
+  <h3>Product Quantization: compressing a vector in four stages</h3>
+  <figure class="diagram">
+    <pre class="mermaid">
+flowchart TB
+  V["input vector — D dimensions"] --> D1
+  D1["1 · Dimension decomposition\nsplit into m equal sub-vectors"] --> D2
+  D2["2 · Subspace codebooks\nk-means per subspace → 2^nbits centroids each"] --> D3
+  D3["3 · Quantization\nmap each sub-vector to its nearest codebook centroid"] --> D4
+  D4["4 · Compression\nstore only the m centroid indices (m × nbits bits)"]
+    </pre>
+    <figcaption>Four-stage PQ compression pipeline (Milvus docs).</figcaption>
+  </figure>
+
+  <div class="card callout">
+    <strong>Compression, concretely:</strong> a 128-dimensional vector at
+    32-bit floats is 4,096 bits. With <code>m = 64</code> sub-vectors and
+    <code>nbits = 8</code> bits per centroid index, it compresses to
+    <code>64 × 8 = 512</code> bits — an <strong>8× reduction</strong>.
+  </div>
+
+  <h3>Search: two stages</h3>
+  <figure class="diagram">
+    <pre class="mermaid">
+flowchart LR
+  Q["query vector"] --> S1
+  S1["Stage 1 — coarse IVF filtering\nfind the nprobe nearest clusters"] --> S2
+  S2["Stage 2 — fine PQ approximation\ndecompose query into m sub-vectors"] --> LUT
+  LUT["build lookup tables:\nprecomputed distance from each\nquery sub-vector to every codebook centroid"] --> SUM
+  SUM["sum per-subvector distances\nusing each candidate's stored PQ codes"] --> R["approximate top-k results"]
+    </pre>
+    <figcaption>
+      The lookup-table trick avoids ever decompressing stored vectors back
+      to full precision — distances are approximated directly from the
+      compressed codes.
+    </figcaption>
+  </figure>
+
+  <h3>Parameters</h3>
+  <div class="overflow-x">
+  <table>
+    <thead><tr><th>Parameter</th><th>Purpose</th><th>Typical range</th></tr></thead>
+    <tbody>
+      <tr><td><code>nlist</code></td><td>Cluster count (IVF step)</td><td>[1, 65536]; recommended [32, 4096]</td></tr>
+      <tr><td><code>nprobe</code></td><td>Clusters searched per query</td><td>[1, nlist] — balances speed vs. recall</td></tr>
+      <tr><td><code>m</code></td><td>Number of sub-vectors (must divide the vector's dimension)</td><td>recommended [D/8, D]</td></tr>
+      <tr><td><code>nbits</code></td><td>Bits per centroid index — larger means less compression</td><td>[1, 24]; recommended [1, 16]</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>
+    Versus IVF-Flat, IVF-PQ needs significantly less memory through
+    compression, at the cost of some precision from quantization. Higher
+    <code>m</code> and <code>nbits</code> improve accuracy but add compute;
+    higher <code>nprobe</code> improves recall at a latency cost — the same
+    three-way tension as everywhere else in ANN search.
+  </p>
+</section>
+
+<section>
+  <h2>Side-by-side comparison</h2>
+  <div class="overflow-x">
+  <table>
+    <thead>
+      <tr><th>Dimension</th><th>HNSW</th><th>IVF-Flat</th><th>IVF-PQ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Recall quality</td><td>Very high, near brute-force</td><td>Moderate, tunable via <code>nprobe</code></td><td>Lower than IVF-Flat — quantization cost</td></tr>
+      <tr><td>Query latency</td><td>Low</td><td>Very fast once tuned</td><td>Fast — lookup-table distances are cheap</td></tr>
+      <tr><td>Memory usage</td><td>Higher — graph edges</td><td>Moderate — full-precision vectors</td><td>Low — compressed codes, 8×+ smaller</td></tr>
+      <tr><td>Build time</td><td>Slower</td><td>Faster</td><td>Faster than HNSW; adds a codebook-training pass</td></tr>
+      <tr><td>Updates</td><td>Real-time, efficient</td><td>Inefficient post-training</td><td>Inefficient post-training</td></tr>
+      <tr><td>Best-fit dataset</td><td>Dynamic, evolving</td><td>Static / semi-static</td><td>Very large, memory-constrained, semi-static</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>Decision guide</h2>
+  <figure class="diagram">
+    <pre class="mermaid">
+flowchart TD
+  Start["Choosing a vector index"] --> Q1{"Frequent inserts/deletes?"}
+  Q1 -- "Yes — real-time updates" --> HNSW["HNSW"]
+  Q1 -- "No — mostly static" --> Q2{"Memory tight relative\nto dataset size?"}
+  Q2 -- "Yes — very large collection" --> PQ["IVF-PQ"]
+  Q2 -- "No — moderate size, memory OK" --> FLAT["IVF-Flat"]
+  HNSW --> U1["RAG retrieval, conversational AI,\npersonalization engines"]
+  FLAT --> U2["Product catalogs, image retrieval,\noffline document search"]
+  PQ --> U3["Billion-scale search,\nmemory-constrained deployments"]
+    </pre>
+    <figcaption>Rule-of-thumb decision tree synthesized from both sources' recommendations.</figcaption>
+  </figure>
+
+  <div class="card">
+    <strong>Hybrid option — IVF-HNSW:</strong> some engines (FAISS, Milvus)
+    combine both: IVF partitions the data into clusters, then HNSW does the
+    fine-grained search <em>within</em> each cluster — scalability from IVF,
+    strong recall from HNSW.
+  </div>
+
+  <div class="card callout">
+    Neither source claims a universal winner: benchmark both approaches on
+    your own data and measure recall, latency, and memory before deciding.
+  </div>
+</section>
+
+<footer>
+  <h2 id="sources" style="margin-top:0;">Sources</h2>
+  <ul class="sources">
+    <li>Prodduturi, N. — <a href="https://medium.com/@nitinprodduturi/hnsw-vs-ivf-flat-choosing-the-right-vector-index-for-similarity-search-921ce576ddb2" target="_blank" rel="noopener">"HNSW vs IVF-Flat: Choosing the Right Vector Index for Similarity Search"</a>, Medium.</li>
+    <li>Milvus Docs — <a href="https://milvus.io/docs/ivf-pq.md" target="_blank" rel="noopener">"IVF_PQ"</a>, milvus.io.</li>
+  </ul>
+  <p>Notes compiled 2026-09-14 for <code>ai-engine/rag/</code>.</p>
+</footer>
+
+</div>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default' });
+</script>
+</body>
+</html>

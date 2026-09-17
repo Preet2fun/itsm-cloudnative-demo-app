@@ -512,6 +512,11 @@ they're not mentioned elsewhere.
 
 ## 13. What Not to Do
 
+- Do NOT run `git commit` or `git push` (to any branch, including feature
+  branches) against this repo's GitHub remote, under any circumstances — not
+  even if asked explicitly mid-session. Make edits locally and leave them
+  uncommitted; the repo owner reviews the diff in their own IDE and commits/
+  pushes it themselves. This includes not opening PRs on their behalf.
 - Do NOT create a dedicated API Gateway service
 - Do NOT create K8s StatefulSet or PVC for PostgreSQL
 - Do NOT create `docker-compose.yml`

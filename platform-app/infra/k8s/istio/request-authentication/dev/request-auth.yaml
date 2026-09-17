@@ -12,6 +12,22 @@
 #   tenant_id claim → X-Tenant-ID header
 #   role      claim → X-User-Role header
 
+# NOTE on `jwks` vs `jwksUri` (found + fixed live, 2026-09-16, while verifying
+# customer-app's Phase 3 Istio wiring — see customer-app's
+# request-authentication/dev/request-auth.yaml for the full writeup):
+# istiod itself (not the sidecars) fetches jwksUri to bake a `local_jwks`
+# snapshot into every workload's Envoy config, and istiod's own fetch client
+# doesn't go through mesh mTLS. user-service sits under STRICT
+# PeerAuthentication (itsm-mtls-strict), so istiod's plaintext fetch gets
+# connection-reset every time and falls back to Istio's internal placeholder
+# key — meaning EVERY JWT-protected request in itsm-dev (not just
+# customer-app's) has been failing validation with 401 "Jwt verification
+# fails" against a fake key, confirmed via istiod's own logs. Fix: pin the
+# current public key inline. Tradeoff: won't auto-update on key rotation —
+# whoever rotates JWT_PRIVATE_KEY must update this (and customer-app's two
+# copies) by hand. Captured live from
+# http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json
+# on 2026-09-16.
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
@@ -20,7 +36,19 @@ metadata:
 spec:
   jwtRules:
     - issuer: "itsm-user-service"
-      jwksUri: "http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json"
+      jwks: |
+        {
+          "keys": [
+            {
+              "kty": "RSA",
+              "use": "sig",
+              "kid": "itsm-rs256-v1",
+              "alg": "RS256",
+              "n": "kIkOMxiwOIxCvF220iqlv1VOsUmV1IR8PSaAMhcihQj1sQBGlbdy4m3EhZmKx3kzfGxze-ayjKjzQXamE4lyrDUsGMahfzMsPUPOYpqecX0vSeME6veMrkFGYVA50i0-QHQuCwgedi_OKheA34tuMYF8u4g26siU_V6obR7J6jL4CbqxLSclu-hLHz0l2eNZJCOMiuuiz3JiCTJFIAM2cixx445TQLmvOTnxVv9ooItVz26sNfCR3govyvJbeRns0uIgMD7E7ld6lR5Gwehs1oo6lYyhd0jmHtqzI4mX50U_TpWMVFKAnS8qAD2RPq60HooGFQHLrwXIbWF0Zsu8Ew",
+              "e": "AQAB"
+            }
+          ]
+        }
       outputClaimToHeaders:
         - header: "x-tenant-id"
           claim: "tenant_id"

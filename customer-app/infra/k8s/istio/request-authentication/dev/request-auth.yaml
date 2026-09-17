@@ -12,6 +12,24 @@
 #     injected; services then return 400 "X-Tenant-ID header is required" -
 #     cross-tenant staff browsing isn't supported yet (root CLAUDE.md S3, #47).
 
+# NOTE on `jwks` vs `jwksUri` (found + fixed live, 2026-09-16):
+# `jwksUri` doesn't work here — istiod (not the sidecars) is the one that
+# fetches it to bake a `local_jwks` snapshot into every workload's Envoy
+# config, and istiod's own fetch client does NOT participate in the mesh's
+# mTLS the way sidecars do. Since user-service sits under a STRICT
+# PeerAuthentication (itsm-mtls-strict, itsm-dev), istiod's plaintext fetch
+# gets connection-reset by user-service's sidecar every time, so istiod falls
+# back to Istio's internal placeholder ("fake JWKS") — which can never verify
+# a real signature, so every legitimately-issued JWT fails with 401 "Jwt
+# verification fails". Confirmed via istiod's own logs
+# (`kubectl logs -n istio-system deploy/istiod | grep jwks`).
+# Fix: pin the current public key inline instead. Tradeoff: this does NOT
+# auto-update if user-service's signing key (JWT_PRIVATE_KEY secret) is ever
+# rotated — whoever rotates it must also paste the new public key in here
+# (and in itsm-jwt-auth, and here again for customer-app-qa, which points at
+# this same dev identity engine). Captured live from
+# http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json
+# on 2026-09-16.
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
@@ -20,7 +38,19 @@ metadata:
 spec:
   jwtRules:
     - issuer: "itsm-user-service"
-      jwksUri: "http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json"
+      jwks: |
+        {
+          "keys": [
+            {
+              "kty": "RSA",
+              "use": "sig",
+              "kid": "itsm-rs256-v1",
+              "alg": "RS256",
+              "n": "kIkOMxiwOIxCvF220iqlv1VOsUmV1IR8PSaAMhcihQj1sQBGlbdy4m3EhZmKx3kzfGxze-ayjKjzQXamE4lyrDUsGMahfzMsPUPOYpqecX0vSeME6veMrkFGYVA50i0-QHQuCwgedi_OKheA34tuMYF8u4g26siU_V6obR7J6jL4CbqxLSclu-hLHz0l2eNZJCOMiuuiz3JiCTJFIAM2cixx445TQLmvOTnxVv9ooItVz26sNfCR3govyvJbeRns0uIgMD7E7ld6lR5Gwehs1oo6lYyhd0jmHtqzI4mX50U_TpWMVFKAnS8qAD2RPq60HooGFQHLrwXIbWF0Zsu8Ew",
+              "e": "AQAB"
+            }
+          ]
+        }
       outputClaimToHeaders:
         - header: "x-tenant-id"
           claim: "tenant_id"
