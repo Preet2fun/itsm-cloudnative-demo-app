@@ -1,5 +1,49 @@
 # Customer App — OPA Rego RBAC Policy (Phase 4)
 
+## 0. Critical correction, found live during Task 5 verification (2026-09-17)
+
+Everything below this section describes the plan as originally approved.
+While verifying it live, a real, pre-existing bug surfaced that goes beyond
+this phase's original scope: **OPA's `ext_authz` check runs *before*
+`jwt_authn` in Istio's filter chain** for `CUSTOM`-action
+`AuthorizationPolicy` objects (confirmed via the actual filter order —
+`rbac, ext_authz, jwt_authn, rbac` — and OPA's own decision log, which
+showed no `x-user-role`/`x-tenant-id` header present on any request it
+evaluated). The policy's `role` helper read `input.attributes.request.http.headers["x-user-role"]`
+— a header `jwt_authn`'s `claim_to_headers` only adds *after* `ext_authz`
+already ran. Every role-based `allow` rule was therefore silently
+unreachable for real traffic, in **both apps** — this predates Phase 4
+entirely; Phase 4 just happened to be the first time anyone exercised it
+with a live JWT end-to-end.
+
+**Fix (first pass):** `role` was derived by unverified `io.jwt.decode()` of
+the `Authorization: Bearer` token directly in Rego, not from a header. Safe
+without signature verification because `jwt_authn` still runs immediately
+after, unconditionally, and independently rejects any invalid signature
+regardless of what OPA decides — a forged claim could pass OPA's check but
+would still be rejected by `jwt_authn` right after. Applied to both
+`platform-app/infra/k8s/opa/authz.rego` and `policy-configmap.yaml`'s
+inline copy (kept in sync per §4.3's own convention) — fixing platform-app's
+RBAC as a side effect, confirmed by the user as in-scope (2026-09-17,
+"fix it now, both apps"). Verified: `opa test` 25/25.
+
+**Fix (second pass, same session):** an automated background security review
+flagged the unverified decode as HIGH severity — correctly. The
+"jwt_authn re-checks it anyway" reasoning holds for every path wired up
+*today*, but it's an implicit coupling this file can't enforce or make
+visible on its own: a future ext_authz-protected route added without a
+matching jwt_authn gate would have no signature check at all. Upgraded to
+`io.jwt.decode_verify()` with the same "itsm-rs256-v1" public key already
+pinned in the RequestAuthentication manifests (§4.1's own JWKS-under-STRICT-
+mTLS fix from earlier the same day) — closing the gap directly instead of
+relying on a downstream filter to compensate. Verified against a real
+signed token captured live (`owner@customer-b.example`, `role: admin`),
+with `with time.now_ns as ...` pinning verification to shortly after the
+token's `iat` so the test stays deterministic regardless of the token's
+real `exp` or the local clock. Also added a tampered-signature test (same
+claims, altered signature bytes) to prove verification is actually
+happening, not just claim-reading. Final: `opa test` 27/27.
+
 ## 1. Problem
 
 Phase 3 (Istio ingress + JWT authn) put customer-app behind the shared

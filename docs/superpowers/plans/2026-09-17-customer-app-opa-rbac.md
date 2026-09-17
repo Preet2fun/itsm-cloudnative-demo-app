@@ -45,6 +45,24 @@ framework), Istio `AuthorizationPolicy` CUSTOM action, bash (existing
   image uses (`import future.keywords.if`/`in`) — Tasks 1–2 need no cluster
   access at all, only local `opa test`.
 
+**Addendum (2026-09-17, found during Task 5's live verification — see spec
+§0):** Tasks 1–2 below, as originally written, read `role` from an
+`x-user-role` header. That header is never populated when this policy
+evaluates — Istio's `CUSTOM` AuthorizationPolicy action runs `ext_authz`
+*before* `jwt_authn` in the filter chain, confirmed via the live filter
+order and OPA's own decision log. This was a real, pre-existing bug in
+platform-app's already-deployed policy too, not something Phase 4
+introduced. Fixed in both `authz.rego` and `policy-configmap.yaml`: `role`
+was first changed to unverified `io.jwt.decode()` of the `Authorization`
+header directly. An automated security review then correctly flagged that
+as HIGH severity — the "jwt_authn re-checks it anyway" reasoning is an
+implicit coupling, not an enforced guarantee. Upgraded again to
+`io.jwt.decode_verify()` with the same pinned public key already used in
+the RequestAuthentication fix earlier the same day, verified against a real
+signed token with `with time.now_ns as ...` pinning so the test stays
+deterministic. See spec §0 for the full two-pass writeup. Final: `opa test`
+27/27.
+
 ---
 
 ### Task 1: Extract `authz.rego` + regression tests for platform-app's existing rules

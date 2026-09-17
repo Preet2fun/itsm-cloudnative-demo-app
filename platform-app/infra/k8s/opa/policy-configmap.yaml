@@ -17,7 +17,46 @@ data:
     # ── Helpers ────────────────────────────────────────────────────────────────
     method := input.attributes.request.http.method
     path   := input.attributes.request.http.path
-    role   := input.attributes.request.http.headers["x-user-role"]
+
+    # role is read directly from the JWT's own "role" claim, not from an
+    # x-user-role header. Istio's CUSTOM AuthorizationPolicy action (this
+    # filter) runs BEFORE jwt_authn in the Envoy filter chain - confirmed live
+    # 2026-09-17 via the actual filter order (rbac, ext_authz, jwt_authn, rbac)
+    # and OPA's own decision log, which showed no x-user-role header present on
+    # requests this filter evaluates. jwt_authn's claim_to_headers injection
+    # simply hasn't happened yet at this point.
+    #
+    # This verifies the signature itself (io.jwt.decode_verify), rather than
+    # relying on jwt_authn running afterward to catch a forged token - an
+    # earlier version of this rule used unverified io.jwt.decode on the
+    # reasoning that jwt_authn independently re-checks the signature right
+    # after in the same filter chain. That's true for every path currently
+    # wired up, but it's an implicit coupling this file can't enforce or make
+    # visible on its own - a future ext_authz-protected route added without a
+    # matching jwt_authn gate would have no signature check at all. Verifying
+    # here removes that dependency entirely (flagged by automated security
+    # review, 2026-09-17).
+    #
+    # jwt_public_key is the same "itsm-rs256-v1" public key pinned in the
+    # RequestAuthentication manifests (platform-app and customer-app's
+    # request-auth.yaml) for the same underlying reason: OPA has no live JWKS
+    # access either, and doesn't need one here since the key changing is a rare,
+    # deliberate operation (see those files for the full jwksUri-under-STRICT-
+    # mTLS writeup). Captured live 2026-09-16 from
+    # http://user-service.itsm-dev.svc.cluster.local/api/v1/.well-known/jwks.json
+    # - if user-service's signing key is ever rotated, this must be updated too.
+    jwt_public_key := `{"kty":"RSA","use":"sig","kid":"itsm-rs256-v1","alg":"RS256","n":"kIkOMxiwOIxCvF220iqlv1VOsUmV1IR8PSaAMhcihQj1sQBGlbdy4m3EhZmKx3kzfGxze-ayjKjzQXamE4lyrDUsGMahfzMsPUPOYpqecX0vSeME6veMrkFGYVA50i0-QHQuCwgedi_OKheA34tuMYF8u4g26siU_V6obR7J6jL4CbqxLSclu-hLHz0l2eNZJCOMiuuiz3JiCTJFIAM2cixx445TQLmvOTnxVv9ooItVz26sNfCR3govyvJbeRns0uIgMD7E7ld6lR5Gwehs1oo6lYyhd0jmHtqzI4mX50U_TpWMVFKAnS8qAD2RPq60HooGFQHLrwXIbWF0Zsu8Ew","e":"AQAB"}`
+
+    role := claims.role if {
+      auth_header := input.attributes.request.http.headers.authorization
+      startswith(auth_header, "Bearer ")
+      token := substring(auth_header, count("Bearer "), -1)
+      [valid, _, claims] := io.jwt.decode_verify(token, {
+        "cert": jwt_public_key,
+        "iss": "itsm-user-service",
+      })
+      valid
+    }
 
     # ── Public paths — allow without JWT ──────────────────────────────────────
     # Login endpoint
