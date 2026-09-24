@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: customer-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Preet2fun/itsm-cloudnative-demo-app.git
+    targetRevision: main
+    path: customer-app/infra/helm/customer-app
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: customer-app-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
