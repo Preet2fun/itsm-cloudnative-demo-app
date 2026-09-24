@@ -1,27 +1,28 @@
 # ci-docker-push.yml
-# Builds and pushes versioned Docker images to Docker Hub on release tags.
-# Triggered by: git tag v* (e.g. git tag v0.6.0)
-# Full automated pipeline with Helm deploy is implemented in Phase 9.
-#
-# To push manually (before Phase 9 CI is live):
-#   VERSION=$(cat platform-app/services/<service>/VERSION)
-#   docker build -t preet2fun/<service>:v$VERSION platform-app/services/<service>/
-#   docker push preet2fun/<service>:v$VERSION
+# Builds and pushes Docker images for all 4 customer-app services on every
+# push to main, tagged by short git SHA, then commits the new tags into
+# the Helm chart's values.yaml so ArgoCD (platform-app/infra/argocd/apps/dev/customer-app.yaml)
+# picks them up and auto-syncs.
+# Requires repo secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN.
 
 name: CI Docker Push
 
 on:
   push:
-    tags:
-      - "v*"                      # platform release: v0.6.0
-      - "*/v*"                    # service release: user-service/v0.3.0
+    branches: [main]
+    paths:
+      - "customer-app/services/**"
+
+permissions:
+  contents: write
 
 jobs:
-  push-on-tag:
-    name: Push Docker image on release tag
+  build-and-push:
+    name: Build and push ${{ matrix.service }}
     runs-on: ubuntu-latest
-    # Phase 9 will expand this into per-service matrix builds with Helm deploy.
-    # For now it validates the tag format and documents the intent.
+    strategy:
+      matrix:
+        service: [order-service, catalog-service, delivery-service, payment-service]
     steps:
       - uses: actions/checkout@v4
       - name: Log in to Docker Hub
@@ -29,12 +30,47 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Extract tag info
+      - name: Compute short SHA
         id: tag
+        run: echo "sha_short=sha-${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+      - name: Build and push
         run: |
-          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          echo "sha_short=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
-      - name: Echo tag (Phase 9 will build + push here)
+          docker build \
+            -t preet2fun/${{ matrix.service }}:${{ steps.tag.outputs.sha_short }} \
+            customer-app/services/${{ matrix.service }}/
+          docker push preet2fun/${{ matrix.service }}:${{ steps.tag.outputs.sha_short }}
+
+  update-image-tags:
+    name: Bump image tags in values.yaml
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install yq
+        env:
+          YQ_VERSION: v4.44.3
+          YQ_SHA256: a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7
         run: |
-          echo "Release tag: ${{ steps.tag.outputs.tag }}"
-          echo "Full CI/CD pipeline (matrix build + Helm upgrade) implemented in Phase 9"
+          wget -qO /tmp/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          echo "${YQ_SHA256}  /tmp/yq" | sha256sum -c -
+          sudo install -m 0755 /tmp/yq /usr/local/bin/yq
+      - name: Compute short SHA
+        id: tag
+        run: echo "sha_short=sha-${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+      - name: Bump image tags
+        run: |
+          TAG="${{ steps.tag.outputs.sha_short }}"
+          FILE=customer-app/infra/helm/customer-app/values.yaml
+          yq -i ".orderService.image.tag = \"$TAG\"" "$FILE"
+          yq -i ".catalogService.image.tag = \"$TAG\"" "$FILE"
+          yq -i ".deliveryService.image.tag = \"$TAG\"" "$FILE"
+          yq -i ".paymentService.image.tag = \"$TAG\"" "$FILE"
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add customer-app/infra/helm/customer-app/values.yaml
+          git commit -m "chore(customer-app): bump image tags to ${{ steps.tag.outputs.sha_short }} [skip ci]"
+          git push
