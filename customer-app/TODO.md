@@ -174,10 +174,81 @@ per project policy on GitHub actions).**
 ## Phase 7 — Observability wiring
 **GitHub: [#40](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/40), [#37](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/37), [#38](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/38), [#39](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/39)**
 
-- [ ] Platform-app's observability stack (OTel Collector + Prometheus + Loki + Jaeger + Grafana) actually deployed live — currently `#40` is still Todo, and everything else here depends on it existing
-- [ ] Manual OTel business spans for `delivery-service`/`payment-service` (Java) — currently auto-instrumentation only
-- [ ] `tenant.id` span attribute on all 4 customer-app services
-- [ ] Confirm customer-app's OTel Collector export target actually reaches platform-app's stack, tagged for tenant-wise segregation
+- [x] Platform-app's observability stack deployed live in `itsm-dev` —
+      OTel Collector (contrib, `open-telemetry/opentelemetry-collector`
+      0.173.1), Jaeger (hand-rolled all-in-one, in-memory), Prometheus
+      (`prometheus-community/prometheus` 29.30.0), Loki
+      (`grafana/loki` 7.3.0, SingleBinary, ephemeral), Promtail
+      (`grafana/promtail` 6.17.1), Grafana (`grafana/grafana` 10.5.15,
+      auto-generated admin password, not committed to git). Two real
+      live bugs hit and fixed during install: `otel-collector` was
+      crash-looping (`1/2 CrashLoopBackOff`) because the custom
+      `prometheus` exporter shared port 8888 with the chart's own
+      internal self-telemetry metrics server — moved the app-metrics
+      exporter to 8889. `loki-0` was crash-looping
+      (`mkdir /var/loki: read-only file system`) because
+      `persistence.enabled: false` does NOT make this chart fall back to
+      an emptyDir automatically, contrary to assumption — added an
+      explicit `singleBinary.extraVolumes`/`extraVolumeMounts` emptyDir.
+      Also found `monitoring.lokiCanary.enabled: false` was a silent
+      no-op (`lokiCanary` is top-level in this chart, not nested under
+      `monitoring:`) — 3 unwanted canary pods were running despite the
+      "disable"; fixed the key path and also disabled the
+      chart-default-on `chunksCache`/`resultsCache` memcached
+      sidecars (one was stuck `Pending` on insufficient memory, unused
+      capacity we don't want). All verified live 2026-09-17/24: pods
+      healthy (`2/2`/`3/3`), canary/caches confirmed gone, real
+      tenant-tagged app metrics confirmed flowing through the fixed
+      8889 port.
+- [x] Manual OTel business spans added to `delivery-service` and
+      `payment-service` — `@WithSpan` annotations
+      (`opentelemetry-instrumentation-annotations` 2.31.1) on
+      `DeliveryController`/`PaymentController`, spans named
+      `customer.delivery.{list,create,get,update_status}` and
+      `customer.payment.{list,create,get,update_status}`, matching the
+      existing `customer.<service>.<operation>` convention from
+      order-service/catalog-service. The OTel javaagent already
+      attached via `-javaagent` does the actual span creation at
+      runtime — no SDK wiring needed.
+- [x] `tenant.id` span attribute on all 4 customer-app services —
+      order-service/catalog-service already had it; delivery-service and
+      payment-service now set it via `Span.current().setAttribute(...)`
+      alongside each `@WithSpan`, reading the same
+      `TenantContext.get()` both controllers already used for DB queries.
+- [x] Confirmed customer-app's telemetry reaches platform-app's stack,
+      tenant-segregated — live end-to-end verification 2026-09-24 via
+      `scripts/tenant-isolation-smoke-test.sh` (customer_a/customer_b):
+      **traces** — `customer.delivery.get/list` and
+      `customer.payment.get/list` all present in Jaeger, each tagged
+      `tenant.id = customer_a` or `customer_b` matching the real
+      requester, never mixed up; **metrics** — real app-emitted metrics
+      (`customer_catalog_cache_duration_seconds_{bucket,count,sum}`)
+      confirmed queryable in Prometheus; **logs** — non-empty Loki query
+      results for `{namespace="customer-app-dev", app="delivery-service"}`;
+      **isolation** — zero `tenant.id` occurrences across 10 sampled
+      `incident-service` (platform-app) traces, confirming no
+      cross-tenant leakage into platform staff's own telemetry, per root
+      `CLAUDE.md` §3's documented "absent claim = platform staff" model.
+- [x] Rebuilt and redeployed `delivery-service`/`payment-service` at
+      `v0.1.2` with the new spans — also found and fixed an unrelated,
+      pre-existing `customer-app` Helm chart bug hit along the way: the
+      `redis` StatefulSet's `volumeClaimTemplates` omitted
+      `storageClassName` on purpose (to let Kubernetes resolve the
+      cluster default on first creation), but Kubernetes persists that
+      resolved value (`local-path`) into the live, now-immutable spec —
+      every subsequent `helm upgrade` was asking the API server to
+      revert it to unset and being correctly rejected
+      (`helm history` shows this exact failure recurring since
+      2026-09-10). Set `redis.persistence.storageClass: "local-path"`
+      explicitly in `values.yaml` to match live state; release returned
+      to `STATUS: deployed` on the next upgrade.
+- [x] **Stop here and check in** — per root `CLAUDE.md` §11's "one
+      roadmap task at a time," Phase 7 ends here. #40/#37/#38/#39 not
+      moved on the GitHub Project board — repo owner's call, per
+      established policy.
+
+**Phase 7 DONE — #40/#37/#38/#39 not yet moved to Done on the board
+(repo owner's call, per project policy on GitHub actions).**
 
 ---
 
