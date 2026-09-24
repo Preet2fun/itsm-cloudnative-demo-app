@@ -1,5 +1,8 @@
 // Package main is the entry point for order-service (Customer App).
 //
+// Trivial no-op comment, 2026-09-24 — triggers the Phase 8 CI/CD pipeline
+// (build+push+tag-bump+ArgoCD sync) for its first real end-to-end run.
+//
 // Responsibilities:
 //   - Order placement and lifecycle (status transitions)
 //   - Multi-tenant via search_path-per-request, same pattern as Platform App
