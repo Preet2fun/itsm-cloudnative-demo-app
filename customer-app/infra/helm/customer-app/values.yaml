@@ -188,10 +188,16 @@ redis:
   port: 6379
   persistence:
     size: 1Gi
-    # Left blank on purpose — the PVC omits storageClassName entirely so
-    # Kubernetes uses whatever the cluster has marked as its default class,
-    # instead of this chart hardcoding a provisioner name.
-    storageClass: ""
+    # Explicit, not blank — confirmed live 2026-09-24: leaving this blank let
+    # Kubernetes resolve the cluster's default class on the redis
+    # StatefulSet's *first* creation, but it then persists that resolved
+    # value (local-path) into the live volumeClaimTemplates spec, which is
+    # immutable. Every subsequent `helm upgrade` re-rendering this as blank
+    # was asking the API server to revert storageClassName back to unset,
+    # which it correctly rejects ("Forbidden: updates to statefulset spec
+    # for fields other than 'replicas'... are forbidden"). Matching the live
+    # value here makes upgrades idempotent again.
+    storageClass: "local-path"
   resources:
     requests:
       cpu: 50m
