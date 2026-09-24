@@ -6,6 +6,17 @@
 # only way to disable it; the Deployment/Service objects still get
 # created but run no pods.
 
+# The Istio Gateway/VirtualService routing this UI through
+# (infra/k8s/istio/virtual-services/dev/argocd-routing.yaml) is plain HTTP,
+# same as Grafana/Jaeger/Prometheus — no TLS passthrough configured. By
+# default argocd-server only speaks TLS on its single port regardless of
+# which Service port (80 vs 443) you hit; without this flag it rejects the
+# Gateway's plaintext requests. Confirmed live 2026-09-24
+# (ERR_SSL_PROTOCOL_ERROR without it).
+configs:
+  params:
+    server.insecure: "true"
+
 dex:
   enabled: false
 
