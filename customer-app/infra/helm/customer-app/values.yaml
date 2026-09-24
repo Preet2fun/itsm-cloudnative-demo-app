@@ -89,7 +89,7 @@ deliveryService:
   name: delivery-service
   image:
     repository: delivery-service
-    tag: "v0.1.1"
+    tag: "v0.1.2"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -142,7 +142,7 @@ paymentService:
   name: payment-service
   image:
     repository: payment-service
-    tag: "v0.1.1"
+    tag: "v0.1.2"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
