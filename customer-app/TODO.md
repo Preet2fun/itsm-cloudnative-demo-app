@@ -255,18 +255,124 @@ per project policy on GitHub actions).**
 ## Phase 8 — CI/CD completion
 **GitHub: [#51](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/51)**
 
-- [ ] `ci-docker-push.yml` per-service matrix for all 4 customer-app services
-- [ ] ArgoCD `Application` for `customer-app-dev` and `customer-app-qa`
-- [ ] Verify: a merge to `main` builds+pushes images and ArgoCD syncs automatically
+Scope grew from the TODO's original one-liner once discovery showed neither
+ArgoCD nor a real CI pipeline existed anywhere in the repo yet — full design
+in `docs/superpowers/specs/2026-09-24-customer-app-cicd-gitops-design.md`,
+plan in `docs/superpowers/plans/2026-09-24-customer-app-cicd-gitops.md`.
+**Dev only, by explicit scope decision** — no live `customer-app-qa`
+namespace or ArgoCD `Application`; placeholder structure only where the code
+naturally wants one.
+
+- [x] **ArgoCD core install** — `argo/argo-cd` chart v10.9.2, namespace
+      `argocd`, via `platform-app/scripts/install-argocd.sh` +
+      `platform-app/infra/argocd/install/values.yaml` (dex/notifications
+      off, `applicationSet.replicas: 0`, `server.insecure: "true"`).
+      Verified live: all ArgoCD pods `Running`, `kubectl api-resources`
+      confirmed `applications.argoproj.io` / `apiVersion: argoproj.io/v1alpha1`
+      before the Application manifest was written (not guessed).
+- [x] **ArgoCD `Application` for `customer-app-dev`** —
+      `platform-app/infra/argocd/apps/dev/customer-app.yaml`, auto-sync +
+      self-heal + prune, source `customer-app/infra/helm/customer-app`.
+      Verified live: `kubectl get application customer-app-dev` →
+      `Synced`/`Healthy`.
+- [x] **`ci-docker-push.yml` per-service matrix, all 4 customer-app
+      services** — `.github/workflows/ci-docker-push.yml`, triggered on
+      push to `main` under `customer-app/services/**`. Build+push job
+      (matrix: order/catalog/delivery/payment-service) tags images
+      `sha-<8 chars>`; second job installs a version-pinned,
+      checksum-verified `yq` and commits the new tags into
+      `customer-app/infra/helm/customer-app/values.yaml` with `[skip ci]`.
+      Fixed along the way: Docker Hub login failure (stale
+      `DOCKERHUB_TOKEN` secret — regenerated), unpinned/unverified `yq`
+      download (pinned to `v4.44.3` + verified SHA256).
+- [x] **End-to-end verification: real push → build+push → tag-bump →
+      ArgoCD sync → live pods** — trivial commit to
+      `customer-app/services/order-service/cmd/main.go` pushed to `main`.
+      Confirmed live, in order:
+      1. All 5 CI jobs succeeded (`gh run watch`) — 4 image builds/pushes
+         + tag-bump commit `90dafe1` (`chore(customer-app): bump image
+         tags to sha-5cf02a10 [skip ci]`).
+      2. ArgoCD detected drift and auto-synced (`OutOfSync`/`Syncing` →
+         `Synced`).
+      3. Mid-sync, `application-controller` hit `CrashLoopBackOff`
+         (OOMKilled, exit 137) — root-caused as under-sized memory limits
+         given the controller caches all live cluster resources
+         cluster-wide, not just this Application's own ~14 resources.
+         Fixed in `platform-app/infra/argocd/install/values.yaml`
+         (`controller.resources.limits.memory` 256Mi→512Mi). A second
+         false start (bumped limit appeared not to take effect even after
+         a manual pod delete) traced to `kubernetes-master`'s checkout
+         never having been `git pull`ed after the local fix — not a
+         Kubernetes/Helm bug. Confirmed fixed: controller stable at
+         512Mi/256Mi limits, `1/1 Running`, 0 restarts.
+      4. Transient `Synced`/`Degraded` (delivery-service/payment-service
+         pods briefly `1/2 Running`) self-resolved — expected JVM+OTel
+         javaagent startup latency (~90-110s), already documented in the
+         chart's own values.yaml comment, not a new bug.
+      5. Final state: `customer-app-dev` Application `Synced`/`Healthy`,
+         all 4 services' pods `2/2 Running`, and a live
+         `kubectl get pods -o jsonpath` image-reference check confirmed
+         `order-service`, `catalog-service`, `delivery-service`,
+         `payment-service` all running `preet2fun/<service>:sha-5cf02a10`
+         — matching the tag CI generated, proving the full GitOps loop
+         works end-to-end, not just stage-by-stage in isolation.
+- [x] Bonus, ad hoc: ArgoCD UI browser access wired up
+      (`platform-app/infra/k8s/istio/virtual-services/dev/argocd-routing.yaml`,
+      mirroring the existing Grafana/Jaeger/Prometheus pattern) and
+      documented in `INFRA-INVENTORY.md` §5, alongside the pre-existing
+      three UIs' access steps.
+- [x] **Stop here and check in** — per root `CLAUDE.md` §11's "one
+      roadmap task at a time," Phase 8 ends here. Issue #51 not moved on
+      the GitHub Project board — repo owner's call, per established
+      policy.
+
+**Phase 8 DONE — #51 not yet moved to Done on the board (repo owner's
+call, per project policy on GitHub actions).**
 
 ---
 
 ## Phase 9 — Capacity risk resolution
 **GitHub: [#36](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/36)**
 
-- [ ] Decide: add node RAM, lower Java service memory limits, or keep customer-app HPA `min=1`-only in dev
-- [ ] Apply the decision to `values.yaml` and root `CLAUDE.md` §4
-- [ ] Live-validate: delivery-service/payment-service pods survive real load without OOMKill
+Bounded task (brainstorming skill, no spec/plan needed — existing Helm
+chart + existing `CLAUDE.md` section being modified).
+
+- [x] **Decided: keep customer-app HPA `min=1`-only in dev** — checked
+      current live headroom first (`kubectl top nodes` + `free -mh` on
+      `kubernetes-master`), which showed real free memory on the two
+      worker nodes had already dropped from ~5 GiB (2026-09-01 snapshot)
+      to ~3.7 GiB since ArgoCD (Phase 8) + the observability stack
+      (Phase 7) landed — worse than the risk note assumed, and the
+      control-plane node itself down to ~600-900 MiB free. Rejected the
+      other two options: adding node RAM is an infra change outside repo
+      scope; lowering the Java services' memory limits would undo the
+      Phase 7 OOM fix (128Mi/256Mi was proven too tight for
+      delivery/payment-service and raised to 256Mi/512Mi for exactly that
+      reason).
+- [x] **Applied the decision** —
+      `customer-app/infra/helm/customer-app/values.yaml`:
+      `hpa.maxReplicas` 2→1 for all 4 services (order/catalog/delivery/
+      payment), with an explanatory comment. Root `CLAUDE.md` §4: capacity
+      risk note updated to record the resolution and reasoning, plus a
+      dev-only exception noted on the "HPA min=1, max=2... never max=3+"
+      rule; §12 open-issues line updated to "resolved for dev, open for
+      QA/prod." `INFRA-INVENTORY.md` §1-§3 refreshed with today's live
+      numbers (was a 24-day-stale 2026-09-01 snapshot).
+- [x] **Live load-testing explicitly descoped by repo owner** — "we dont
+      want to do 4th point as I am not doing perfromance for my this
+      set up." No synthetic load generated. Since customer-app's HPA is
+      now capped at its already-running footprint (1 replica per service,
+      matching what's live in the cluster today), there is no scale-out
+      event left to validate against — the cap itself is the mitigation.
+- [ ] Pending: confirm live in cluster — commit+push this change, then
+      verify ArgoCD (`customer-app-dev` Application, auto-sync/self-heal
+      per Phase 8) picks up the `values.yaml` diff and the HPA objects
+      report `maxReplicas: 1`
+      (`kubectl get hpa -n customer-app-dev`).
+- [ ] **Stop here and check in** — per root `CLAUDE.md` §11's "one
+      roadmap task at a time," Phase 9 ends here once the ArgoCD sync is
+      confirmed. Issue #36 not moved on the GitHub Project board —
+      repo owner's call, per established policy.
 
 ---
 

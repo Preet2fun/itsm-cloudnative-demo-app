@@ -204,7 +204,10 @@ requested today). Real, measured headroom is **~5 GiB free on the two
 workers** — plan against that number, not a bigger one.
 
 **HPA: min=1, max=2 replicas for all stateless services, in both apps. Never
-set max=3 or higher.** CPU threshold for HPA: 70%.
+set max=3 or higher.** CPU threshold for HPA: 70%. **Exception:** customer-app
+in `dev` is currently capped at `max=1` (no scale-out at all) — a
+capacity-driven, dev-only carve-out, not a change to this rule. See "Known
+open capacity risk" below.
 
 ### Resource limits (use these in all Helm templates and K8s manifests)
 
@@ -239,15 +242,23 @@ set max=3 or higher.** CPU threshold for HPA: 70%.
 | Redis | 50m | 200m | 64Mi | 256Mi |
 | Istio sidecars (×4) | ~100m each | — | ~128Mi each | ~128Mi each |
 
-**Known open capacity risk:** Java services run 2× the memory footprint of
-the Go/Python ones. Customer-app at HPA max (4 services × 2 replicas) plus
-its sidecars needs ~4 GiB at the limit ceiling — that does **not** comfortably
-fit alongside a platform-app burst *and* the not-yet-deployed observability
-stack, on ~5 GiB of real headroom. Until resolved (more node RAM, lower the
-Java limits, or keep customer-app at HPA min=1 in dev), treat this as a live
-constraint when sizing anything new — don't assume the numbers in this table
-alone prove capacity; check `INFRA-INVENTORY.md` for the current measured
-picture first.
+**Capacity risk — RESOLVED 2026-09-25 for dev (Phase 9, #36):** Java services
+run 2× the memory footprint of the Go/Python ones, and by 2026-09-25 the
+observability stack (Phase 7) and ArgoCD (Phase 8) had both landed, dropping
+real free memory on the two worker nodes from ~5 GiB (2026-09-01) to ~3.7 GiB
+— with the control-plane node itself (also schedulable) down to
+~600-900 MiB free. Customer-app at HPA max (4 services × 2 replicas) plus
+sidecars would need ~4 GiB at the limit ceiling, which no longer fits.
+Decision: capped customer-app's `hpa.maxReplicas` at **1** in dev (no
+scale-out) rather than the other two options — adding node RAM is an
+infra change outside repo scope, and lowering the Java services' memory
+limits back down would undo the Phase 7 OOM fix (128Mi/256Mi was proven too
+tight; see `customer-app/infra/helm/customer-app/values.yaml`'s own comment
+on `deliveryService`/`paymentService`). This is a dev-only, capacity-driven
+exception to the HPA rule above — revisit if/when more node RAM is added or
+this risk is re-evaluated for a QA/prod environment. Check
+`INFRA-INVENTORY.md` for the current measured picture before sizing
+anything new.
 
 ---
 
@@ -500,7 +511,10 @@ they're not mentioned elsewhere.
   `AuthorizationPolicy`) in
   `docs/superpowers/specs/2026-08-27-identity-tenancy-consolidation-design.md`
   — not yet implemented.
-- **Capacity risk** — see §4's "Known open capacity risk."
+- **Capacity risk — resolved for dev, open for QA/prod.** See §4's capacity
+  risk note: customer-app dev is capped at HPA max=1 as of 2026-09-25; the
+  underlying headroom constraint isn't fixed, just worked around, and needs
+  its own decision before any future QA/prod environment is sized.
 - **Telemetry gap** — see §5's "Known gap" (delivery-service/payment-service
   manual spans).
 - **Cross-tenant data browsing by platform staff** — no mechanism designed
