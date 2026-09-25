@@ -1,8 +1,25 @@
 # AuthorizationPolicy — Layer 2: CUSTOM action delegates RBAC to OPA.
 #
-# Every request to workloads in itsm-dev is forwarded to the OPA gRPC ext_authz
-# server. OPA evaluates the Rego policy in policy-configmap.yaml and returns
-# allow/deny based on the x-user-role header (injected by Istio from the JWT).
+# Scoped to the three services whose paths the Rego policy (authz.rego)
+# actually gates: user-service (/api/v1/users*), incident-service
+# (/api/v1/incidents*), asset-service (/api/v1/assets*). Istio's
+# AuthorizationPolicy selector only supports a single matchLabels map (no
+# OR/matchExpressions), so one selector per service, all CUSTOM/opa-authz.
+#
+# Originally this had NO selector (applied to every workload in itsm-dev) —
+# harmless when written, since only the app services lived in this namespace
+# then. Confirmed live 2026-09-25: once the observability stack (Phase 7)
+# landed, this started 403-denying Grafana's Prometheus datasource proxy
+# (and any direct query) — Prometheus's own native REST API happens to also
+# be versioned under /api/v1/*, which authz.rego's public-path exemption
+# (`not startswith(path, "/api/v1/")`) doesn't recognize as public, and
+# Prometheus never carries a role-bearing JWT, so it hit `default allow :=
+# false`. Jaeger (/api/traces) and Loki-via-Grafana (/loki/api/v1/*) never
+# collided, which is why only Prometheus was affected. Narrowing the
+# selector to the actual protected services removes this collision without
+# weakening any real protection — nothing in the Rego rules ever expected a
+# role for Prometheus/Grafana/Jaeger/Loki/OTel-collector paths in the first
+# place.
 #
 # The "opa-authz" provider is registered in the Istio meshConfig extensionProvider
 # inside infra/istio/istio-operator.yaml.
@@ -10,11 +27,44 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: opa-authz
+  name: opa-authz-user-service
   namespace: itsm-dev
 spec:
+  selector:
+    matchLabels:
+      app: user-service
   action: CUSTOM
   provider:
     name: opa-authz
   rules:
-    - {}  # Match all requests — the Rego policy handles public-path exemptions
+    - {}  # Match all requests to this workload — the Rego policy handles public-path exemptions
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: opa-authz-incident-service
+  namespace: itsm-dev
+spec:
+  selector:
+    matchLabels:
+      app: incident-service
+  action: CUSTOM
+  provider:
+    name: opa-authz
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: opa-authz-asset-service
+  namespace: itsm-dev
+spec:
+  selector:
+    matchLabels:
+      app: asset-service
+  action: CUSTOM
+  provider:
+    name: opa-authz
+  rules:
+    - {}
