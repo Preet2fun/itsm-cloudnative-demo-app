@@ -515,6 +515,25 @@ they're not mentioned elsewhere.
   risk note: customer-app dev is capped at HPA max=1 as of 2026-09-25; the
   underlying headroom constraint isn't fixed, just worked around, and needs
   its own decision before any future QA/prod environment is sized.
+- **`argocd-repo-server` instability — root-caused and fixed 2026-09-25,
+  pending a live re-apply.** Two separate causes, confirmed via live
+  evidence, NOT memory pressure: (1) the pod that appeared stuck in
+  `ContainerStatusUnknown` was a stale, already-terminated leftover from a
+  `k8s-worker-2` disk-pressure eviction (`DiskPressure` condition has
+  since cleared; the ReplicaSet already self-healed by rescheduling its
+  one desired replica onto `kubernetes-master`) — harmless, safe to
+  `kubectl delete` as cleanup. (2) The actively-restarting replica
+  (15 restarts/7h) was hitting the chart's default 1-second probe
+  timeout on `kubernetes-master` (the cluster's most contended node) —
+  confirmed NOT an OOM (33Mi/256Mi memory used, exit 143/SIGTERM not
+  137/OOMKilled). Fixed in
+  `platform-app/infra/argocd/install/values.yaml`
+  (`repoServer.readinessProbe.timeoutSeconds` /
+  `livenessProbe.timeoutSeconds` 1→5) — same pattern as the
+  delivery/payment-service probe fix. Requires a manual
+  `platform-app/scripts/install-argocd.sh` re-run on `kubernetes-master`
+  to take effect (ArgoCD does not manage its own install via GitOps) —
+  not yet confirmed live.
 - **Telemetry gap** — see §5's "Known gap" (delivery-service/payment-service
   manual spans).
 - **Cross-tenant data browsing by platform staff** — no mechanism designed

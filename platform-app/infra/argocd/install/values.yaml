@@ -53,6 +53,18 @@ repoServer:
     limits:
       cpu: 300m
       memory: 256Mi
+  # Chart default probe timeoutSeconds is 1 — confirmed live 2026-09-25 this
+  # is too tight on kubernetes-master (the cluster's most contended node:
+  # 76% memory used, also hosting etcd/apiserver/scheduler/istiod/
+  # ingressgateway/argocd-server). The container itself was healthy
+  # (33Mi/256Mi memory in use, exit 143/SIGTERM not 137/OOMKilled) but
+  # missed the 1s HTTP health-check deadline under node contention,
+  # tripping 15 restarts in 7h. Same fix pattern already used for
+  # delivery/payment-service's probes in customer-app's values.yaml.
+  readinessProbe:
+    timeoutSeconds: 5
+  livenessProbe:
+    timeoutSeconds: 5
 
 controller:
   # 128Mi/256Mi was too tight — confirmed live 2026-09-25 the controller

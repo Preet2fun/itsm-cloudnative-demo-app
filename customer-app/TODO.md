@@ -364,15 +364,35 @@ chart + existing `CLAUDE.md` section being modified).
       now capped at its already-running footprint (1 replica per service,
       matching what's live in the cluster today), there is no scale-out
       event left to validate against — the cap itself is the mitigation.
-- [ ] Pending: confirm live in cluster — commit+push this change, then
-      verify ArgoCD (`customer-app-dev` Application, auto-sync/self-heal
-      per Phase 8) picks up the `values.yaml` diff and the HPA objects
-      report `maxReplicas: 1`
-      (`kubectl get hpa -n customer-app-dev`).
-- [ ] **Stop here and check in** — per root `CLAUDE.md` §11's "one
-      roadmap task at a time," Phase 9 ends here once the ArgoCD sync is
-      confirmed. Issue #36 not moved on the GitHub Project board —
-      repo owner's call, per established policy.
+- [x] **Confirmed live in cluster** — committed+pushed, ArgoCD's
+      `customer-app` Application (namespace `argocd`, destination
+      `customer-app-dev` — note: the Application's own name is
+      `customer-app`, not `customer-app-dev`) auto-synced automatically,
+      no manual `helm upgrade` needed. Live evidence:
+      `kubectl get events -n argocd` showed `OperationStarted` →
+      `Synced -> OutOfSync -> Synced` → `OperationCompleted... succeeded`,
+      timestamped to the push. `kubectl get hpa -n customer-app-dev`
+      confirmed all 4 services (`order-service-hpa`,
+      `catalog-service-hpa`, `delivery-service-hpa`,
+      `payment-service-hpa`) report `MAXPODS: 1`.
+- [x] **Stop here and check in** — per root `CLAUDE.md` §11's "one
+      roadmap task at a time," Phase 9 ends here. Issue #36 not moved on
+      the GitHub Project board — repo owner's call, per established
+      policy.
+
+**Phase 9 DONE — #36 not yet moved to Done on the board (repo owner's
+call, per project policy on GitHub actions).**
+
+**Separate, unrelated finding surfaced during verification (not chased,
+not part of this phase):** `argocd-repo-server` is showing real
+instability — one replica (`argocd-repo-server-...-8kchz`) has 15
+restarts in 7h21m with repeated readiness/liveness probe timeouts on
+`:8084/healthz` and a `BackOff` event, and the second replica
+(`...-t84lt`) has sat in `ContainerStatusUnknown` for 20h. ArgoCD synced
+successfully despite this, so it isn't blocking anything today, but it's
+worth keeping an eye on — possibly related to the same tight cluster
+memory headroom this phase just documented. Logged as a new entry in
+root `CLAUDE.md` §12.
 
 ---
 
