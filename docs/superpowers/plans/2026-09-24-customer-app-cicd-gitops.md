@@ -113,13 +113,20 @@ repoServer:
       memory: 256Mi
 
 controller:
+  # 128Mi/256Mi was too tight — confirmed live 2026-09-25 the controller
+  # got OOMKilled (exit 137) mid-sync and entered CrashLoopBackOff. Not
+  # really about this one Application's ~14 resources: the controller
+  # caches ALL live cluster resources across every namespace for
+  # watch-based reconciliation, and this cluster carries a lot of CRDs
+  # (Istio, Calico, cert-manager, Rancher) plus 40+ pods — a much bigger
+  # working set than the Application-scoped sizing assumed.
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 300m
-      memory: 256Mi
+      memory: 512Mi
 ```
 
 - [ ] **Step 2: Write the real install script**
