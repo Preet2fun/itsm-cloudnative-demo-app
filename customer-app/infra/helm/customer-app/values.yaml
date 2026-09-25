@@ -14,14 +14,13 @@ global:
   # (confirmed live 2026-09-10). Plaintext http (not https) because the
   # collector listens without TLS in-cluster.
   otelCollectorEndpoint: "http://otel-collector.itsm-dev:4317"
-
 # ── Order Service (Go) ──────────────────────────────────────────────────────
 orderService:
   enabled: true
   name: order-service
   image:
     repository: order-service
-    tag: "v0.1.0"
+    tag: "sha-5cf02a10"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -48,14 +47,13 @@ orderService:
     path: /api/v1/health
     initialDelaySeconds: 15
     periodSeconds: 20
-
 # ── Catalog Service (Python) ────────────────────────────────────────────────
 catalogService:
   enabled: true
   name: catalog-service
   image:
     repository: catalog-service
-    tag: "v0.1.0"
+    tag: "sha-5cf02a10"
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
@@ -82,14 +80,13 @@ catalogService:
     path: /api/v1/health
     initialDelaySeconds: 15
     periodSeconds: 20
-
 # ── Delivery Service (Java) ─────────────────────────────────────────────────
 deliveryService:
   enabled: true
   name: delivery-service
   image:
     repository: delivery-service
-    tag: "v0.1.2"
+    tag: "sha-5cf02a10"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -135,14 +132,13 @@ deliveryService:
     periodSeconds: 20
     timeoutSeconds: 3
     failureThreshold: 3
-
 # ── Payment Service (Java) ──────────────────────────────────────────────────
 paymentService:
   enabled: true
   name: payment-service
   image:
     repository: payment-service
-    tag: "v0.1.2"
+    tag: "sha-5cf02a10"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -179,7 +175,6 @@ paymentService:
     periodSeconds: 20
     timeoutSeconds: 3
     failureThreshold: 3
-
 # ── Redis (dedicated to customer-app) ───────────────────────────────────────
 redis:
   enabled: true
