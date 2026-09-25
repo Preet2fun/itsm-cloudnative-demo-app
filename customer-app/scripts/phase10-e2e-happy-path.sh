@@ -51,7 +51,7 @@ curl -s $RESOLVE "${AUTH_HDR[@]}" "${BASE}/api/v1/restaurants/${REST_ID}/menu-it
 
 echo
 echo "=== 4. Place order ==="
-ITEMS_B64=$(echo -n '[{"item":"Margherita Pizza","qty":2},{"item":"Garlic Bread","qty":1}]' | base64)
+ITEMS_B64=$(echo -n '[{"item":"Margherita Pizza","qty":2},{"item":"Garlic Bread","qty":1}]' | base64 -w 0)
 ORDER_JSON=$(curl -s $RESOLVE "${AUTH_HDR[@]}" -X POST "${BASE}/api/v1/orders" \
   -H 'Content-Type: application/json' \
   -d "{\"restaurant_id\":\"${REST_ID}\",\"customer_name\":\"Phase 10 E2E Test\",\"items\":\"${ITEMS_B64}\",\"total_amount\":34.50}")
