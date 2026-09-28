@@ -23,6 +23,24 @@ Full contract for both: [`data-sources.md`](data-sources.md). Every output
 follows [`output-contract.md`](output-contract.md) — analysis body, attributed
 quotes, explicit **HYPOTHESIS** labels, and a **Limitations** section.
 
+**State today:** Input A — nothing connected (no Zendesk/Intercom/Gong MCP
+wired up yet). Input B — one **dummy, clearly-marked illustrative** CSV
+exists: [`sample-feedback.csv`](sample-feedback.csv), so the format exists
+and a lens can actually be run end-to-end today. Columns match
+`data-sources.md`'s table exactly (`account`, `feedback_text`, `date`,
+`tier`, `nps_score`, `channel`). Content is synthetic feedback about the same
+running example used across the playbook — `ai_drafted_resolution_notes` —
+and the accounts/tiers deliberately match
+[`../context-hub/feature-flag-rollouts.md`](../context-hub/feature-flag-rollouts.md):
+`customer_a`/`customer_b` (Tier 1, flag 100% on) react as active users;
+`tenant_c` (Tier 2, 50% rollout) shows a split team; `tenant_d`/`tenant_e`
+(flag off) show pre-launch demand signal instead of usage feedback — so a
+`signal-scan` or `pattern-classification` run on this file lines up with the
+rollout state in context-hub rather than contradicting it. Replace with a
+real MCP connection or a real exported CSV once one exists — until then, tag
+any citation pulled from it `[Feedback: sample-feedback.csv — illustrative]`
+per `../ai-prd/citations.md`'s honesty rule, never as a real signal.
+
 ---
 
 ## The lenses

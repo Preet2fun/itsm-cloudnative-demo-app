@@ -300,9 +300,22 @@ Examples:
   customer.order.update_status
 ```
 
-**Known gap:** `delivery-service` and `payment-service` (Java) currently have
-auto-instrumentation only — no manual business spans yet. Adding them is a
-roadmap item, not something to silently skip when touching those services.
+**Known gap — RESOLVED (Phase 7):** `delivery-service` and `payment-service`
+(Java) now have manual `@WithSpan` business spans with `tenant.id`/
+`user.role` attributes, same as the rest of the customer-app services —
+verified live end-to-end during Phase 7 and again during Phase 10's
+happy-path test (2026-09-25).
+
+**New known gap — confirmed 2026-09-25 (Phase 10):** `order-service`,
+`delivery-service`, and `payment-service` have no structured business-event
+logging and no custom Prometheus counters (`catalog-service` has both —
+`customer_restaurants_created_total` etc.). Confirmed live: real INFO-level
+log lines exist for all 3 services in Loki (correctly labeled, timed right
+around a live test order), but none contain the order/delivery/payment ID
+as searchable text — so log-based correlation by entity ID isn't possible
+for these 3 services today, only trace-based correlation. Not blocking
+(traces alone satisfy tenant-tagged observability for these services), but
+a real depth gap if log/metric-based correlation is ever needed.
 
 ### Required span attributes on every business span
 ```python
@@ -534,8 +547,9 @@ they're not mentioned elsewhere.
   (ArgoCD does not manage its own install via GitOps). **Confirmed live:**
   new pod running 0 restarts post-rollout, no further probe-timeout
   events.
-- **Telemetry gap** — see §5's "Known gap" (delivery-service/payment-service
-  manual spans).
+- **Telemetry depth gap** — see §5's "New known gap" (no structured
+  business-event logs or custom metrics on order/delivery/payment-service;
+  trace-only correlation for those 3 services).
 - **Cross-tenant data browsing by platform staff** — no mechanism designed
   yet; see §3's Identity model note. Don't build an ad hoc workaround.
 - **Undecided:** where platform-app's legacy `tenant_a/b/c` data (`assets`,

@@ -50,6 +50,33 @@ across incidents, or a tenant moving up the edition ladder.
 | Significant but quality metrics don't hold (activation up, retention flat/down) | **Iterate** — the mechanism works, the payoff doesn't stick yet |
 | Not significant, or significant but every segment is flat/negative | **Kill** — record what was learned, not just that it failed |
 
+**"Post-launch" means live on a staged rollout, not 100% of customers.** This
+whole hierarchy runs against `../context-hub/feature-flag-rollouts.md`'s
+per-tenant flag state — a feature typically reaches this analysis while still
+at partial exposure (some tenants enabled, some at a partial `rollout_pct`,
+some not yet on), the way `ai_drafted_resolution_notes` sits today
+(`customer_a`/`customer_b` 100%, `tenant_c` 50%, `tenant_d`/`tenant_e` 0%).
+That's what makes each call an actual lever pull on the flag, not an
+abstract label:
+
+- **Ship broadly** = expand the flag — raise `rollout_pct` toward 100% and
+  enable the tenants still off.
+- **Ship to a narrower segment** = stop expanding; lock the flag at its
+  current state for the segment that won, leave the rest off (the worked
+  example below does exactly this: Tier 1–2 stay on, Tier 3 gated behind
+  opt-in).
+- **Iterate** = freeze the rollout where it is — don't expand further — fix
+  the mechanism, then re-measure the same cohort before deciding again.
+- **Kill** = turn the flag off for whoever currently has it. A rollback of a
+  limited exposure, not a recall of something already at 100%.
+
+A feature shipped with no staged flag at all (straight to 100%, no beta) can
+still run this hierarchy, but "kill" then means rolling back a fully-live
+feature and "ship" degenerates to "no action, already everywhere" — a
+blunter, riskier version of the same call. That's the argument for always
+rolling out through `feature-flag-rollouts.md`'s staged pattern rather than a
+single flip: it's what gives ship/iterate/kill real room to operate.
+
 ## AI-specific addition
 
 For an AI-native feature, run this alongside — not instead of — the PRD's
@@ -58,11 +85,21 @@ guardrail was loosened, or because confidence thresholds were quietly relaxed,
 is not a real win. Cite the groundedness / correction-rate numbers next to the
 lift number, not in a separate doc.
 
+## Closing the loop back to the prediction
+
+Once the ship/iterate/kill call above is made, append one row to
+[`calibration-log.md`](calibration-log.md): the lift `impact-estimation.md`
+predicted before this feature was built, next to what this hierarchy just
+measured. Without that row, a wrong forecast is never examined — the next
+feature's Expected Lift guess starts from zero again instead of learning from
+this one.
+
 ## Do / Don't
 
 **Do:** run the segment cut before a kill decision; treat "not found in the
 data" as a valid, stated result; keep the eval query/dataset the same across
-weeks so numbers are comparable.
+weeks so numbers are comparable; write the calibration-log row the same day
+as the ship/iterate/kill call, above.
 
 **Don't:** kill on topline alone; report a single scenario as if the lift is
 guaranteed; let an experiment that only worked for Tier 1 accounts get

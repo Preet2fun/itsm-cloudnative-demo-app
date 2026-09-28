@@ -69,6 +69,26 @@ An early stage can end the loop: a failed fit gate at 01, a Bolt-on verdict at
 
 ---
 
+## Autonomy per stage — what runs without you, what needs you
+
+Beyond the stop conditions above, each stage has its own default posture.
+This is the contract this agent runs by — read it as three postures, not six
+separate rules: 01 and 04 run clean; 02 and 06 always pause because the
+decision itself carries the weight, not the mechanics; 03 and 05 pause only
+when the real world hasn't supplied what's needed — which is most of the
+time, pre-launch.
+
+| Stage | Runs without stopping | Always stops for you |
+|---|---|---|
+| 01 Idea intake | Restate, type, `knowledge-hub/` check, fit check | Two materially different problem readings (stop condition 1). A clear fit failure routes straight to a stage-06 Kill without asking — but still gets *stated*, never silently dropped. |
+| 02 Opportunity scoring | Drafts all five factor scores + the AI-native check + fit gates + a lean | **Always** — state the AI-native verdict and the lean, and wait for a go-ahead before stage 03. `opportunity-scorecard.md` calls itself "a structured judgement, not a formula" — the highest-leverage call in the whole loop doesn't get made unattended. |
+| 03 Problem-space research | Synthesizes whatever signal is already connected (`ai-feedback/`, usage snapshots, anything supplied) | Any claim that would need real customer evidence that isn't available. Never fabricate a "said vs did" data point — state the gap plainly and ask: proceed with it marked `[Assumed]`, wait for real signal to be connected, or carry it into stage 05 as an assumption to test. |
+| 04 Solution hypothesis | The whole stage — diverge through the lead hypothesis | Nothing structurally. Reasoning only, no resourcing commitment yet; a human look afterward is about taste, not correctness. |
+| 05 Assumption & risk map | Lists and classifies every assumption | Any item landing in **Test before PRD** (stop condition 2) — name the cheapest test, surface it, never simulate having run it. |
+| 06 Decision & brief | Computes Pursue/Park/Kill, drafts the brief or log | **Always**, before it's treated as final — a Pursue commits real future PRD effort. Stop condition 3 (overriding a failed fit gate) lives here specifically. A recurring-signal flag for `../ai-product-strategy/` gets *stated*, not silently dropped, even though that folder has nowhere to receive it yet (`../TODO.md`). |
+
+---
+
 ## The decision (stage 06)
 
 - **Pursue** — factors mostly 3+, AI-native check = **Native**, all fit gates

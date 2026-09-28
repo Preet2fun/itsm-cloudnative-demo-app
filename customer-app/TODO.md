@@ -400,9 +400,84 @@ root `CLAUDE.md` §12.
 **GitHub: [#52](https://github.com/Preet2fun/itsm-cloudnative-demo-app/issues/52)**
 
 The actual point of the whole exercise — closing validation, not an early task.
+Customer-app has no frontend yet (§6), so the happy path runs as direct API
+calls with real JWTs, not clicks — same live evidence bar as every other
+phase.
 
-- [ ] Full happy path live: shared-identity login → browse restaurant → place order → delivery → payment
-- [ ] Traces/metrics/logs for that flow visible in platform-app's Jaeger/Grafana, tagged by tenant
+- [x] **Full happy path live: shared-identity login → browse restaurant →
+      place order → delivery → payment.** Script:
+      `customer-app/scripts/phase10-e2e-happy-path.sh`, run on
+      `kubernetes-master` (needs `kubectl logs` for the dev-mode MFA OTP;
+      the rest reaches the cluster's NodePort 30080 directly). Real result,
+      tenant `customer_a`:
+      - Login + MFA → JWT acquired.
+      - Browsed 2 real restaurants, then `Pasta Corner`'s 2 menu items.
+      - Order `408851c3-19ec-4711-9827-e97dbac1ca07` created (`201`).
+      - Delivery `936423dc-b384-4a2e-af40-ff858cf46f59` created (`201`).
+      - Payment `56ad0cee-8f01-4854-9023-2384980df0d4` created (`201`,
+        status `completed`).
+      One real bug hit and fixed along the way: the order-create request's
+      `items` field is Go `[]byte` (base64-encoded JSON string, not a raw
+      JSON value) — the test script's `base64` call needed `-w 0` to
+      disable GNU coreutils' default 76-column line wrap, which was
+      splicing a raw newline into the JSON body and breaking the decode
+      (`"invalid request body"`). Root-caused from the exact symptom before
+      the second attempt, not guessed.
+- [x] **Traces/metrics/logs for that flow visible in platform-app's
+      Jaeger/Grafana, tagged by tenant.**
+      - **Traces:** confirmed directly via Jaeger's API (queried live from
+        this laptop — NodePort 30080 is directly reachable, no `kubectl`
+        needed for this part). Real tenant-tagged spans found for all 4
+        services in the flow: `customer.catalog.list_restaurants`,
+        `customer.order.create`, `customer.delivery.create`,
+        `customer.payment.create` — every one `tenant.id=customer_a`.
+      - **Metrics:** found and fixed a real, pre-existing bug along the
+        way — see below. Once fixed: `up{namespace="customer-app-dev"}`
+        confirmed Prometheus is scraping every customer-app pod, and
+        `customer_catalog_cache_duration_seconds_count` (a real custom
+        metric on the one service that has any —
+        `catalog-service`) showed live data from the browse step.
+      - **Logs:** confirmed real INFO-level log lines exist in Loki for
+        all 4 services, correctly labeled (`namespace=customer-app-dev`,
+        `container=<service>`), clustered right around the test's actual
+        timestamp. Searching for the order ID's text found nothing in
+        `order-service`/`delivery-service`/`payment-service`'s log
+        lines — ruled out as a real gap, not a query mistake, after
+        confirming real container label values via Grafana's Label
+        Browser and confirming the same 3 services' logs exist at all in
+        the right time window. Logged as a new gap in root `CLAUDE.md`
+        §5/§12: these 3 services have no structured business-event
+        logging or custom metrics (only `catalog-service` does) — trace
+        data is their only detailed correlation signal today. Not
+        blocking (traces alone satisfy "tagged by tenant"), but real.
+- [x] **Bonus bug found and fixed: OPA `ext_authz` policy blocking
+      Prometheus.** Grafana's Prometheus datasource returned `403` on
+      every query (metric picker: "No options found"), while Loki and
+      Jaeger both worked. Root-caused to `itsm-dev`'s `opa-authz`
+      `AuthorizationPolicy` — applied namespace-wide (no `selector`) since
+      before the observability stack existed in that namespace. Its Rego
+      policy (`authz.rego`) treats any path NOT starting with `/api/v1/`
+      as public; Prometheus's own native REST API happens to also be
+      versioned under `/api/v1/*` (pure naming coincidence with
+      platform-app's protected endpoints), so it always hit
+      `default allow := false`. Jaeger (`/api/traces`) and
+      Loki-via-Grafana (`/loki/api/v1/*`) never collided with that prefix,
+      which is why only Prometheus broke. Fixed by replacing the single
+      namespace-wide policy with 3 workload-scoped ones (Istio
+      `AuthorizationPolicy.selector` only supports one `matchLabels` map,
+      no OR) — `opa-authz-user-service`, `opa-authz-incident-service`,
+      `opa-authz-asset-service` — matching exactly the 3 services the
+      Rego rules actually gate. Confirmed live: Grafana's Prometheus
+      metric picker went from empty to fully populated.
+- [x] **Stop here and check in** — per root `CLAUDE.md` §11's "one
+      roadmap task at a time," Phase 10 ends here. Issue #52 not moved on
+      the GitHub Project board — repo owner's call, per established
+      policy. **This is the last phase in this roadmap — all 10 phases
+      are now done.**
+
+**Phase 10 DONE — #52 not yet moved to Done on the board (repo owner's
+call, per project policy on GitHub actions). customer-app's Phase 1-10
+roadmap is complete.**
 
 ---
 

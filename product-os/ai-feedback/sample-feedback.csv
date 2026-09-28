@@ -1,0 +1,13 @@
+account,feedback_text,date,tier,nps_score,channel
+customer_a,"The AI-drafted resolution notes save our on-call engineers so much time -- we used to skip writing them entirely.",2026-09-05,Tier 1,9,in-app survey
+customer_a,"Sometimes the auto-drafted note misses the actual root cause and just repeats the alert text. We still have to rewrite half of it.",2026-09-12,Tier 1,6,support ticket
+customer_a,"Would trust the AI-drafted note more if it flagged which parts were inferred vs pulled directly from logs.",2026-09-24,Tier 1,7,support ticket
+customer_b,"Love that resolution notes get pre-filled now. Our SLA compliance on documentation went way up this month.",2026-09-18,Tier 1,9,csm check-in
+customer_b,"Can the draft include links to the specific traces it used? Right now it's just prose, hard to verify.",2026-08-30,Tier 1,7,support ticket
+tenant_c,"We're only half-rolled-out on this and already the team that has it stopped complaining about postmortem busywork.",2026-09-15,Tier 2,8,sales call
+tenant_c,"The other half of our team without the AI drafting is asking when they get it too.",2026-09-20,Tier 2,8,csm check-in
+tenant_c,"Competitor X's tool apparently does this already and their reps are using it as a selling point against us.",2026-09-19,Tier 2,6,sales call
+tenant_d,"We heard about the AI resolution-notes feature from another customer at a conference -- when is it coming to us?",2026-09-08,Tier 2,7,sales call
+tenant_d,"Writing resolution notes by hand is the #1 complaint from our on-call rotation. Anything that automates it is a win.",2026-09-22,Tier 2,5,support ticket
+tenant_e,"Not using the platform's incident workflow much yet, so can't comment on the AI notes specifically.",2026-09-10,Tier 3,6,in-app survey
+tenant_e,"Our team is small -- anything that cuts manual documentation steps matters a lot to us.",2026-09-25,Tier 3,7,support ticket

@@ -27,9 +27,9 @@ Impact = Users Affected × Current Action Rate × Expected Lift × Value per Act
 
 | Term | What it is | Ockham source |
 |---|---|---|
-| **Users Affected** | Tenants/users actually reached — adjusted for rollout, not the full ICP | `[Data: …]` rollout curve from the feature-flag / cohort table; never assume 100% of the ICP is on the new build |
-| **Current Action Rate** | Baseline rate of the action today | `[Data: …]` from Prometheus / OTel metrics (root `CLAUDE.md` §5 `itsm_*` counters) or the warehouse |
-| **Expected Lift** | How much the action rate moves | Ranked by reliability: a prior Ockham experiment (see `experiment-analysis.md`) > an `ai-feedback/` VoC signal > a named competitor benchmark > expert judgement — tag accordingly |
+| **Users Affected** | Tenants/users actually reached — adjusted for rollout, not the full ICP | `[Data: …]` from `../context-hub/feature-flag-rollouts.md` (dummy today — no real feature-flag system exists yet; see `../context-hub/README.md`); never assume 100% of the ICP is on the new build |
+| **Current Action Rate** | Baseline rate of the action today | `[Data: …]` from `../context-hub/`'s product usage data (a connected MCP product-analytics tool, or the monthly snapshot in `../context-hub/product-usage-snapshots/` — see `../context-hub/README.md`); today that snapshot itself is sourced from `platform-app`/`customer-app`'s live Prometheus / OTel metrics (root `CLAUDE.md` §5 `itsm_*` counters) |
+| **Expected Lift** | How much the action rate moves | Ranked by reliability: a prior Ockham experiment (check [`calibration-log.md`](calibration-log.md) first — that's where a prior experiment's *measured* lift actually lives, not just its `experiment-analysis.md` writeup) > an `ai-feedback/` VoC signal > a named competitor benchmark > expert judgement — tag accordingly |
 | **Value per Action** | $ or strategic value of one action | Ties to the edition ladder (`../gtm/pricing-and-packaging.md`): does the action drive activation → land, retention → expansion (Observe → Observe+Secure), or virality → seat/tenant growth? |
 
 Every term carries a citation tag per
