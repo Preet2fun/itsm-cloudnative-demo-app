@@ -1,6 +1,6 @@
 # PRD Review Rubric
 
-Used by [`prd-reviewer-agent.md`](prd-reviewer-agent.md). Structure follows
+Used by the `prd-reviewer-agent` (`.claude/agents/prd-reviewer-agent.md`). Structure follows
 **Uber's AI PRD Evaluator** (six review dimensions + a tiered launch-readiness
 scorecard). Dimension 7 is Ockham's AI-native extension. Tier sets depth;
 dimensions set what's checked; gates set the rating.
@@ -124,7 +124,7 @@ Calibrated to tier: a Tier 1 PRD needs only dimensions 1, 2, 4 clean to be
 
 ## Scorecard output
 
-Four parts (see `prd-reviewer-agent.md` §4):
+Four parts (see `.claude/agents/prd-reviewer-agent.md` §4):
 1. **Dimension-by-dimension** — Looks Good / Needs Review per dimension.
 2. **Detailed findings & fixes** — per gap: what's missing · write-ready
    replacement text · evidence from a linked doc or prior experiment.

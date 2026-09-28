@@ -1,8 +1,10 @@
 # How to Run the Discovery Agent
 
 A practical guide, not a restatement of the spec. Full stage detail lives in
-[`discovery-agent.md`](discovery-agent.md) (the agent's own operating rules
-— including the full "Autonomy per stage" table) and
+[`../../.claude/agents/discovery-agent.md`](../../.claude/agents/discovery-agent.md)
+(the agent's own operating rules — including the full "Autonomy per stage"
+table; it lives under `.claude/` since it's a Claude Code subagent
+definition, not tool-agnostic content) and
 [`../ai-pdlc-playbook.md`](../ai-pdlc-playbook.md) §3.1–§3.9 (input /
 working-flow / output, stage by stage). This is only what you need to
 actually use it.
@@ -11,7 +13,11 @@ actually use it.
 
 ## Start it
 
-Point an agent at `discovery-agent.md` and give it: the raw idea, its
+**In Claude Code:** run `/discovery-agent <idea> — came from: <provenance>`
+(the command at `.claude/commands/discovery-agent.md`).
+
+**With any other tool, or to run it manually:** point an agent at
+`.claude/agents/discovery-agent.md` and give it: the raw idea, its
 provenance, and anything already connected (a real ticket export,
 `../ai-feedback/`'s CSV, usage data). Nothing else is required to start —
 missing sources get flagged, never silently blocked on.
@@ -59,5 +65,5 @@ through the loop. Full path-by-path detail: `../ai-pdlc-playbook.md`
 Small/reversible idea → run stages 01, 02, 06 only. Net-new capability, or
 anything policy-/pricing-sensitive → run the full six. This guide's autonomy
 table applies to whichever stages actually run — it doesn't change *which*
-ones do; `discovery-agent.md`'s own "Effort scales to the idea" section
-decides that.
+ones do; `.claude/agents/discovery-agent.md`'s own "Effort scales to the
+idea" section decides that.

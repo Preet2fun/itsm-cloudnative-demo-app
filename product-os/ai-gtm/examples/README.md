@@ -2,7 +2,7 @@
 
 > **SAMPLE DATA — fictional accounts, illustrative numbers.** Not real prospects
 > or results. Every company name here is invented. Replace with live data once
-> there's a real outbound motion feeding `gtm/` (and once the AI feature is
+> there's a real outbound motion feeding `ai-gtm/` (and once the AI feature is
 > generating signals). Mirrors the starter kit's `examples/sample-company/`.
 
 This folder shows what a *populated* GTM repo looks like — so the plays,

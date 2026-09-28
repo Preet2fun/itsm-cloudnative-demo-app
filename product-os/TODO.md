@@ -24,7 +24,7 @@ Each item: where it came from, why it's parked, what would unblock it.
    **Unblocks when:** the user is ready to work on `ai-product-strategy/`
    for real.
 
-2. **`gtm/pricing-and-packaging.md` is thin.**
+2. **`ai-gtm/pricing-and-packaging.md` is thin.**
    Affects `data-analysis/impact-estimation.md`'s **Value per Action** term
    (ties to the edition ladder — Observe / Observe+Secure / Autonomous — which
    isn't priced out yet), and indirectly stage 02's opportunity scoring

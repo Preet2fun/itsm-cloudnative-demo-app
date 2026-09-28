@@ -1,6 +1,6 @@
 # Stages — the discovery loop
 
-[`discovery-agent.md`](../discovery-agent.md) works these in order. Each reads
+`discovery-agent` (`../../../.claude/agents/discovery-agent.md`) works these in order. Each reads
 the prior artifacts and writes one file into
 `product-os/ai-discovery/discovery/<slug>/stages/`. The loop is short on purpose
 — its job is to reach a **Pursue / Park / Kill** call cheaply, before a PRD is

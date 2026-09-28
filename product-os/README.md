@@ -56,7 +56,7 @@ product-os/
 ├── ai-discovery/         Discovery Agent (idea → Pursue/Park/Kill) — BUILT
 ├── ai-prd/               PRD Agent + PRD Reviewer Agent — BUILT
 ├── ai-feedback/          Customer Feedback Intelligence (MCP or CSV) — BUILT
-├── gtm/                  Go-to-market — GTM-repository pattern (+ sample data) — BUILT
+├── ai-gtm/                  Go-to-market — GTM-repository pattern (+ sample data) — BUILT
 ├── ai-product-strategy/  standalone scaffold ┐ each folds into a lifecycle/
 ├── ai-design/            standalone scaffold ┘ phase once that is built
 └── data-analysis/        standalone, partially built — impact-estimation.md +
@@ -66,7 +66,7 @@ product-os/
 Root docs: [`ai-pmf-strategy.md`](ai-pmf-strategy.md) ·
 [`ai-launch-strategy.md`](ai-launch-strategy.md) — cross-cutting frameworks;
 [`messaging.md`](messaging.md) — the homepage & product message (5-second test).
-The BUILT standalone folders (`ai-discovery/`, `ai-prd/`, `ai-feedback/`, `gtm/`)
+The BUILT standalone folders (`ai-discovery/`, `ai-prd/`, `ai-feedback/`, `ai-gtm/`)
 also fold into `lifecycle/` — see "Standalone folders" below.
 
 ### The two hubs
@@ -81,7 +81,7 @@ Both are persistent stores that outlive any single phase.
 ### Standalone folders
 
 `ai-discovery/`, `ai-prd/`, `ai-feedback/`, `ai-product-strategy/`, `ai-design/`,
-`gtm/`, `data-analysis/` are standalone **only until `lifecycle/` is built** —
+`ai-gtm/`, `data-analysis/` are standalone **only until `lifecycle/` is built** —
 then each folds into the matching phase:
 
 | Folder | Folds into |
@@ -90,7 +90,7 @@ then each folds into the matching phase:
 | `ai-prd/` — **PRD Agent + PRD Reviewer Agent** | `lifecycle/discovery/` (back half) |
 | `ai-feedback/` — **Customer Feedback Intelligence** (MCP tool or CSV → cited VoC evidence) | shared capability feeding `lifecycle/discovery/`, `planning/`, `release/` |
 | `ai-design/` | `lifecycle/design/` |
-| `gtm/` — **ICP tiers · signal library · account scoring · plays · battlecards · playbooks** (GTM-repository pattern) | `lifecycle/release/` |
+| `ai-gtm/` — **ICP tiers · signal library · account scoring · plays · battlecards · playbooks** (GTM-repository pattern) | `lifecycle/release/` |
 | `ai-product-strategy/` | feeds `lifecycle/discovery/` + `lifecycle/planning/` across phases |
 | `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) — `impact-estimation.md` grounds `ai-discovery/` scoring + `ai-prd/` stage 10; `experiment-analysis.md` grounds `ai-prd/` Addendum E + `ai-launch-strategy.md`'s scale-when-green gate |
 

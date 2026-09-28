@@ -6,7 +6,9 @@ exactly how solid each one is.
 **Inputs:** `01`–`06`; connected analytics / warehouse / logs / tickets; market
 sources from stage 04; `data-analysis/` if populated (quantitative);
 `ai-feedback/` lens output from stage 05 (customer-feedback counts, tagged
-`[Feedback: …]`).
+`[Feedback: …]`). For the actual postgres/prometheus MCP query pattern to
+run live against `platform-app`/`customer-app` — not just "run it live where
+you can" — see `../../ai-pdlc-playbook.md` §3.8.
 
 **Do:**
 1. For each claim the PRD will make (impact of the problem, addressable base,

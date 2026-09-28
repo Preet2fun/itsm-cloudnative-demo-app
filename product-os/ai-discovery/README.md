@@ -10,8 +10,14 @@ solutions) that becomes the [`../ai-prd/`](../ai-prd/) PRD Agent's stage-01 inpu
 Discovery is deliberately cheap and short. Its value is killing weak ideas
 *before* a PRD is spent on them — a confident Kill is a good outcome.
 
-- **[`discovery-agent.md`](discovery-agent.md)** — the agent: role, the 6-stage
-  loop, the Pursue / Park / Kill decision.
+- **The agent itself** — role, the 6-stage loop, the Pursue / Park / Kill
+  decision, and the autonomy-per-stage contract — lives at
+  [`../../.claude/agents/discovery-agent.md`](../../.claude/agents/discovery-agent.md),
+  **not** in this folder. This folder holds the agent's supporting content
+  (templates, per-stage contracts, the scorecard) — the tool-agnostic
+  methodology, usable by any AI tool. The agent definition itself is Claude
+  Code-specific config, so it lives under `.claude/`, same as every other
+  subagent.
 
 ## Supporting files
 
@@ -21,13 +27,18 @@ Discovery is deliberately cheap and short. Its value is killing weak ideas
 | [`research-methods.md`](research-methods.md) | The problem-space toolkit: signal synthesis, JTBD, current-state journey, evidence-gap list (stage 03) |
 | [`discovery-brief.md`](discovery-brief.md) | The output template — the Pursue handoff to the PRD Agent (and the Park / Kill decision log) |
 | [`stages/`](stages/) | One file per stage of the loop (01–06) |
+| [`how-to-run-discovery-agent.md`](how-to-run-discovery-agent.md) | Practical guide: how to start the agent, what runs unattended vs. what needs you, where output lands |
 
 ## How to run
 
-Point an agent at `discovery-agent.md`, give it the idea or signal, and give it
-read access to `../context-hub/`, `../ai-product-strategy/`, `../knowledge-hub/`,
-and any research sources (interviews, tickets, usage, churn). It works through
-`stages/01 … 06` and writes the decision.
+In Claude Code: `/discovery-agent <idea> — came from: <provenance>` (the
+command at `.claude/commands/discovery-agent.md`). With any other tool, or to
+understand what to expect either way: point an agent at
+`.claude/agents/discovery-agent.md`, give it the idea or signal, and give it
+read access to `../context-hub/`, `../ai-product-strategy/`,
+`../knowledge-hub/`, and any research sources (interviews, tickets, usage,
+churn). It works through `stages/01 … 06` and writes the decision. Full guide:
+[`how-to-run-discovery-agent.md`](how-to-run-discovery-agent.md).
 
 ## Where discovery work lands
 

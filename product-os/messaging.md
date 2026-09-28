@@ -150,8 +150,8 @@ Same product, sharper "that's me" — pick the entry point per campaign:
   the positioning statement, the wedge, the buyer pitches, the proof-chain line.
 - **Feeds** [`ai-launch-strategy.md`](ai-launch-strategy.md) Customer lens (does
   the ICP self-identify from the hero? if not, Customer Segments stays Yellow)
-  and [`gtm/positioning-statement.md`](gtm/positioning-statement.md) +
-  [`gtm/messaging-by-persona.md`](gtm/messaging-by-persona.md) — the hero copy is
+  and [`ai-gtm/positioning-statement.md`](ai-gtm/positioning-statement.md) +
+  [`ai-gtm/messaging-by-persona.md`](ai-gtm/messaging-by-persona.md) — the hero copy is
   the copy standard for every sequence.
 - **Tested by** [`ai-feedback/`](ai-feedback/) — once there's traffic,
   `signal-scan` over "what did you think Ockham did?" replies is the 5-second

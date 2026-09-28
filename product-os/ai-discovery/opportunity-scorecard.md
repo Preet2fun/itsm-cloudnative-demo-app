@@ -1,6 +1,6 @@
 # Opportunity Scorecard
 
-Used by [`discovery-agent.md`](discovery-agent.md) at stage 02. A structured
+Used by the `discovery-agent` (`../../.claude/agents/discovery-agent.md`) at stage 02. A structured
 judgement, not a formula — score each factor 1–5, write the one-line reason and
 the AI angle, then read the whole picture against the two gates.
 

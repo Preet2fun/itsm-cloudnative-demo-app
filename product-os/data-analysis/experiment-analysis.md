@@ -26,7 +26,7 @@ p < 0.05 and the confidence-interval width. A wide interval on a small tenant
 count is common early — say so; don't round it up to "significant."
 
 ### 3. Segment analysis
-Cut by `../gtm/icp-tiers.md` tier, by edition (Observe / Observe+Secure /
+Cut by `../ai-gtm/icp-tiers.md` tier, by edition (Observe / Observe+Secure /
 Autonomous), and by ICP fit. A flat topline average can hide a segment win and
 a segment loss cancelling out — read segments **before** a kill call, not
 after.

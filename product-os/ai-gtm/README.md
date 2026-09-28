@@ -18,13 +18,14 @@ context-hub, it references it.
 |---|---|---|
 | **Index** | `README.md` (this file) | Scannable in 2 minutes. Points to everything else. |
 | **Context** | `icp-tiers.md` · `signal-library.md` · `account-scoring.md` · `positioning-statement.md` · `messaging-by-persona.md` · `personas/` · `battlecards/` | The GTM knowledge base. Dated; carries evolution + performance logs. |
-| **Plays** | [`plays/`](plays/) | What an agent executes — one prompt, one output. |
+| **Plays** | [`plays/`](plays/) index; agents at [`.claude/agents/gtm-*.md`](../../.claude/agents/) | What an agent executes — one prompt, one output. |
 | **Workflows** | [`workflows/`](workflows/) | How the team operates — decision trees for humans, not agent instructions. |
 | **Playbooks** | [`playbooks/`](playbooks/) | Step-by-step for one situation. Ockham's four sales plays + two from the kit. |
 | **Outputs** | [`outputs/`](outputs/) | Dated archive of every brief, campaign, and scoring run. The feedback loop. |
 | **Examples** | [`examples/`](examples/) | **Sample data** — fictional prospect accounts + worked scoring / research / campaign, so the model is legible before real data exists. Replace once the AI feature generates real signals. |
 
 Plus `pricing-and-packaging.md` (strategy, no commercial terms) and `launch-plan.md`.
+Practical usage guide: [`how-to-run-gtm-agents.md`](how-to-run-gtm-agents.md).
 
 ---
 
@@ -40,12 +41,14 @@ a compliance deadline (SOC 2 / DORA / audit) · a public incident where
 a first security-engineer hire into an IT team with no SOC. Full library +
 scoring + decay: [`signal-library.md`](signal-library.md).
 
-**The plays:**
+**The plays** (in Claude Code, as slash commands — `/gtm-account-research`
+etc.; with any other tool, point an agent at the matching
+`.claude/agents/gtm-*.md` file):
 ```
-Read gtm/plays/account-research.md and research <company.com>
-Read gtm/plays/account-scoring.md and score: <list>
-Read gtm/plays/signal-to-sequence.md — build a Tier 2 campaign for <signal>, persona <role>
-Read gtm/plays/weekly-update.md and run the weekly GTM update
+/gtm-account-research <company.com>
+/gtm-account-scoring <list>
+/gtm-signal-to-sequence build a Tier 2 campaign for <signal>, persona <role>
+/gtm-weekly-update
 ```
 
 ---
@@ -58,7 +61,7 @@ Read gtm/plays/weekly-update.md and run the weekly GTM update
   data), [`../messaging.md`](../messaging.md) — the 5-second hero copy is the
   **copy standard for every sequence**.
   *(`ai-product-strategy/` and `data-analysis/` are README-only scaffolds today —
-  `gtm/` runs without them; `pricing-and-packaging.md` and the `launch-plan.md`
+  `ai-gtm/` runs without them; `pricing-and-packaging.md` and the `launch-plan.md`
   targets stay thin until they're populated.)*
 - **Reuses [`../ai-feedback/`](../ai-feedback/):** the behavioural / intent
   signal class (what the market is saying) runs through `signal-scan` — not a

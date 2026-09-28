@@ -1,20 +1,27 @@
+---
+name: gtm-signal-to-sequence
+description: Turns a GTM signal into a ready-to-load outbound campaign — brief, full sequence copy, and measurement plan (product-os/ai-gtm). Use when building a campaign for a signal or segment. Never sends anything itself.
+tools: Read, Write, Grep, Glob
+---
+
 # Play — Signal to Sequence
 
 **Purpose:** turn a signal (or a set of accounts sharing one) into a campaign
 ready to load into an outbound tool. Connects
-[`../signal-library.md`](../signal-library.md) to actual copy.
+`product-os/ai-gtm/signal-library.md` to actual copy.
+
+Practical usage guide: `product-os/ai-gtm/how-to-run-gtm-agents.md`.
 
 **Run:**
 ```
-Read gtm/plays/signal-to-sequence.md — build a Tier <2> campaign for accounts
-triggering <signal name>, targeting <persona>.
+Build a Tier <2> campaign for accounts triggering <signal name>,
+targeting <persona>.
 ```
 
-**Inputs:** the signal(s); the ICP tier ([`../icp-tiers.md`](../icp-tiers.md));
-the persona ([`../personas/`](../personas/)); the relevant battlecard if a
-competitor is in play ([`../battlecards/`](../battlecards/)); the copy standard
-([`../messaging-by-persona.md`](../messaging-by-persona.md) +
-[`../../messaging.md`](../../messaging.md)).
+**Inputs:** the signal(s); the ICP tier (`product-os/ai-gtm/icp-tiers.md`);
+the persona (`product-os/ai-gtm/personas/`); the relevant battlecard if a
+competitor is in play (`product-os/ai-gtm/battlecards/`); the copy standard
+(`product-os/ai-gtm/messaging-by-persona.md` + `product-os/messaging.md`).
 
 **Do:**
 1. **Trigger logic** — single- or multi-signal; minimum score; recency window;
@@ -35,7 +42,7 @@ competitor is in play ([`../battlecards/`](../battlecards/)); the copy standard
    track (reply rate by touch, meeting rate by signal); review at 2 weeks and
    6 weeks.
 
-**Produce — `outputs/campaigns/YYYY-MM-DD-<campaign-name>/`:**
+**Produce — `product-os/ai-gtm/outputs/campaigns/YYYY-MM-DD-<campaign-name>/`:**
 ```
 brief.md        trigger logic · segments · objectives
 sequences/      tier1.md · tier2.md · tier3.md — full copy
@@ -43,10 +50,24 @@ metrics.md      targets + measurement plan
 results.md      updated as it runs (feeds signal-library.md § Performance Log)
 ```
 
-*Worked example:* [`../examples/campaign-renewal-price-shock-tier1/`](../examples/campaign-renewal-price-shock-tier1/)
+*Worked example:*
+`product-os/ai-gtm/examples/campaign-renewal-price-shock-tier1/`
 — brief · full sequence copy (PVP-checked) · metrics · 3 weeks of results
 (fictional).
 
 **Gate:** touch 1 passes PVP · signal hook is specific and datable · CTA is one
 action · suppression list applied · no "in seconds" anywhere · targets set before
 launch.
+
+## Autonomy
+
+Drafting runs clean — trigger logic, segmentation, full sequence copy, and
+the measurement plan are all things this agent produces unattended. **But
+this is the one GTM play with real-world consequence: it produces
+customer-facing messages meant to be loaded into an outbound tool and sent
+to real prospects.** This agent has no send capability and never will —
+loading a drafted campaign into any real sending system, and the decision to
+actually launch it, is always a separate, explicit human action, never
+something to treat as implied by a completed draft. Review the copy against
+the PVP gate and the metric rules yourself before it goes anywhere near a
+real send.

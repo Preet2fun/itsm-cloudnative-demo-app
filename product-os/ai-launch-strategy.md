@@ -141,12 +141,12 @@ value is that it names the pre-scale work precisely:
 
 | Canvas lens | Owned by | Fed by |
 |---|---|---|
-| Customer — Segments, Retention, Pain | `gtm/` | `context-hub/icp.md`; `ai-feedback/` (signal-scan for Pain, pattern-classification for reach); VoC from `ai-prd/` stage 05 |
+| Customer — Segments, Retention, Pain | `ai-gtm/` | `context-hub/icp.md`; `ai-feedback/` (signal-scan for Pain, pattern-classification for reach); VoC from `ai-prd/` stage 05 |
 | Product — AI Reliability | `ai-prd/` stage 06 + addendum E | eval results |
 | Product — Reach, Uniqueness | `ai-product-strategy/` | `context-hub/ebpf-signal-thesis.md`, `positioning.md` |
 | Company — AI Infrastructure | `ai-prd/` addendum F + engineering | cost + latency measurements |
-| Company — GTM Viability, Supplier Power | `gtm/` (`launch-plan.md`, `account-scoring.md`) + `ai-product-strategy/` | design-partner pipeline; `ai-engine/` provider stance |
-| Competition — all three | `ai-product-strategy/` + `gtm/battlecards/` | `context-hub/competitive-landscape.md` |
+| Company — GTM Viability, Supplier Power | `ai-gtm/` (`launch-plan.md`, `account-scoring.md`) + `ai-product-strategy/` | design-partner pipeline; `ai-engine/` provider stance |
+| Competition — all three | `ai-product-strategy/` + `ai-gtm/battlecards/` | `context-hub/competitive-landscape.md` |
 
 Re-scored at each major launch — post-launch, `ai-feedback/`'s **launch-feedback**
 lens supplies the before/after read. A **Yellow → Red** move on any gating cell
@@ -154,7 +154,7 @@ is escalated to `ai-product-strategy/` immediately, not deferred to the next
 review.
 
 When `lifecycle/` is built, this doc folds into `lifecycle/release/` alongside
-`gtm/`.
+`ai-gtm/`.
 
 ---
 

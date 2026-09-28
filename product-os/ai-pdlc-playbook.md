@@ -54,7 +54,7 @@ IDEA
   │ shipped
   ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ RELEASE             gtm/  ✅   ai-launch-strategy.md  ✅      │
+│ RELEASE             ai-gtm/  ✅   ai-launch-strategy.md  ✅      │
 │                     messaging.md  ✅                          │
 │ Scale-when-green gate, GTM plays/battlecards/campaigns        │
 └─────────────────────────────────────────────────────────────┘
@@ -97,7 +97,7 @@ first.
 | `ebpf-signal-thesis.md` | How runtime signals turn theoretical risk into observed evidence; the one-sensor structural advantage |
 
 **Connects to:** literally everything downstream — `ai-discovery/` reads ICP +
-positioning for fit gates; `ai-prd/`'s Ockham-fit checks; `gtm/`'s ICP tiers
+positioning for fit gates; `ai-prd/`'s Ockham-fit checks; `ai-gtm/`'s ICP tiers
 and battlecards; `ai-launch-strategy.md`'s Customer/Competition lenses;
 `messaging.md`'s hero copy.
 
@@ -405,7 +405,7 @@ TAM/SAM/SOM would be the only lever.
 | Users Affected | 🟡 Roughly | `context-hub/feature-flag-rollouts.md` gives a real (if dummy) rollout curve now — 2 tenants fully enabled, 1 at 50% — rather than falling back to active-tenant-count as a proxy |
 | Current Action Rate | ✅ Yes | `% of resolved incidents with resolution_notes != ''` — a real query against live data, zero AI involved, describes the *manual baseline*, not the future feature |
 | Expected Lift | ⛔ No | Inherently a forecast about something that hasn't shipped — stays `[Assumed]` until a real version launches and `data-analysis/experiment-analysis.md` measures it |
-| Value per Action | ⛔ No | Would tie to `gtm/pricing-and-packaging.md`'s edition ladder — that file is thin/unpopulated today |
+| Value per Action | ⛔ No | Would tie to `ai-gtm/pricing-and-packaging.md`'s edition ladder — that file is thin/unpopulated today |
 
 So: **3 of 4 terms describe the present, not the future** — that's the
 answer to "do we have any data at all." The one term that's genuinely
@@ -448,11 +448,11 @@ it from scratch each time.
 |---|---|---|
 | Feature-flag / cohort tracking | 🟡 Partial (dummy) | No real feature-flagging system exists — but `context-hub/feature-flag-rollouts.md` now gives `impact-estimation.md`'s Users Affected term a real, if illustrative, place to read from. Real system stays ⛔ Pending — proposed, not approved. |
 | A connected `ai-feedback/` source | 🟡 Partial (dummy) | No real customers/support tool yet — genuinely pre-launch. `ai-feedback/sample-feedback.csv` closes the format gap (stage 02's Severity/Competition/Contrast scoring and stage 03's signal synthesis can both run against it today) without inventing real customer data. |
-| `gtm/pricing-and-packaging.md` populated | ⛔ Pending | Depends on real pricing decisions, not data infrastructure — genuinely not fixable by building anything. |
+| `ai-gtm/pricing-and-packaging.md` populated | ⛔ Pending | Depends on real pricing decisions, not data infrastructure — genuinely not fixable by building anything. |
 | Prior Ockham experiments | ⛔ Pending | Can't exist before something ships — self-resolving over time. `data-analysis/calibration-log.md` (below) is ready to receive the first one. |
 | Calibration loop (Discovery's `Expected Lift` vs. `experiment-analysis.md`'s measured lift) | ✅ Built | `data-analysis/calibration-log.md` — one row per shipped feature, written after the ship/iterate/kill call, read before the next feature's Expected Lift guess. One illustrative row exists; needs a real ship/iterate/kill call to populate for real. |
 
-Two genuinely un-fixable items remain (`gtm/pricing-and-packaging.md`, real
+Two genuinely un-fixable items remain (`ai-gtm/pricing-and-packaging.md`, real
 prior experiments) plus one deliberately parked one (stage 06's
 `ai-product-strategy/` handoff, §3.6) — tracked in `product-os/TODO.md`, not
 duplicated here.
@@ -482,13 +482,487 @@ Uber's AI PRD Evaluator — 360° context, risk-tier classification, 7 dimension
 | 11 | Draft PRD + review | Assembles `prd.md`; runs the Reviewer Agent; applies fixes |
 | 12 | Final checklist | Go / no-go gate |
 
-**Where it lands:** `product-os/ai-prd/prds/<feature-slug>/` — same slug as
-its Discovery Brief.
+**Every stage below follows the same three-part shape as Discovery's** (§3):
+Input (what it reads, including every prior stage's output and every
+hub/data-analysis reference), Working flow (the exact numbered steps),
+Output (the artifact, its real storage path, and which stage or module it
+feeds). Storage convention, stated once: every artifact for a given feature
+lives under `product-os/ai-prd/prds/<slug>/` — same `<slug>` its Discovery
+Brief used, so the two trails share one name. **As of today, the `prds/`
+folder itself does not exist anywhere in this repo** — same as
+`ai-discovery/discovery/`, it's created the first time a real feature runs
+through the loop.
 
-**Downstream, per `ai-prd/README.md`'s own documented handoff:** `ai-design/`
-(⛔ scaffold — see §5) and then **engineering** directly. This is exactly why
-§9's process rule matters: nothing in product-os itself currently turns a
-Ready PRD into code.
+### 4.1 Stage 01 — Idea Brief
+
+**Input**
+- The user's brief (line/paragraph/doc) — **or** a Discovery Brief from
+  `ai-discovery/discovery/<slug>/`, if the idea came through Discovery:
+  problem, hypothesis, opportunity score, primary JTBD, affected personas,
+  the candidate-solutions table, and a suggested tier, all already
+  validated.
+- `context-hub/` — positioning, vision, ICP, metric rules.
+
+**Working flow**
+1. If a Discovery Brief exists, treat the next two steps as **verify and
+   adopt, not re-derive** — copy its candidate-solutions table straight into
+   `01-idea-brief.md` so stage 02 has it; build the evidence plan (step 5)
+   from its "what the PRD must still prove" list, carrying any `[pre-build]`
+   item straight to §15 with a "before build" due.
+2. Restate the ask in one sentence — the feature, the user, the outcome.
+3. Write the problem (a specific user, a specific cost of the status quo)
+   and the hypothesis ("if we build X, then `<measurable>` will move,
+   because …").
+4. Run 3–5 Socratic questions and answer them from context, marking any
+   assumed answers: *What specific pain does this solve? How do we know
+   it's real? Who feels it most? What's the cost of not solving it? Why
+   this, why now?*
+5. Assign the risk tier (1–4) per `review-rubric.md`, with one sentence of
+   why. The reviewer confirms or overrides this at stage 11 — its tier is
+   authoritative.
+6. List what you'd need to prove the hypothesis and where each piece would
+   come from — this becomes the work order for stages 03–07.
+7. **Gate:** the hypothesis is falsifiable and the tier is set. If the brief
+   has two readings that change scope, stop and ask the user.
+
+**Output**
+- Artifact: `01-idea-brief.md` — one-sentence restatement · Problem /
+  Hypothesis · Socratic Q&A (assumptions flagged) · Tier + rationale ·
+  candidate-solutions table (carried, if any) · evidence plan.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/01-idea-brief.md`.
+- Feeds: stage 02 — and its tier calibrates how deep every later stage runs
+  (see "Effort scales to tier" above).
+
+### 4.2 Stage 02 — Requirements
+
+**Input**
+- Stage 01's output, including any carried candidate-solutions table.
+- The Discovery Brief itself, if this came from `ai-discovery/`.
+- `context-hub/icp.md`, `context-hub/positioning.md`.
+- `ai-product-strategy/` — ⛔ scaffold today, so this input is a no-op until
+  that folder is real.
+- `ai-feedback/` **cohort-compare** — where feedback data exists (today:
+  `ai-feedback/sample-feedback.csv`, dummy) — scopes the shared vs
+  differential vs unique persona split.
+
+**Working flow**
+1. Write Users & JTBD: primary and secondary personas, the job each is
+   hiring this feature to do, who is explicitly not a user. Where feedback
+   data exists, run `ai-feedback/`'s cohort-compare first — its split scopes
+   these personas directly.
+2. Write scope: **Goals** (few, priority-ordered, measurable, with guardrail
+   metrics), **Non-goals** (deliberate exclusions, each with a why), **Out
+   of scope this iteration** (deferred, with the revisit trigger).
+3. Write constraints: performance, cost, security/tenant-isolation,
+   compliance, platform, timeline — pull hard numbers from `knowledge-hub/`
+   where they exist (today: empty, so this is mostly N/A until something
+   ships).
+4. Write 2–3 genuinely different strategic framings (e.g. surface-first vs
+   workflow-first vs evidence-first), one paragraph each — the bet, what it
+   optimizes, what it gives up — then pick one with rationale. If a
+   Discovery Brief supplied candidate solutions, those are the starting
+   framings — extend/re-score them rather than starting from scratch.
+5. From the chosen framing + JTBD, write the `US-xxx` user stories (As a /
+   I want / So that + P0/P1/P2) and derive one `FR-x` line per acceptance
+   path. (Acceptance criteria themselves get filled at stage 08, finalized
+   at stage 11.)
+6. **Gate:** the scope boundary is explicit, one framing is chosen, and
+   every user story has a priority.
+
+**Output**
+- Artifact: `02-requirements.md` — Users & JTBD · Goals/Non-goals/Out of
+  scope · Constraints · Framings (2–3) + chosen framing + why · `US-xxx`
+  stories + `FR-x` skeleton.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/02-requirements.md`.
+- Feeds: stage 03 (constraints/scope inform the adjacent-systems check),
+  stage 08 (user stories get their acceptance-criteria states filled in),
+  and PRD §3/§4/§7's skeleton directly.
+
+### 4.3 Stage 03 — Knowledge Gathering
+
+**Input**
+- Stage 02's output.
+- `knowledge-hub/` — shipped features + dependencies (today: empty,
+  greenfield — this check returns "nothing to reuse yet," not a real gap).
+- Linked specs, prior PRDs/experiments (today: none exist — pre-launch,
+  self-resolving).
+- If from a Discovery Brief: its candidate-solutions table (a feasibility
+  read) and "what we know" table (adjacent systems already named) — extend
+  these, don't restart.
+
+**Working flow**
+1. Map what already ships near this problem — features, surfaces, data
+   models, runtimes — and what's reusable.
+2. List adjacent systems this feature would read from, write to, or sit
+   beside; for each, note the dependency direction and what breaks if it
+   changes.
+3. Assess blast radius: second-order effects on load, cost, on-call
+   surface, incentives, permissions/RBAC, tenant isolation.
+4. Record prior attempts: has this been tried before, what happened, what
+   was learned.
+5. List open technical unknowns — things engineering will need to answer.
+6. **Gate:** the adjacent-systems table is complete enough that the
+   reviewer's dimension 5 (Adjacent Impact) can be checked against it;
+   unknowns flow to §15.
+
+**Output**
+- Artifact: `03-knowledge-gathering.md` — Existing capability map ·
+  Adjacent-systems table (system · direction · breaks-if) · Blast radius ·
+  Prior attempts · Technical unknowns.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/03-knowledge-gathering.md`.
+- Feeds: assembles directly into PRD §11 (Dependencies); feeds the
+  Reviewer's dimension 5 (Adjacent Impact) at stage 11.
+
+### 4.4 Stage 04 — Market & Competitor Research
+
+**Input**
+- Stages 01–03.
+- `context-hub/competitive-landscape.md` — the fixed 7-competitor set (ops:
+  Datadog, Dynatrace, Edge Delta, Resolve.ai; security: Upwind, Wiz,
+  Dropzone.ai).
+- Web research — only widen beyond the fixed set if the user says so.
+- `ai-feedback/` **signal-scan** — where feedback data exists (today:
+  `ai-feedback/sample-feedback.csv`) — its Contrast step surfaces real
+  competitor mentions tied to the topic.
+- If from a Discovery Brief: its opportunity score already sized the
+  competitive gap — this stage builds the detailed table, it doesn't
+  re-decide whether there's an opening.
+
+**Working flow**
+1. For each relevant competitor, capture: the comparable feature,
+   pricing/gating (what plan or admin privilege unlocks it), the key
+   limitation, and any user complaint/signal (G2, forums, docs) — run
+   `ai-feedback/` signal-scan first where data exists, folding its
+   competitor mentions into the "user complaint/signal" column, cited
+   `[Feedback: …]`.
+2. Name the opportunity for us per row — the concrete wedge, tied to
+   Ockham's positioning (unified ops+security team/budget; one-sensor
+   eBPF; time-to-first-hypothesis).
+3. Note where a competitor's own messaging validates our approach — use it,
+   don't avoid it.
+4. Cite every competitor claim `[Source: …]` with doc/date; re-verify live —
+   don't replay stale findings.
+5. **Gate:** every row is cited and dated; the opening is specific, not
+   "we'll be better."
+
+**Output**
+- Artifact: `04-market-competitor-research.md` — the §6.2 table + a short
+  "opening for us" paragraph + validation notes.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/04-market-competitor-research.md`.
+- Feeds: PRD §6.2 verbatim.
+
+### 4.5 Stage 05 — Voice of Customer
+
+**Input**
+- Stages 01–02.
+- Interview notes, support tickets, sales-call notes, community threads,
+  churn reasons — whatever's connected.
+- `ai-feedback/` — where a feedback tool (MCP) or CSV is available (today:
+  `ai-feedback/sample-feedback.csv`) — its **prd-evidence-pack** lens *is*
+  this stage's artifact; **cohort-compare** answers "who most."
+- If from a Discovery Brief: its JTBD, personas, and "what we know" signals
+  are the starting point — this stage deepens them with named quotes and
+  the said-vs-did split, it doesn't rebuild them.
+
+**Working flow**
+1. Where a feedback source is available, run `ai-feedback/`'s
+   prd-evidence-pack lens first — returns volume, trend, sentiment, segment
+   breakdown, 5 attributed quotes, impact, and limitations, already tagged
+   `[Feedback: …]`; run cohort-compare to answer who's affected most.
+2. Pull named quotes and signals on top of that: who said it, what they
+   said, the source — verbatim where possible.
+3. Separate what users say from what they do (usage data, observed
+   workarounds); flag where these diverge.
+4. Segment by persona — the primary persona's demand matters most.
+5. **Gap check:** if there's no feature-specific demand by name, say so
+   explicitly and turn it into a §14 risk + a pre-GA action ("run 3–5
+   interviews before broad GTM claims"). Label adjacent-but-not-exact
+   signals as such.
+6. **Gate:** §6.1's content is either real named demand or an explicit,
+   logged gap — no invented quotes, ever.
+
+**Output**
+- Artifact: `05-voice-of-customer.md` — Named quotes/signals (with sources)
+  · Say-vs-do notes · Per-persona demand · Gap statement.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/05-voice-of-customer.md`.
+- Feeds: PRD §6.1 verbatim; its `[Feedback: …]` rows also carry into the
+  Evidence Appendix (§17).
+
+### 4.6 Stage 06 — Metrics & AI Design Strategy
+
+**Input**
+- Stages 01–03.
+- `context-hub/` metric rules.
+- `ai-pmf-strategy.md` — the dual-metrics principle.
+
+**Working flow — always, every tier**
+1. Write the north-star: one outcome metric, not a vanity count; honor the
+   metric rules (time-to-first-hypothesis framing, never "in seconds").
+2. Write primary & secondary metrics: metric · baseline · target · how
+   tracked · horizon.
+3. Write guardrail metrics — what must not regress.
+4. Write failure criteria — the explicit conditions under which this
+   feature is a failure and gets pulled or reworked.
+5. Write events & tracking: event names, segments, dashboards; call out any
+   "don't treat X as Y" trap.
+
+**Working flow — AI-native features only (owns addendum A–H)**
+6. Run the per-component **ML-necessity check** (addendum A): is ML
+   necessary, data available, meets the accuracy bar, bias risk,
+   explainable, feedback-loop speed → PASS/PARTIAL/FAIL + note. **A FAIL on
+   "is ML necessary" means stop and flag it — don't build it as an AI
+   feature.**
+7. Add AI-specific metrics: accuracy/F1, hallucination/groundedness rate,
+   calibration, latency, cost per run, correction rate.
+8. Write the **grounding strategy** (addendum B): the single source of
+   truth, what the model may/may not see, attribution required on every
+   output, "not found" is a valid answer.
+9. Write the **prompt strategy** (addendum C): per task — technique, output
+   format, rationale — plus the prompt-improvement loop.
+10. Write **hallucination guardrails** (addendum D): at inference/
+    extraction, at chat, at the UI/human-in-the-loop.
+11. Write the **evaluation strategy** (addendum E): ground-truth sources,
+    offline eval plan (metric/method/target/cadence), online monitoring, the
+    eval dataset location — stage 07 verifies any data claims this makes.
+12. Write **production readiness / HHH** (addendum F): Helpful/Honest/
+    Harmless × strength/risk/mitigation; launch criteria per Alpha/Beta/GA;
+    Responsible AI.
+13. Write the **agent-capabilities & autonomy** table (addendum G):
+    component · input · output · autonomy level (observe → suggest →
+    act-with-approval → act) · human-in-the-loop trigger.
+14. Write **model requirements & selection trade-offs** (addendum H):
+    model/provider, context window, temperature, max output tokens, latency
+    target, cost per call — why this model beats the next-best alternative,
+    and the fallback if pricing/availability changes.
+15. **Gate:** the north-star is an outcome, failure criteria exist; for AI
+    features, the ML-necessity check is done and addendum A–H is drafted.
+
+**Output**
+- Artifact: `06-metrics-strategy.md` — North-star · Metrics tables ·
+  Guardrails · Failure criteria · Events (+ the full addendum A–H for
+  AI-native features).
+- Storage: `product-os/ai-prd/prds/<slug>/stages/06-metrics-strategy.md`.
+- Feeds: PRD §10 (Data & Instrumentation) directly; the AI addendum
+  assembles verbatim into the template's AI-native addendum section; feeds
+  stage 07 (verifies its data claims) and the Reviewer's dimensions 4
+  (Metric & Data Rigor) and 7 (AI Readiness).
+
+### 4.7 Stage 07 — Evidence Gathering
+
+**Input**
+- Stages 01–06.
+- Connected analytics/warehouse/logs/tickets.
+- Market sources from stage 04.
+- `data-analysis/` if populated — today: `impact-estimation.md`,
+  `experiment-analysis.md`, and `calibration-log.md` all exist.
+- `ai-feedback/` lens output from stage 05 (customer-feedback counts,
+  tagged `[Feedback: …]`).
+- The actual query recipe — `ai-pdlc-playbook.md` §3.8 — the
+  postgres/prometheus MCP pattern for pulling real numbers, not just "run it
+  live where you can" (this cross-reference is new; added directly to this
+  stage's own file as part of this restructure).
+
+**Working flow**
+1. For each claim the PRD will make (impact of the problem, addressable
+   base, adoption ceiling, cost, market size), get a figure and a source.
+2. Run it live where you can — use the §3.8 query pattern against
+   `platform-app`/`customer-app`'s live postgres/prometheus (via MCP, per
+   root `CLAUDE.md` §2); record the query/source and the run date.
+3. Tag every figure Measured/Assumed/Gated per `citations.md`: **Measured**
+   (verified live this run), **Assumed** (estimate, state the basis),
+   **Gated** (depends on an unconfirmed source — never present as proven,
+   raise a §14 risk + §15 open question).
+4. For each figure, write one line on what it proves and what it does not —
+   guard against a scale number standing in for an adoption number.
+5. Build the Evidence Appendix rows: claim · citation · source type.
+6. **Gate:** every number the PRD will cite is in this file with a tag;
+   Gated items are all mirrored into risks/open questions.
+
+**Output**
+- Artifact: `07-evidence-gathering.md` — Evidence table (claim · value ·
+  tag · citation · proves/does-not-prove) · Evidence Appendix rows · Gated
+  items carried forward.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/07-evidence-gathering.md`.
+- Feeds: PRD §17 (Evidence Appendix) directly; its Gated items feed §14
+  (Risks) and §15 (Open Questions).
+
+### 4.8 Stage 08 — Visual Strategy
+
+**Input**
+- Stage 02 (chosen framing), stage 03 (where it lives/adjacent systems),
+  stage 06 (what's shown).
+- `ai-design/` principles — ⛔ scaffold only today, no principles actually
+  written yet.
+- Root `CLAUDE.md` §10 — the real bridge in the meantime: UI is drafted
+  directly in Claude Design, without waiting on `ai-design/` (this note is
+  new; added directly to this stage's own file as part of this restructure).
+
+**Working flow**
+1. Define surfaces: where the feature lives (module, nav entry, embedded vs
+   standalone), and what it does not replace.
+2. Write the screen list: each screen, its primary job, its key widgets.
+3. Define states for every screen: default, loading, empty/zero-data,
+   first-run, error, unauthorized. For AI features specifically: model/
+   telemetry unavailable → show empty/error, **never invent metrics**.
+4. Define information architecture: nav order, drill paths, what's advisory
+   vs actionable.
+5. Start the Claude Design draft directly (the `design` skill, per root
+   `CLAUDE.md` §10) — link the artboards, note what's still open for
+   design.
+6. For each stage-02 user story, list the concrete negative/edge/
+   cross-system cases its screens must handle, drawn from the state matrix
+   — these become §7's acceptance criteria at assembly.
+7. **Gate:** every screen has its non-happy states defined; the prototype
+   path is noted for stage 09.
+
+**Output**
+- Artifact: `08-visual-strategy.md` — Surfaces · Screen list · State matrix
+  · IA · link to the Claude Design draft · acceptance-criteria states per
+  user story.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/08-visual-strategy.md`.
+  The Claude Design artboards themselves are a published Artifact, not a
+  repo file — link it here and note it in `prds/<slug>/prototype/`.
+- Feeds: stage 09; its acceptance-criteria states assemble into PRD §7 at
+  stage 11.
+
+### 4.9 Stage 09 — Prototype Summary
+
+**Input**
+- Stage 08's output.
+- The Claude Design draft.
+- Any code/clickable prototype.
+
+**Working flow**
+1. State status: Generated / Partial / Not run. If not run, say why and
+   what that leaves unvalidated.
+2. Describe what it is: artboards vs clickable vs coded; where it lives
+   (`prototype/`).
+3. Describe what it validated: which flows/states hold up, what it exposed
+   (dead ends, missing states, confusing IA).
+4. Describe what it did not cover: flows still on paper only.
+5. List open design questions → feeds §15.
+6. **Gate:** honest status — "Not run" is acceptable; pretending otherwise
+   is not.
+
+**Output**
+- Artifact: `09-prototype-summary.md` — Status · What it is · Validated ·
+  Not covered · Open questions.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/09-prototype-summary.md`;
+  prototype artifacts themselves in `product-os/ai-prd/prds/<slug>/prototype/`.
+- Feeds: PRD §9.7 directly; open questions feed §15.
+
+### 4.10 Stage 10 — ROI / Business Case
+
+**Input**
+- Stage 04 (market), stage 06 (metrics), stage 07 (evidence).
+- `context-hub/icp.md`.
+- `data-analysis/impact-estimation.md` — where telemetry exists, gives a
+  bottoms-up scenario set to cross-check against the top-down TAM/SAM/SOM.
+- `ai-gtm/pricing-and-packaging.md` — thin/unpopulated today, tracked in
+  `product-os/TODO.md` item 2. Value per Action and the edition-ladder
+  tie-in both stall here until it's populated — this is exactly where that
+  parked gap bites hardest.
+
+**Working flow**
+1. Estimate build cost: rough team + duration, infra/model/tooling run
+   cost.
+2. Estimate operating cost: monthly at a stated usage level, cost per
+   active user/per run, unit economics.
+3. Size the market: TAM/SAM/SOM against the ICP, each with basis and tag
+   (Measured/Assumed).
+4. Write revenue scenarios: conservative/target/optimistic — paying
+   customers · ARPU · ARR, with the assumption behind each.
+5. Write the mini business case: the ICP, the adoption goal, the **measured
+   wedge** (what live data proves) vs the **assumed/gated impact** (what it
+   doesn't — never narrated as proven), and a one-line recommendation
+   (proceed / proceed phased / don't).
+6. **Gate:** measured vs gated impact are separated; the recommendation is
+   explicit.
+
+**Output**
+- Artifact: `10-roi-business-case.md` — Build cost · Operating cost ·
+  TAM/SAM/SOM · Revenue scenarios · Mini business case + recommendation.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/10-roi-business-case.md`.
+- Feeds: PRD §12.1 (verbatim tables) and §5 (mini business case +
+  recommendation).
+
+### 4.11 Stage 11 — Draft PRD & Review
+
+**Input**
+- Stages 01–10, all of it.
+- `prd-template.md`, `citations.md`, and the `prd-reviewer-agent`
+  (`../../.claude/agents/prd-reviewer-agent.md`).
+
+**Working flow**
+1. Assemble `prd.md` to `prd-template.md` exactly — header block, an empty
+   PRD Review block, sections 1–17, and the AI-native addendum if the
+   feature's core value depends on a model. Each section pulls from a
+   specific stage per the `prd-agent`'s own section-sourcing table (§1 from
+   01+10, §2 from 01/05/07, §6 from 04/05/07, §17 from 07, the AI addendum
+   from 06, and so on) — carry every Gated figure into §14/§15, cite every
+   number.
+2. Run the reviewer: invoke the `prd-reviewer-agent` against `prd.md`. It
+   assembles 360° context (adjacent impacts via `knowledge-hub/`, partner
+   concerns, prior experiments, the discovery trail if one exists,
+   `context-hub/` consistency anchors), classifies the tier, scores the
+   seven dimensions (Looks Good / Needs Review / Blocking), and returns the
+   scorecard: launch-readiness rating, tier, major blindspot, dimension
+   scores, detailed findings & write-ready fixes, prioritized action items.
+3. Apply fixes: fold accepted action items into `prd.md`, citing each
+   changed/added passage inline as `[Source: PRD Review]`. Fill the PRD
+   Review block with the rating, blindspot, dimension scores, and Critical
+   requirements list.
+4. Re-check: the reviewer re-checks only the changed sections and finalizes
+   the rating. If still **Not Ready** and the fix needs a decision you
+   can't make from context (pricing, a policy owner, a strategy call), stop
+   and ask the user.
+5. **Gate:** launch-readiness is Ready or Ready with Caveats, with every
+   Critical requirement logged in §14/§15 with an owner and a due.
+
+**Output**
+- Artifacts: `prd.md` (assembled + reviewed) and `11-draft-prd-and-review.md`
+  (the scorecard + what was applied/deferred).
+- Storage: `product-os/ai-prd/prds/<slug>/prd.md` (at the `prds/<slug>/`
+  root, not under `stages/`) and
+  `product-os/ai-prd/prds/<slug>/stages/11-draft-prd-and-review.md`.
+- Feeds: stage 12 — the final checklist reads `prd.md` and this scorecard
+  directly.
+
+### 4.12 Stage 12 — Final Checklist
+
+**Input**
+- `prd.md`.
+- The stage-11 scorecard.
+
+**Working flow**
+1. Work through the fixed checklist: header complete; PRD Review block
+   filled with Ready/Ready with Caveats; overview passes the "repeat the
+   bet" test; problem is concrete; every quantitative claim cited; every
+   number tagged with no Gated-as-proven; VoC real or a logged risk; goals
+   few and measurable with guardrails; non-goals/out-of-scope explicit;
+   adjacent-systems map present with named owners for policy/pricing
+   changes; north-star is an outcome with failure criteria; AI-native
+   addendum fully present where applicable; user stories have full
+   acceptance criteria; dependencies/blockers named with owners; rollout
+   phased with honest labelling; open questions genuinely unresolved with
+   owner + next step; every Discovery Brief `[pre-build]` item resolved or
+   owned; Evidence Appendix complete; every Critical requirement owned +
+   due.
+2. Check each box, or explicitly waive it with a stated reason — never
+   leave one silently unchecked.
+3. **Gate:** all boxes checked or waived; `prd.md` is ready for human
+   review.
+
+**Output**
+- Artifact: `12-final-checklist.md` — the checklist with each box checked
+  or waived (with reason), and a one-line final status.
+- Storage: `product-os/ai-prd/prds/<slug>/stages/12-final-checklist.md`.
+- Feeds: nothing further inside `ai-prd/` — this is the loop's exit.
+  Downstream: `ai-design/` (⛔ scaffold — bridged today by Claude Design
+  directly, same as stage 08) and then engineering
+  (`superpowers:brainstorming` → `writing-plans` → `executing-plans`, per
+  §6 of this playbook), reusing the same `<slug>` per the traceability rule
+  stated there.
 
 ---
 
@@ -570,7 +1044,7 @@ graph that satisfies it.
 
 ---
 
-## 8. Release — `gtm/` (✅), `ai-launch-strategy.md` (✅), `messaging.md` (✅)
+## 8. Release — `ai-gtm/` (✅), `ai-launch-strategy.md` (✅), `messaging.md` (✅)
 
 Three built modules, one phase: getting a shipped feature in front of real
 buyers, and deciding whether to spend real money doing it.
@@ -578,10 +1052,10 @@ buyers, and deciding whether to spend real money doing it.
 **`messaging.md`** — the customer-facing 5-second-test copy, derived from
 `positioning.md`. Hero headline/subhead, product one-liner, elevator pitch,
 use-case-positioned campaign variants. **Feeds** `ai-launch-strategy.md`'s
-Customer lens (does the ICP self-identify from the hero?) and `gtm/`'s
+Customer lens (does the ICP self-identify from the hero?) and `ai-gtm/`'s
 `positioning-statement.md` + `messaging-by-persona.md`.
 
-**`gtm/`** — the sales-qualification/execution layer on top of context-hub:
+**`ai-gtm/`** — the sales-qualification/execution layer on top of context-hub:
 ICP tiers, signal library, account scoring, sales plays, playbooks, and
 battlecards for the fixed 7 competitors. Structure and content are built and
 populated with Ockham's real ICP/signals/personas; execution pieces (live
@@ -597,6 +1071,143 @@ this PRD ready to build?" vs. "should we scale this launch?"). Ockham's own
 current read (dated 2026-09-04) is captured in the doc: mostly Yellow, Red on
 Product's Reach / Brand Power / AI Reliability-pending-evals — the expected
 pre-launch state, with the priority order to move each cell already named.
+
+**`ai-gtm/` is structurally different from Discovery and PRD**: not one
+agent running a sequential stage loop, but **four independent,
+single-shot plays** — each its own `.claude/agents/gtm-*.md` subagent, run
+on demand, in any order. Same three-part shape as Discovery/PRD below
+(Input / Working flow / Output), just per-play instead of per-stage.
+Storage convention: every output files under `product-os/ai-gtm/outputs/`
+— this folder **does** already exist and already holds real (fictional,
+clearly-marked) worked examples in `product-os/ai-gtm/examples/`, unlike
+Discovery's `discovery/` and PRD's `prds/`, which don't exist yet at all.
+
+### 8.1 Play — Account Research
+
+**Input**
+- Account name + domain (from the user).
+- `ai-gtm/icp-tiers.md` (fit), `ai-gtm/signal-library.md` (active signals),
+  `ai-gtm/battlecards/` (competitive context), `ai-gtm/personas/` (who to
+  reach).
+- Public web sources: LinkedIn, Crunchbase, BuiltWith, the company's own
+  blog/changelog/status page.
+
+**Working flow**
+1. Build the snapshot: funding + months since last raise, headcount +
+   growth, hires in the last 90 days (GTM, platform, security), recent
+   product/infra moves, tech stack.
+2. Build the stakeholder map: 2–3 people per `ai-gtm/personas/` — name,
+   title, time in role, recent public activity, best channel.
+3. Run the signal check: for each Tier-1/Tier-2 signal, is it present, when
+   did it fire, what's its decayed score contribution. Run the scoring play
+   (§8.2) if not already done.
+4. Assess competitive context: evidence of a fixed-7 competitor in the
+   stack, job posts, or content; which battlecard applies.
+5. Write the angle — the judgement step: why now (a datable event — if none
+   exists, don't recommend outreach), why us, the hook (passes PVP), who
+   sends it.
+6. **Gate:** "why now" is a datable event, not a generic assumption; ≥2
+   reachable stakeholders; signal score recorded; competitive context
+   checked.
+
+**Output**
+- Artifact: `product-os/ai-gtm/outputs/YYYY-MM-DD-research-<account>.md`.
+- Feeds: a recommended next action — usually §8.2 (score it) or §8.3 (build
+  a sequence) if the account is already in-tier.
+
+### 8.2 Play — Account Scoring
+
+**Input**
+- Account name/domain, or a list, plus any known firmographic/technographic
+  data.
+- `ai-gtm/account-scoring.md` (the point-table model + hard gates),
+  `ai-gtm/icp-tiers.md` (criteria), `ai-gtm/signal-library.md` (signal
+  points + decay).
+
+**Working flow**
+1. Gather firmographic, technographic, and organizational fit data; mark
+   any field that's inferred rather than confirmed.
+2. Score Part 1 (0–70, fit) and Part 2 (signal points, decayed, capped 30).
+3. Apply the hard gates: a suppression rule → Exclude; a disqualifier
+   present → cap at Tier 4; a Tier-1 score with no live Tier-1 behavioural
+   signal → treat as Tier 2. Never skip a gate because the rest of the
+   score looks strong.
+4. Assign the tier; write what qualifies, what reduces the score, the next
+   action, and the re-score trigger.
+5. **Gate:** every account has a tier, a next action, a re-score trigger;
+   disqualifiers explicitly checked; inferred fields marked.
+
+**Output**
+- Artifact: `product-os/ai-gtm/outputs/YYYY-MM-DD-scoring-<name-or-list>.md`
+  — single account or a batch table sorted by score, Tier 1 flagged.
+- Feeds: §8.3 (a scored, tiered account is the input a campaign segments
+  by); §8.1 (research often runs this play mid-flow to confirm a tier).
+
+### 8.3 Play — Signal to Sequence
+
+**Input**
+- The signal(s) + target segment/persona.
+- `ai-gtm/icp-tiers.md`, `ai-gtm/personas/`, `ai-gtm/battlecards/` (if a
+  competitor is in play), the copy standard
+  (`ai-gtm/messaging-by-persona.md` + `messaging.md`).
+
+**Working flow**
+1. Write the trigger logic in plain language before any copy: single- or
+   multi-signal, minimum score, recency window, suppression conditions
+   (from `signal-library.md`).
+2. Segment by tier, persona, and account status (cold / previously
+   contacted / dark opp).
+3. Set sequence structure by tier: Tier 1 → 6–8 touches, all channels,
+   manual personalization on 1–3; Tier 2 → 5–7, email + LinkedIn; Tier 3 →
+   4–5, email-first, templated.
+4. Write every touch. Touch 1 (Tier 1 & 2) must pass PVP (remove the CTA —
+   does it still carry value?); honor the metric rules (no "in seconds,"
+   time-to-first-hypothesis, "you can check its work," fixed-7 competitors
+   only).
+5. Write the measurement plan: reply/meeting/pipeline targets by tier,
+   what's tracked, review points at 2 and 6 weeks.
+6. **Gate:** touch 1 passes PVP; the signal hook is specific and datable;
+   one CTA; suppression list applied; targets set before launch.
+
+**Output**
+- Artifact: `product-os/ai-gtm/outputs/campaigns/YYYY-MM-DD-<campaign-name>/`
+  — `brief.md`, `sequences/tier{1,2,3}.md`, `metrics.md`, `results.md`
+  (updated as it runs).
+- Feeds: `results.md` back into `signal-library.md`'s Performance Log (via
+  §8.4); this is the one play with real-world consequence — **the drafted
+  campaign is never loaded into a real send system by this play itself**,
+  that's always a separate human action.
+
+### 8.4 Play — Weekly Update
+
+**Input**
+- `ai-gtm/README.md` §Status, `ai-gtm/signal-library.md` §Performance Log,
+  `ai-gtm/account-scoring.md` §Calibration Log, `ai-gtm/icp-tiers.md`
+  §Evolution Log, every `outputs/campaigns/*/results.md`, any
+  `outputs/*` from the last 14 days.
+
+**Working flow**
+1. Run the staleness check: README priorities untouched 7+ days; a campaign
+   live 14+ days with no performance-log row; a results table older than 7
+   days; battlecards >60 days old; ICP evolution log >90 days. Print the
+   summary before drafting anything.
+2. Draft the diff per stale section — CURRENT → PROPOSED → QUESTIONS FOR
+   YOU. Signal Performance Log rows get computed from real campaign
+   results; battlecards and the ICP Evolution Log get a flag and a
+   question instead of a draft — those need real competitive/market
+   judgement this play doesn't have.
+3. **Apply only on confirm** — write nothing until the user approves the
+   diff. Never invent a performance number not already in the repo.
+4. Log one line to `outputs/weekly-log.md`.
+5. **Gate:** every stale section updated or has a logged open question; no
+   invented numbers; changes applied only after confirmation.
+
+**Output**
+- Artifacts: edits applied directly to the relevant `ai-gtm/` files, plus
+  one line appended to `product-os/ai-gtm/outputs/weekly-log.md`. No
+  separate output file — this play's product is the diff, applied in place.
+- Feeds: keeps every other play's inputs (the scoring model, signal
+  library, battlecards) accurate for next time they run.
 
 ---
 
@@ -702,7 +1313,7 @@ one.
 | `ai-design/` | ⛔ Pending | Scaffold only — 7 expected artifacts named, none written |
 | `ai-product-strategy/` | ⛔ Pending | Scaffold only — 7 expected artifacts named, none written; alignment doc partially pre-seeds it |
 | `data-analysis/` | 🟡 Partial | 2 of 8 artifacts built (impact-estimation, experiment-analysis) |
-| `gtm/` | ✅ Completed | Structure + Ockham's own ICP/signals/personas/battlecards populated; execution automation intentionally unpopulated pre-launch |
+| `ai-gtm/` | ✅ Completed | Structure + Ockham's own ICP/signals/personas/battlecards populated; execution automation intentionally unpopulated pre-launch |
 | `ai-pmf-strategy.md` | ✅ Completed | The framework everything else operationalizes |
 | `ai-launch-strategy.md` | ✅ Completed | Scale-when-green gate, with Ockham's own current scored read |
 | `messaging.md` | ✅ Completed | Hero copy + product message drafted (first pass, not yet ICP-validated) |

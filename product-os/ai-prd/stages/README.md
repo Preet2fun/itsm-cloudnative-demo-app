@@ -1,6 +1,6 @@
 # Stages — the drafting loop
 
-The [`prd-agent.md`](../prd-agent.md) works these in order. Each stage reads the
+The `prd-agent` (`../../../.claude/agents/prd-agent.md`) works these in order. Each stage reads the
 prior artifacts and writes exactly one file into
 `product-os/ai-prd/prds/<slug>/stages/`. Context compounds — a later stage never
 re-derives what an earlier one settled; if it must contradict an earlier stage,

@@ -24,7 +24,7 @@ doesn't unknowingly break it. That is the only thing that belongs here.
 | Future / proposed features | [`../ai-prd/`](../ai-prd/) |
 | Product strategy, roadmap, bets | [`../ai-product-strategy/`](../ai-product-strategy/) |
 | Design specs and UX | [`../ai-design/`](../ai-design/) |
-| Go-to-market | [`../gtm/`](../gtm/) |
+| Go-to-market | [`../ai-gtm/`](../ai-gtm/) |
 | Market / analyst / pricing data | [`../data-analysis/`](../data-analysis/) |
 
 ## Discovery questions this hub answers

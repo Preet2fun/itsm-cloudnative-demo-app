@@ -79,7 +79,7 @@ Four lenses, three factors each, every factor scored **Green / Yellow / Red**.
 
 → **Full canvas, per-cell Green/Yellow/Red rubric, the scale-or-hold gate, and
 Ockham's current read:** [`ai-launch-strategy.md`](ai-launch-strategy.md).
-Owned by `ai-product-strategy/` + `gtm/`. Scaling with a gating cell still red is
+Owned by `ai-product-strategy/` + `ai-gtm/`. Scaling with a gating cell still red is
 a named failure mode.
 
 ### Phase 4 — Optimize for sustainable growth
@@ -144,7 +144,7 @@ Rigor* dimension.
 | 4D **Discover** · problem validation · customer-feedback evidence | `ai-discovery/` stages 03–05 + `ai-feedback/` (MCP or CSV) → Discovery Brief |
 | 4D **Design** | `ai-design/` |
 | 4D **Develop + Deploy** · dual metrics · grounding / prompts / evals | `ai-prd/` (AI addendum, stage 06) |
-| AI Launch Strategy Canvas · scale-when-green gate | [`ai-launch-strategy.md`](ai-launch-strategy.md) → `ai-product-strategy/` + `gtm/` |
+| AI Launch Strategy Canvas · scale-when-green gate | [`ai-launch-strategy.md`](ai-launch-strategy.md) → `ai-product-strategy/` + `ai-gtm/` |
 | Data network effects · intelligence moats · trust compounding | `ai-product-strategy/moat-thesis.md` → `context-hub/` |
 | Dual-metric enforcement · probabilistic-behaviour check | PRD Reviewer — *AI Readiness* + *Metric & Data Rigor* dimensions |
 

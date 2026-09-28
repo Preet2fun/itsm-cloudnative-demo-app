@@ -3,8 +3,9 @@
 **Purpose:** assemble the full PRD from the stage artifacts, run it through the
 reviewer, and fold the fixes back in.
 
-**Inputs:** `01`–`10`; [`../prd-template.md`](../prd-template.md);
-[`../prd-reviewer-agent.md`](../prd-reviewer-agent.md); [`../citations.md`](../citations.md).
+**Inputs:** `01`–`10`; [`../prd-template.md`](../prd-template.md); the
+`prd-reviewer-agent` (`../../../.claude/agents/prd-reviewer-agent.md`);
+[`../citations.md`](../citations.md).
 
 **Do:**
 1. **Assemble `prd.md`** to `prd-template.md` exactly — header block, an empty
@@ -33,7 +34,7 @@ reviewer, and fold the fixes back in.
    | AI addendum A–H | 06 (07 verifies its data claims) |
 
    - Carry every Gated figure into §14/§15. Cite every number.
-2. **Run the reviewer** — invoke `prd-reviewer-agent.md` against `prd.md`. It
+2. **Run the reviewer** — invoke the `prd-reviewer-agent` against `prd.md`. It
    returns the scorecard: launch-readiness rating (Ready / Ready with Caveats /
    Not Ready), tier, major blindspot, dimension-by-dimension scores, detailed
    findings & fixes (write-ready text + evidence), and prioritised action items

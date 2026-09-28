@@ -4,8 +4,10 @@
 engineering to see the same picture.
 
 **Inputs:** `02` (chosen framing), `03` (where it lives), `06` (what's shown);
-`ai-design/` principles; root `CLAUDE.md` §10 (UI is drafted in Claude Design
-first).
+`ai-design/` principles (⛔ scaffold only today — no principles are actually
+written yet); root `CLAUDE.md` §10 (UI is drafted in Claude Design first) is
+the real bridge in the meantime — draft directly there, don't wait on
+`ai-design/`.
 
 **Do:**
 1. **Surfaces** — where the feature lives (module, nav entry, embedded vs
