@@ -10,7 +10,7 @@ tools: Read, Write, Grep, Glob, WebSearch, WebFetch
 Not a company summary — the specific **trigger** that makes now the right time,
 and the **angle** to use.
 
-Practical usage guide: `product-os/ai-gtm/how-to-run-gtm-agents.md`.
+Practical usage guide: `product-os/ai-gtm/README.md`.
 
 **Run:** give this agent an account name + domain to research.
 

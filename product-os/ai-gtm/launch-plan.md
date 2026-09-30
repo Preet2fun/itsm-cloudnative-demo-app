@@ -26,7 +26,7 @@ Last updated: 2026-09-04 · Current phase: **Design partner (pre-launch).**
 - **Goal:** repeatable motion — known buyer, cycle length, price point; 3+ deals
   closed the same way.
 - **Audience:** Tier 1 + Tier 2, signal-triggered.
-- **Motion:** founder + first AE/SDR; `plays/signal-to-sequence.md` campaigns;
+- **Motion:** founder + first AE/SDR; `.claude/agents/gtm-signal-to-sequence.md` campaigns;
   the four playbooks operational.
 - **Exit criteria:** GTM Viability Green; Customer Pain off Red (named-customer
   VoC via `../ai-feedback/`).

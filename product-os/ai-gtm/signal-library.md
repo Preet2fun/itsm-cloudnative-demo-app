@@ -249,13 +249,19 @@ automatically — otherwise the active list quietly fills with stale interest.
 
 ## Signal Performance Log
 
-Update after every campaign ([`plays/weekly-update.md`](plays/weekly-update.md)).
-A signal with 30+ sends and no meetings is a calibration flag. Filled sample:
-[`examples/signal-performance-log.md`](examples/signal-performance-log.md).
+Update after every campaign (`.claude/agents/gtm-weekly-update.md`).
+A signal with 30+ sends and no meetings is a calibration flag. Full worked
+sample: [`examples/signal-performance-log.md`](examples/signal-performance-log.md)
+(~3 weeks of one fictional campaign, 8 rows, plus calibration flags).
+
+> Row below is that same dummy example's strongest row, copied in here so
+> this real table has one concrete row to update rather than sitting fully
+> blank — **SAMPLE, fictional**, not a real campaign result. Replace with
+> real rows as soon as a real campaign runs; delete the dummy row then.
 
 | Signal | Sends (90d) | Reply rate | Meeting rate | Pipeline | Notes |
 |---|---|---|---|---|---|
-| Observability renewal / price shock | | | | | |
+| Observability renewal / price shock *(SAMPLE)* | 108 | 12.0% | 3.7% | 2 POCs (fictional) | Steep proximity decay — <8 wks to renewal replies far higher than 8–13 wks. See `examples/signal-performance-log.md` for the full read. |
 | Compliance deadline | | | | | |
 | "Attack or outage?" incident | | | | | |
 | K8s / cloud-migration milestone | | | | | |

@@ -29,7 +29,7 @@ Any "no" → resolve before proceeding.
 3. **Message strategy** (45 min) — in writing, before copy: the hook (the
    datable trigger), the insight, the one ask, the most relevant proof point, the
    competitor angle if any.
-4. **Sequence build** — run [`../plays/signal-to-sequence.md`](../plays/signal-to-sequence.md).
+4. **Sequence build** — run [`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md).
 5. **QA** — copy: touch 1 passes PVP · no generic openers · signal hook datable ·
    one CTA · **no "in seconds"** · links + variables work. List: no customers, no
    active opps, no suppressed contacts. Tooling: sequence loaded, variables

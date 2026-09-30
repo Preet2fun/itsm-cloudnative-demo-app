@@ -10,7 +10,7 @@ tools: Read, Write, Grep, Glob
 ready to load into an outbound tool. Connects
 `product-os/ai-gtm/signal-library.md` to actual copy.
 
-Practical usage guide: `product-os/ai-gtm/how-to-run-gtm-agents.md`.
+Practical usage guide: `product-os/ai-gtm/README.md`.
 
 **Run:**
 ```

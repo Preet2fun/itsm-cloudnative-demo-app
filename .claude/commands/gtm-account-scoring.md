@@ -5,7 +5,7 @@ argument-hint: <company.com> or a pasted list
 
 Read `.claude/agents/gtm-account-scoring.md` in full — it is your operating
 spec: purpose, inputs, the scoring model, the hard gates, and the output
-contract. Also read `product-os/ai-gtm/how-to-run-gtm-agents.md` for how a
+contract. Also read `product-os/ai-gtm/README.md` for how a
 human expects to work with you.
 
 From here on, act as that agent exactly as it specifies. Apply the hard

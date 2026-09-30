@@ -3,7 +3,7 @@
 > **SAMPLE DATA — fictional campaign, illustrative numbers.**
 
 Created: 2026-08-18 · Owner: founder · Status: **Live — launched 2026-08-18**
-Play: [`../../plays/signal-to-sequence.md`](../../plays/signal-to-sequence.md) ·
+Play: [`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md) ·
 Playbook: [`../../playbooks/renewal-price-shock.md`](../../playbooks/renewal-price-shock.md)
 
 ---

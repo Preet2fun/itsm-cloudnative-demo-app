@@ -30,7 +30,7 @@ behavioural signal active** ([`signal-library.md`](signal-library.md)).
   security hire.
 - **Approach:** founder / AE-led, fully researched, design-partner framing
   (co-build, reference logo, pricing latitude). Run
-  [`plays/account-research.md`](plays/account-research.md) before any touch.
+  [`.claude/agents/gtm-account-research.md`](.claude/agents/gtm-account-research.md) before any touch.
 
 ### Tier 2 — High-fit, signal-triggered
 
@@ -38,7 +38,7 @@ Full ICP fit, no Tier-1 signal yet — or a Tier-2 signal (tool sprawl, outgrown
 AWS-native security, a consolidation post).
 
 - **Approach:** signal-triggered, semi-personalised sequences via
-  [`plays/signal-to-sequence.md`](plays/signal-to-sequence.md); an SDR reviews
+  [`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md); an SDR reviews
   touch 1.
 
 ### Tier 3 — Good-fit, automated

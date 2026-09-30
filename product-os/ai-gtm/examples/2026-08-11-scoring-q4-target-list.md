@@ -2,7 +2,7 @@
 
 > **SAMPLE DATA — fictional accounts, illustrative scores.**
 
-Date: 2026-08-11 · Scored by: Claude (`plays/account-scoring.md`) · Model:
+Date: 2026-08-11 · Scored by: Claude (`.claude/agents/gtm-account-scoring.md`) · Model:
 [`../account-scoring.md`](../account-scoring.md) · Accounts:
 [`accounts.md`](accounts.md)
 
@@ -33,7 +33,7 @@ Date: 2026-08-11 · Scored by: Claude (`plays/account-scoring.md`) · Model:
 | Signals (decayed) | 30 (capped) | Compliance deadline 35 + first security hire 30 + tool sprawl 18 + combo 12 = 95 → cap 30 |
 
 **Qualifies:** every must-have; two Tier-1 signals live; the audit clock is real.
-**Next action:** `plays/account-research.md` → the compliance-deadline playbook,
+**Next action:** `.claude/agents/gtm-account-research.md` → the compliance-deadline playbook,
 IT Director + Priya Anand on thread.
 **Re-score trigger:** audit passes / slips, or a second security hire.
 
@@ -48,7 +48,7 @@ IT Director + Priya Anand on thread.
 
 **Qualifies:** all must-haves; renewal window is the only re-openable moment.
 **Reduces score:** sector isn't in the mandated set (−5 firmographic).
-**Next action:** `plays/account-research.md` → renewal-price-shock playbook,
+**Next action:** `.claude/agents/gtm-account-research.md` → renewal-price-shock playbook,
 POC scoped to finish before the re-sign date.
 **Re-score trigger:** the renewal closes (drops to Tier 3 nurture).
 

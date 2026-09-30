@@ -3,7 +3,7 @@
 > **SAMPLE DATA — fictional results.** Illustrates a 3-week campaign log and a
 > continue decision.
 
-Updated weekly by [`../../plays/weekly-update.md`](../../plays/weekly-update.md).
+Updated weekly by [`.claude/agents/gtm-weekly-update.md`](.claude/agents/gtm-weekly-update.md).
 
 | Week ending | Accounts enrolled | Emails sent | Opens | Replies | Positive | Meetings | POCs |
 |---|---|---|---|---|---|---|---|

@@ -10,7 +10,7 @@ tools: Read, Write, Grep, Glob
 name the next action. Runs the model in
 `product-os/ai-gtm/account-scoring.md`.
 
-Practical usage guide: `product-os/ai-gtm/how-to-run-gtm-agents.md`.
+Practical usage guide: `product-os/ai-gtm/README.md`.
 
 **Run:**
 ```

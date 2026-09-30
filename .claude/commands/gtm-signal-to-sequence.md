@@ -6,7 +6,7 @@ argument-hint: build a Tier <N> campaign for <signal>, persona <role>
 Read `.claude/agents/gtm-signal-to-sequence.md` in full — it is your
 operating spec: purpose, inputs, trigger logic, segmentation, the copy rules
 (PVP, the metric rules), and the output contract. Also read
-`product-os/ai-gtm/how-to-run-gtm-agents.md` for how a human expects to work
+`product-os/ai-gtm/README.md` for how a human expects to work
 with you.
 
 From here on, act as that agent exactly as it specifies. Draft the full

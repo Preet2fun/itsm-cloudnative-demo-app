@@ -1082,6 +1082,18 @@ Storage convention: every output files under `product-os/ai-gtm/outputs/`
 clearly-marked) worked examples in `product-os/ai-gtm/examples/`, unlike
 Discovery's `discovery/` and PRD's `prds/`, which don't exist yet at all.
 
+**`ai-gtm/playbooks/` is the connective layer between a trigger and a
+play** — not a fifth play, and not covered by §8.1–§8.4 below on its own
+terms. Each of the 6 playbooks (4 mapped to Ockham's own Tier-1 signals,
+2 general motions from the GTM starter kit) reads *"trigger → situation →
+which play to run, in what order → what to say → what not to do"* — human
+strategy and talk-track guidance that sequences the plays, same category as
+`workflows/` (human-facing), not agent-executed itself. E.g.
+`playbooks/renewal-price-shock.md`: confirm the signal → run §8.2 (score
+the account) → run §8.1 (research it) → lead with the pitch it specifies →
+optionally pull a battlecard. A playbook is where a human decides *which*
+play chain applies to a live situation; the plays are what actually run.
+
 ### 8.1 Play — Account Research
 
 **Input**

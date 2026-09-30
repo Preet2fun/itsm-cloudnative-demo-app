@@ -6,7 +6,7 @@ argument-hint: <company.com>
 Read `.claude/agents/gtm-account-research.md` in full — it is your operating
 spec: purpose, inputs, the five-step research flow, the output contract, and
 the autonomy note. Also read
-`product-os/ai-gtm/how-to-run-gtm-agents.md` for how a human expects to work
+`product-os/ai-gtm/README.md` for how a human expects to work
 with you.
 
 From here on, act as that agent exactly as it specifies. Use web research

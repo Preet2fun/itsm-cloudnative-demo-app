@@ -2,7 +2,7 @@
 
 > **SAMPLE DATA — fictional account, invented people and numbers.**
 
-Date: 2026-08-14 · Researched by: Claude (`plays/account-research.md`)
+Date: 2026-08-14 · Researched by: Claude (`.claude/agents/gtm-account-research.md`)
 Signal score: 95/100 · Tier: 1 · **Recommended action: immediate outreach
 (founder-led), within 48 h**
 

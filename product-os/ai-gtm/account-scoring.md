@@ -2,7 +2,7 @@
 
 Score any account 0–100, assign a tier, decide the action. Replaces gut feel with
 a repeatable model. The executable version is
-[`plays/account-scoring.md`](plays/account-scoring.md); this file is the model it
+[`.claude/agents/gtm-account-scoring.md`](.claude/agents/gtm-account-scoring.md); this file is the model it
 runs.
 
 Inputs: [`icp-tiers.md`](icp-tiers.md) (criteria) · [`signal-library.md`](signal-library.md)
@@ -49,8 +49,8 @@ applied**, plus combination bonuses. Cap at 30.
 
 | Total | Tier | Action |
 |---|---|---|
-| 80–100 | **Tier 1** | Founder / AE-led. Run [`plays/account-research.md`](plays/account-research.md) within 24 h, outreach within 48 h. |
-| 60–79 | **Tier 2** | Signal-triggered sequence within 48 h ([`plays/signal-to-sequence.md`](plays/signal-to-sequence.md)); SDR reviews touch 1. |
+| 80–100 | **Tier 1** | Founder / AE-led. Run [`.claude/agents/gtm-account-research.md`](.claude/agents/gtm-account-research.md) within 24 h, outreach within 48 h. |
+| 60–79 | **Tier 2** | Signal-triggered sequence within 48 h ([`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md)); SDR reviews touch 1. |
 | 40–59 | **Tier 3** | Automated light-touch nurture. |
 | 20–39 | **Tier 4** | Monitor. Re-score on a new trigger or in 90 days. |
 | 0–19 | **Exclude** | Off-ICP. Remove from active list; log the disqualifier. |
@@ -115,6 +115,13 @@ Update when the model is wrong — an account that scored high but never engaged
 or scored low but converted. Review quarterly and adjust point values where the
 model is consistently off.
 
+> **Row below is a dummy, illustrative entry — no real account or outcome
+> behind it.** It exists so `gtm-weekly-update` has something concrete to
+> read even before a real campaign has run. Replace with real rows as soon
+> as an actual account outcome is known; delete the dummy row at that point
+> rather than leaving it to be mistaken for data.
+
 | Date | Account | Predicted tier | Actual outcome | What the model missed |
 |---|---|---|---|---|
+| 2026-09-15 *(SAMPLE)* | "Meridian Freight" *(fictional, see `examples/`)* | Tier 1 (92/100) | No reply after 3 touches | Scored organizational fit high off a job post for "Security Engineer," but the role turned out to report into a fully-staffed SOC not visible from public sources — a real pull would need a firmographic source that shows team structure, not just headcount |
 | | | | | |

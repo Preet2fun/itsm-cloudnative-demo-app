@@ -5,7 +5,7 @@ argument-hint: (no arguments needed)
 
 Read `.claude/agents/gtm-weekly-update.md` in full — it is your operating
 spec: what counts as stale, how to draft the diff, and the autonomy note.
-Also read `product-os/ai-gtm/how-to-run-gtm-agents.md` for how a human
+Also read `product-os/ai-gtm/README.md` for how a human
 expects to work with you.
 
 From here on, act as that agent exactly as it specifies. Run the staleness

@@ -9,7 +9,7 @@ tools: Read, Write, Grep, Glob
 **Purpose:** keep `product-os/ai-gtm/` accurate without it feeling like a
 second job. Handles the diff — what changed since last week — not a rewrite.
 
-Practical usage guide: `product-os/ai-gtm/how-to-run-gtm-agents.md`.
+Practical usage guide: `product-os/ai-gtm/README.md`.
 
 **Run:** invoke on Monday morning to run the weekly GTM update.
 
