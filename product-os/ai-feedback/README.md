@@ -60,14 +60,31 @@ Only the ones that feed our cycle. Full table: [`lenses/README.md`](lenses/READM
 
 ## How to run
 
-Point an agent at [`feedback-agent.md`](feedback-agent.md). Give it:
+Two ways to invoke it:
+
+- **Directly:** `/feedback-agent <lens name or question>, source: <MCP tool /
+  CSV / pasted text>` — runs [`.claude/agents/feedback-agent.md`](../../.claude/agents/feedback-agent.md),
+  the built subagent implementing this spec.
+- **As a sub-step:** `ai-discovery/` and `ai-prd/` call it directly by name
+  when a stage needs customer evidence (e.g. PRD stage 05, Discovery stage 02)
+  — you don't invoke it separately in that case, it runs inside their loop.
+
+Either way it needs:
 
 1. a question, or a lens name;
-2. a data source — an MCP tool name, or an uploaded CSV;
+2. a data source — an MCP tool name, an uploaded CSV, or pasted text;
 3. read access to `../context-hub/` (ICP, segments, the fixed competitor set,
    metric rules) and `../knowledge-hub/` (shipped features to map themes onto).
 
-It picks one lens, runs it, returns the standard output.
+It picks one lens, runs it, returns the standard four-part output.
+
+**Human vs. agent:** this agent runs unattended end to end — source
+resolution, lens pick, budget check, analysis, cited output — because it only
+*reports*; it never decides Pursue/Park/Kill, never writes a PRD verdict, and
+never edits another module's canonical file itself. The human (or the calling
+Discovery/PRD agent) is the one who acts on what it returns. Full autonomy
+breakdown: the "Autonomy" section of
+[`.claude/agents/feedback-agent.md`](../../.claude/agents/feedback-agent.md).
 
 ---
 
