@@ -107,7 +107,10 @@ Every AI feature tracks **both**:
 
 Ignoring AI-specific metrics in favour of the conversion funnel is a named
 failure mode. Same rule as `ai-prd/` stage 06 and the reviewer's *Metric & Data
-Rigor* dimension.
+Rigor* dimension. Pre-launch, these are targets set in `ai-prd/` stage 06;
+post-launch, [`operations/agent-reliability-monitoring.md`](operations/agent-reliability-monitoring.md)
+is where the AI-specific column (accuracy, hallucination rate, cost per run)
+actually gets watched on an ongoing basis, not just checked once at ship time.
 
 ---
 

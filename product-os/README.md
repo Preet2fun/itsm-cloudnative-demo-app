@@ -59,15 +59,21 @@ product-os/
 ├── ai-gtm/                  Go-to-market — GTM-repository pattern (+ sample data) — BUILT
 ├── ai-product-strategy/  standalone scaffold ┐ each folds into a lifecycle/
 ├── ai-design/            standalone scaffold ┘ phase once that is built
-└── data-analysis/        standalone, partially built — impact-estimation.md +
-                          experiment-analysis.md; rest scaffold
+├── data-analysis/        standalone, partially built — impact-estimation.md +
+│                         experiment-analysis.md + calibration-log.md; rest scaffold
+└── operations/           cross-references ai-feedback/ + data-analysis/, plus
+                          4 built artifacts (reliability monitoring, failure
+                          triage, feedback routing, incident runbook) — BUILT
 ```
 
 Root docs: [`ai-pmf-strategy.md`](ai-pmf-strategy.md) ·
 [`ai-launch-strategy.md`](ai-launch-strategy.md) — cross-cutting frameworks;
-[`messaging.md`](messaging.md) — the homepage & product message (5-second test).
-The BUILT standalone folders (`ai-discovery/`, `ai-prd/`, `ai-feedback/`, `ai-gtm/`)
-also fold into `lifecycle/` — see "Standalone folders" below.
+[`messaging.md`](messaging.md) — the homepage & product message (5-second test);
+[`HOW-TO-BUILD-A-FEATURE.md`](HOW-TO-BUILD-A-FEATURE.md) — one worked feature,
+every slash command in order, every always-stop checkpoint marked — start here
+if this is your first time running the cycle end to end.
+The BUILT standalone folders (`ai-discovery/`, `ai-prd/`, `ai-feedback/`, `ai-gtm/`,
+`operations/`) also fold into `lifecycle/` — see "Standalone folders" below.
 
 ### The two hubs
 
@@ -81,8 +87,8 @@ Both are persistent stores that outlive any single phase.
 ### Standalone folders
 
 `ai-discovery/`, `ai-prd/`, `ai-feedback/`, `ai-product-strategy/`, `ai-design/`,
-`ai-gtm/`, `data-analysis/` are standalone **only until `lifecycle/` is built** —
-then each folds into the matching phase:
+`ai-gtm/`, `data-analysis/`, `operations/` are standalone **only until
+`lifecycle/` is built** — then each folds into the matching phase:
 
 | Folder | Folds into |
 |---|---|
@@ -92,7 +98,8 @@ then each folds into the matching phase:
 | `ai-design/` | `lifecycle/design/` |
 | `ai-gtm/` — **ICP tiers · signal library · account scoring · plays · battlecards · playbooks** (GTM-repository pattern) | `lifecycle/release/` |
 | `ai-product-strategy/` | feeds `lifecycle/discovery/` + `lifecycle/planning/` across phases |
-| `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) — `impact-estimation.md` grounds `ai-discovery/` scoring + `ai-prd/` stage 10; `experiment-analysis.md` grounds `ai-prd/` Addendum E + `ai-launch-strategy.md`'s scale-when-green gate |
+| `data-analysis/` | feeds every phase (quantitative half; `ai-feedback/` is the qualitative half) — `impact-estimation.md` grounds `ai-discovery/` scoring + `ai-prd/` stage 10; `experiment-analysis.md` grounds `ai-prd/` Addendum E + `ai-launch-strategy.md`'s scale-when-green gate; `calibration-log.md` closes the predicted-vs-measured loop between the two |
+| `operations/` — **reliability monitoring · failure triage · feedback routing · incident runbook**, cross-referencing `ai-feedback/`'s `launch-feedback` + `data-analysis/experiment-analysis.md` | `lifecycle/operations/` |
 
 Chain: **`ai-discovery/` Pursue → Discovery Brief → `ai-prd/` stage 01 → PRD.**
 

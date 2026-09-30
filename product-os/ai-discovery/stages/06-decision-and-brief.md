@@ -24,7 +24,7 @@ the PRD Agent starts from.
 - **Park / Kill** → write `decision-log.md` (reason · evidence · revisit trigger
   · strategy note).
 - Either way: if the underlying signal keeps recurring across ideas, flag it for
-  `../ai-product-strategy/`.
+  `../../ai-product-strategy/`.
 
 **Produce:** `06-decision-and-brief.md` (the decision + one-paragraph rationale)
 and either `discovery-brief.md` (carrying the stage-04 candidate solutions, and

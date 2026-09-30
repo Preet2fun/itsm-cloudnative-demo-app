@@ -61,9 +61,9 @@ IDEA
   │
   ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ OPERATIONS          fragmented — see §8. No dedicated module.│
-│ ai-feedback/launch-feedback  ✅   data-analysis/               │
-│ experiment-analysis.md  ✅      (a real gap — see §9)         │
+│ OPERATIONS          operations/  ✅  — see §9                │
+│ cross-refs: ai-feedback/launch-feedback  ✅                   │
+│ data-analysis/experiment-analysis.md  ✅   + 4 artifacts  ✅  │
 └─────────────────────────────────────────────────────────────┘
   │ learnings feed back
   ▼
@@ -891,7 +891,7 @@ through the loop.
 **Input**
 - Stages 01–10, all of it.
 - `prd-template.md`, `citations.md`, and the `prd-reviewer-agent`
-  (`../../.claude/agents/prd-reviewer-agent.md`).
+  (`../.claude/agents/prd-reviewer-agent.md`).
 
 **Working flow**
 1. Assemble `prd.md` to `prd-template.md` exactly — header block, an empty
@@ -1223,10 +1223,12 @@ play chain applies to a live situation; the plays are what actually run.
 
 ---
 
-## 9. Operations — a real gap, not fully covered (🟡 Partial / fragmented)
+## 9. Operations — `product-os/operations/` (✅ Completed)
 
-There's no dedicated Operations module. What exists today is split across two
-other folders:
+Split across three places: two existing pieces, cross-referenced (not
+duplicated) into [`operations/README.md`](operations/README.md), plus four
+new artifacts built directly in that folder — decided 2026-09-30, built
+2026-09-30. The two existing pieces:
 
 - **`ai-feedback/`'s `launch-feedback` lens (✅)** — pre-launch risk read (90
   days out) and post-launch before/after comparison.
@@ -1236,21 +1238,37 @@ other folders:
   and well-specified — it's just not organized under an "Operations" heading
   anywhere.
 
-**What's missing**, matching `product-os/README.md`'s own lifecycle-phases
+**What was missing**, matching `product-os/README.md`'s own lifecycle-phases
 reference table (which names a "Support · Ops · SRE Agent" producing "triage
-report, pull request" as the Operations phase owner): there's no dedicated
+report, pull request" as the Operations phase owner): there was no dedicated
 agent or artifact set for ongoing production support once something has
 shipped and scaled — the actual day-2 operations of Ockham's own AI features
 (monitoring the agent's own reliability in the field, triaging its failures,
 routing customer-reported issues back into `ai-feedback/`/`ai-product-strategy/`).
 
-**Proposing, with your permission:** either (a) leave this as-is — the two
-existing pieces (`launch-feedback` + `experiment-analysis.md`) are enough for
-now, revisit when `lifecycle/operations/` gets built — or (b) stand up a
-minimal `product-os/operations/README.md` scaffold now (matching the
-`ai-design/`/`ai-product-strategy/` pattern: an "expected artifacts" list, no
-content yet) so the gap is at least named the same way the other two are.
-I haven't done either — flagging for your call, not deciding it.
+**Decided and built (2026-09-30):** option (b) — stood up
+[`operations/README.md`](operations/README.md), matching the
+`ai-design/`/`ai-product-strategy/` scaffold pattern, then built the four
+artifacts it named as the real gap directly in that folder:
+
+- [`operations/agent-reliability-monitoring.md`](operations/agent-reliability-monitoring.md)
+  — the product/ops-facing consumption layer on top of `ai-engine/`'s already-built
+  Langfuse scoring (not a second eval spec); routes accuracy/hallucination to
+  the AI Reliability cell and latency/cost to the AI Infrastructure cell in
+  `ai-launch-strategy.md`.
+- [`operations/failure-triage-log.md`](operations/failure-triage-log.md) —
+  4-class severity model, entry template, one illustrative sample row.
+- [`operations/feedback-routing.md`](operations/feedback-routing.md) — the
+  decision tree from a customer report to engineering / this triage log /
+  `ai-feedback/` / a flagged `ai-product-strategy/` note.
+- [`operations/incident-runbook.md`](operations/incident-runbook.md) —
+  severity levels, roles, the detect→declare→mitigate→resolve→postmortem
+  flow, postmortem template.
+
+None of it moves `launch-feedback` or `experiment-analysis.md` — each stays
+where its shared machinery lives (the `ai-feedback/` lens pipeline; the
+`data-analysis/` quantitative toolkit). All four new artifacts are frameworks,
+not live data — nothing is in production yet to generate real numbers from.
 
 ---
 
@@ -1270,10 +1288,11 @@ something to silently copy over, a decision for you when it's time.
 
 **`ai-design/` (⛔ Pending)** — covered in §5.
 
-**`data-analysis/` (🟡 Partial, 2 of 8 artifacts)** — built:
+**`data-analysis/` (🟡 Partial, 3 of 9 artifacts)** — built:
 `impact-estimation.md` (pre-build sizing: `Impact = Users Affected × Current
 Action Rate × Expected Lift × Value per Action`, run pessimistic/realistic/
-optimistic) and `experiment-analysis.md` (§9). Scaffold still: `market-sizing.md`,
+optimistic), `experiment-analysis.md` (§9), and `calibration-log.md`
+(predicted-vs-measured loop between the two). Scaffold still: `market-sizing.md`,
 `analyst-data.md`, `competitor-pricing.md`, `poc-metric-framework.md`,
 `win-loss.md`, `icp-sizing.md`.
 
@@ -1324,13 +1343,13 @@ one.
 | `ai-feedback/` | ✅ Completed | Agent + 6 lenses built (dormant until real feedback data exists — pre-launch) |
 | `ai-design/` | ⛔ Pending | Scaffold only — 7 expected artifacts named, none written |
 | `ai-product-strategy/` | ⛔ Pending | Scaffold only — 7 expected artifacts named, none written; alignment doc partially pre-seeds it |
-| `data-analysis/` | 🟡 Partial | 2 of 8 artifacts built (impact-estimation, experiment-analysis) |
+| `data-analysis/` | 🟡 Partial | 3 of 9 artifacts built (impact-estimation, experiment-analysis, calibration-log) |
 | `ai-gtm/` | ✅ Completed | Structure + Ockham's own ICP/signals/personas/battlecards populated; execution automation intentionally unpopulated pre-launch |
 | `ai-pmf-strategy.md` | ✅ Completed | The framework everything else operationalizes |
 | `ai-launch-strategy.md` | ✅ Completed | Scale-when-green gate, with Ockham's own current scored read |
 | `messaging.md` | ✅ Completed | Hero copy + product message drafted (first pass, not yet ICP-validated) |
 | Design/Planning/Development/QA/Deployment (engineering repo) | ✅ Completed | Proven this session — `superpowers` flow, not a product-os module |
-| Operations (dedicated module) | 🟡 Partial / gap | Fragmented across `ai-feedback` + `data-analysis`; no dedicated module — see §9, needs your call |
+| `operations/` | ✅ Completed | Cross-references `ai-feedback`'s `launch-feedback` + `data-analysis/experiment-analysis.md`; 4 new artifacts built (reliability monitoring, failure triage, feedback routing, incident runbook) — see §9 |
 | `lifecycle/` (unifying folder) | ⛔ Pending | Explicitly "planned," not started — deferred per the alignment doc |
 | `ai-pdlc/` (product-side governance) | ⛔ Pending | Explicitly "planned," not started — deferred per the alignment doc |
 
@@ -1338,9 +1357,8 @@ one.
 
 ## 13. Open items needing your decision
 
-1. **Operations module (§9)** — leave the two fragments as-is, or stand up a
-   minimal `product-os/operations/README.md` scaffold now to name the gap
-   consistently with the other two scaffolds?
+1. ~~**Operations module (§9)**~~ — **Decided 2026-09-30**: scaffold built at
+   `operations/README.md`, per §9.
 2. **`ai-product-strategy/` seeding (§10)** — when this folder gets built for
    real, use the alignment doc as the starting draft for
    `roadmap-sequencing.md`/`bets-and-non-goals.md`, or write it fresh?

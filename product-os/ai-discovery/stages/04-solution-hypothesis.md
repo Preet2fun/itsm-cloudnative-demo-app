@@ -5,8 +5,8 @@ candidate solution shapes, and pick the one or two worth taking into a PRD.
 
 **Inputs:** `01`–`03` — the ranked AI-solvable pain-points, the JTBD, the
 current-state journey; [`../opportunity-scorecard.md`](../opportunity-scorecard.md)
-(the AI-native verdict); `../context-hub/agentic-use-cases.md` (shapes that
-already fit Ockham's model); `../knowledge-hub/` (feasibility sanity-check).
+(the AI-native verdict); `../../context-hub/agentic-use-cases.md` (shapes that
+already fit Ockham's model); `../../knowledge-hub/` (feasibility sanity-check).
 
 **Do:**
 
@@ -22,7 +22,7 @@ already fit Ockham's model); `../knowledge-hub/` (feasibility sanity-check).
 2. **Converge** — score each shape 1–5 on two axes:
    - **Impact** — how much of the ranked pain it removes, for how many users
    - **Feasibility** — data availability, model fit, build/run cost, and
-     adjacent-system disruption (check against `../knowledge-hub/`)
+     adjacent-system disruption (check against `../../knowledge-hub/`)
 
    Keep the **top 1–3** (high impact × workable feasibility). Kill the rest with
    a one-line reason.

@@ -12,7 +12,7 @@ signals the user connects (interviews, tickets, usage, churn, sales notes).
 2. **JTBD** — one primary, plus secondaries.
 3. **Current-state journey** — the steps today, the friction / time / cost at
    each, where users drop or work around.
-4. **Affected personas** — from `../context-hub/icp.md`; who feels it most.
+4. **Affected personas** — from `../../context-hub/icp.md`; who feels it most.
 5. **Evidence-gap list** — verified vs assumed. "Not found" is recorded, not
    hidden.
 

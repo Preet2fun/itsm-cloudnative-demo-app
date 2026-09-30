@@ -3,8 +3,8 @@
 **Purpose:** turn a raw idea or signal into a stated problem, and do a fast fit
 check before spending any research effort.
 
-**Inputs:** the raw idea / signal + provenance; `../context-hub/` (positioning,
-ICP); `../knowledge-hub/` (does this already exist?).
+**Inputs:** the raw idea / signal + provenance; `../../context-hub/` (positioning,
+ICP); `../../knowledge-hub/` (does this already exist?).
 
 **Do:**
 1. **Restate as a problem.** If the idea is a feature ("add X"), write the

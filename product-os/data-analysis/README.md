@@ -19,6 +19,11 @@ pulls from both.
   iterate / kill framework: topline → statistical significance → segment
   analysis → quality metrics → leading indicators. Adapted from the same
   source's experiment-analysis hierarchy.
+- [`calibration-log.md`](calibration-log.md) — closes the loop the two above
+  leave open: one row per shipped feature, predicted lift (from
+  `impact-estimation.md`) vs. measured lift (from `experiment-analysis.md`'s
+  ship/iterate/kill call), so the next feature's guess doesn't start from
+  zero. Read before filling in a new `impact-estimation.md` Expected Lift row.
 
 ## Expected artifacts (built on direction)
 
@@ -43,6 +48,7 @@ and `ai-launch-strategy.md`'s scale-when-green gate.
 
 ## Status
 
-Partially built — two of eight artifacts (the product-analytics half:
-pre-build sizing + post-launch evaluation). The market/pricing/analyst
-evidence-base artifacts above remain scaffold.
+Partially built — three of nine artifacts (the product-analytics half:
+pre-build sizing, post-launch evaluation, and the calibration loop between
+them). The market/pricing/analyst evidence-base artifacts above remain
+scaffold.

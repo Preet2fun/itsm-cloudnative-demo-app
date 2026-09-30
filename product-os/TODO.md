@@ -16,7 +16,7 @@ Each item: where it came from, why it's parked, what would unblock it.
 1. **Stage 06's handoff to `ai-product-strategy/` has no real landing spot.**
    `ai-discovery/stages/06-decision-and-brief.md` says: *"if the underlying
    signal keeps recurring across ideas, flag it for
-   `../ai-product-strategy/`."* But `ai-product-strategy/` is scaffold-only
+   `../../ai-product-strategy/`."* But `ai-product-strategy/` is scaffold-only
    today — nothing exists there to actually flag it into.
    **Why parked:** user's call — `ai-product-strategy/` needs real alignment
    with the Ockham product direction first, not a placeholder built ahead of

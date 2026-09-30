@@ -2,7 +2,7 @@
 
 What happens when a signal fires — which account gets enriched, who gets
 notified, which sequence triggers, and which signals suppress outreach. The
-connective tissue between detection and [`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md).
+connective tissue between detection and [`.claude/agents/gtm-signal-to-sequence.md`](../../../.claude/agents/gtm-signal-to-sequence.md).
 
 ---
 

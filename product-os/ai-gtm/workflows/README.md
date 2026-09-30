@@ -1,7 +1,8 @@
 # Workflows
 
 How the GTM team operates — decision trees and process specs **for humans**, not
-execution instructions for an agent (that's [`../plays/`](../plays/)).
+execution instructions for an agent (that's
+[`../../../.claude/agents/`](../../../.claude/agents/) — the 4 `gtm-*.md` plays).
 
 | Workflow | Covers |
 |---|---|

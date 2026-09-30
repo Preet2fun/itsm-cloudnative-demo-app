@@ -1,7 +1,7 @@
 # Weekly Update Log — sample
 
 > **SAMPLE DATA — fictional.** One line per
-> [`.claude/agents/gtm-weekly-update.md`](.claude/agents/gtm-weekly-update.md) run. The real one is
+> [`.claude/agents/gtm-weekly-update.md`](../../../.claude/agents/gtm-weekly-update.md) run. The real one is
 > `../outputs/weekly-log.md`, created on the first real run.
 
 | Date | Files changed | Most significant change |

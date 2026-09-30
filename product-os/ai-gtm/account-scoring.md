@@ -2,7 +2,7 @@
 
 Score any account 0–100, assign a tier, decide the action. Replaces gut feel with
 a repeatable model. The executable version is
-[`.claude/agents/gtm-account-scoring.md`](.claude/agents/gtm-account-scoring.md); this file is the model it
+[`.claude/agents/gtm-account-scoring.md`](../../.claude/agents/gtm-account-scoring.md); this file is the model it
 runs.
 
 Inputs: [`icp-tiers.md`](icp-tiers.md) (criteria) · [`signal-library.md`](signal-library.md)
@@ -49,8 +49,8 @@ applied**, plus combination bonuses. Cap at 30.
 
 | Total | Tier | Action |
 |---|---|---|
-| 80–100 | **Tier 1** | Founder / AE-led. Run [`.claude/agents/gtm-account-research.md`](.claude/agents/gtm-account-research.md) within 24 h, outreach within 48 h. |
-| 60–79 | **Tier 2** | Signal-triggered sequence within 48 h ([`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md)); SDR reviews touch 1. |
+| 80–100 | **Tier 1** | Founder / AE-led. Run [`.claude/agents/gtm-account-research.md`](../../.claude/agents/gtm-account-research.md) within 24 h, outreach within 48 h. |
+| 60–79 | **Tier 2** | Signal-triggered sequence within 48 h ([`.claude/agents/gtm-signal-to-sequence.md`](../../.claude/agents/gtm-signal-to-sequence.md)); SDR reviews touch 1. |
 | 40–59 | **Tier 3** | Automated light-touch nurture. |
 | 20–39 | **Tier 4** | Monitor. Re-score on a new trigger or in 90 days. |
 | 0–19 | **Exclude** | Off-ICP. Remove from active list; log the disqualifier. |

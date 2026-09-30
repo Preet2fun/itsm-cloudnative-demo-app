@@ -15,7 +15,7 @@ Any fail → log the signal, stop.
 
 ## Step 2 — Score (10 min)
 
-Run [`.claude/agents/gtm-account-scoring.md`](.claude/agents/gtm-account-scoring.md). Record score +
+Run [`.claude/agents/gtm-account-scoring.md`](../../../.claude/agents/gtm-account-scoring.md). Record score +
 tier.
 
 - ≥ 80 **and** a live Tier-1 behavioural signal → Tier 1 process
@@ -24,7 +24,7 @@ tier.
 
 ## Tier 1 process (45–60 min · outreach within 48 h)
 
-1. **Research** — [`.claude/agents/gtm-account-research.md`](.claude/agents/gtm-account-research.md),
+1. **Research** — [`.claude/agents/gtm-account-research.md`](../../../.claude/agents/gtm-account-research.md),
    save to `../outputs/`.
 2. **Pick the contact** — closest match to a persona, reachable, no contact in
    45 days.
@@ -40,7 +40,7 @@ tier.
 
 1. Check `../outputs/campaigns/` for a matching active campaign — add the contact
    if one exists.
-2. If none: run [`.claude/agents/gtm-signal-to-sequence.md`](.claude/agents/gtm-signal-to-sequence.md)
+2. If none: run [`.claude/agents/gtm-signal-to-sequence.md`](../../../.claude/agents/gtm-signal-to-sequence.md)
    for this signal + persona.
 3. Personalise touch 1 with the specific signal event, add to sequence, log.
 

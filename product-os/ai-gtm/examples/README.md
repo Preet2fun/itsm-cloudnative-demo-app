@@ -13,11 +13,11 @@ scoring model, and signal library are legible before any real campaign runs.
 | File | What it demonstrates |
 |---|---|
 | [`accounts.md`](accounts.md) | 6 fictional prospect companies — profile + which signals fired |
-| [`2026-08-11-scoring-q4-target-list.md`](2026-08-11-scoring-q4-target-list.md) | A batch [`account-scoring`](.claude/agents/gtm-account-scoring.md) output — the 6 accounts scored, tiered, with breakdowns and the two hard-gate exclusions |
-| [`2026-08-14-research-meridian-freight.md`](2026-08-14-research-meridian-freight.md) | A full [`account-research`](.claude/agents/gtm-account-research.md) brief on the top Tier-1 account |
-| [`campaign-renewal-price-shock-tier1/`](campaign-renewal-price-shock-tier1/) | A complete campaign from [`signal-to-sequence`](.claude/agents/gtm-signal-to-sequence.md): `brief.md` · `sequences.md` · `metrics.md` · `results.md` (3 weeks of sample performance) |
+| [`2026-08-11-scoring-q4-target-list.md`](2026-08-11-scoring-q4-target-list.md) | A batch [`account-scoring`](../../../.claude/agents/gtm-account-scoring.md) output — the 6 accounts scored, tiered, with breakdowns and the two hard-gate exclusions |
+| [`2026-08-14-research-meridian-freight.md`](2026-08-14-research-meridian-freight.md) | A full [`account-research`](../../../.claude/agents/gtm-account-research.md) brief on the top Tier-1 account |
+| [`campaign-renewal-price-shock-tier1/`](campaign-renewal-price-shock-tier1/) | A complete campaign from [`signal-to-sequence`](../../../.claude/agents/gtm-signal-to-sequence.md): `brief.md` · `sequences.md` · `metrics.md` · `results.md` (3 weeks of sample performance) |
 | [`signal-performance-log.md`](signal-performance-log.md) | A filled version of `signal-library.md` § Performance Log |
-| [`weekly-log.md`](weekly-log.md) | 3 sample [`weekly-update`](.claude/agents/gtm-weekly-update.md) entries |
+| [`weekly-log.md`](weekly-log.md) | 3 sample [`weekly-update`](../../../.claude/agents/gtm-weekly-update.md) entries |
 
 ## What you can learn from it
 

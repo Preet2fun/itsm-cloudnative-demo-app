@@ -13,7 +13,7 @@ increase, so the unified-budget wedge is at maximum leverage.
 
 1. Confirm the renewal window (procurement job posts, "evaluating alternatives"
    language, community threads). Score the account.
-2. Run [`.claude/agents/gtm-account-research.md`](.claude/agents/gtm-account-research.md). Target the
+2. Run [`.claude/agents/gtm-account-research.md`](../../../.claude/agents/gtm-account-research.md). Target the
    **IT Director / CIO** ([`../personas/it-director-cio.md`](../personas/it-director-cio.md)).
 3. Lead with **single-platform TCO**: one bill replacing an APM bill *plus* the
    security spend they're about to add anyway. Frame it as a decision to make
