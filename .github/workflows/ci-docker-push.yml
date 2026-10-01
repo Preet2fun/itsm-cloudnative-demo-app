@@ -1,6 +1,7 @@
 # ci-docker-push.yml
-# Builds and pushes Docker images for all 4 customer-app services on every
-# push to main, tagged by short git SHA, then commits the new tags into
+# Builds and pushes Docker images for all 5 customer-app services (4 backend
+# + frontend) on every push to main, tagged by short git SHA, then commits
+# the new tags into
 # the Helm chart's values.yaml so ArgoCD (platform-app/infra/argocd/apps/dev/customer-app.yaml)
 # picks them up and auto-syncs.
 # Requires repo secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN.
@@ -22,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [order-service, catalog-service, delivery-service, payment-service]
+        service: [order-service, catalog-service, delivery-service, payment-service, frontend]
     steps:
       - uses: actions/checkout@v4
       - name: Log in to Docker Hub
@@ -67,6 +68,7 @@ jobs:
           yq -i ".catalogService.image.tag = \"$TAG\"" "$FILE"
           yq -i ".deliveryService.image.tag = \"$TAG\"" "$FILE"
           yq -i ".paymentService.image.tag = \"$TAG\"" "$FILE"
+          yq -i ".frontend.image.tag = \"$TAG\"" "$FILE"
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"

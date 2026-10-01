@@ -239,8 +239,9 @@ open capacity risk" below.
 | catalog-service (Python) | 100m | 300m | 128Mi | 256Mi |
 | delivery-service (Java) | 100m | 300m | 256Mi | 512Mi |
 | payment-service (Java) | 100m | 300m | 256Mi | 512Mi |
+| Frontend (Hearth — nginx:alpine) | 50m | 200m | 64Mi | 128Mi |
 | Redis | 50m | 200m | 64Mi | 256Mi |
-| Istio sidecars (×4) | ~100m each | — | ~128Mi each | ~128Mi each |
+| Istio sidecars (×5) | ~100m each | — | ~128Mi each | ~128Mi each |
 
 **Capacity risk — RESOLVED 2026-09-25 for dev (Phase 9, #36):** Java services
 run 2× the memory footprint of the Go/Python ones, and by 2026-09-25 the
@@ -361,7 +362,7 @@ they're added — keep the two namespaces as separate as the span names are.
 | catalog-service | Python 3.12+ | FastAPI 0.111+ | SQLAlchemy 2.x async, asyncpg |
 | delivery-service | Java | Spring Boot | — |
 | payment-service | Java | Spring Boot | — |
-| Frontend | — | **none yet** | greenfield — no UI exists for customer-app today; stack choice happens as part of that roadmap task, using Claude Design (§10) |
+| Frontend ("Hearth") | TypeScript | Vite + React 18 | React Router, TanStack Query, Zustand, CSS Modules — Aurora design system (same as platform-app's Synap UI). Login + 6-digit MFA verify built (issue #45); App Shell, Dashboard, Orders, Menu, Deliveries, Payments specced in `customer-app/design_handoff/design_handoff_hearth/BUILD_PLAN.md`, not yet built — each is its own future roadmap task per §11 |
 
 ### JWT (RS256 — one issuer for both apps)
 Claims: `sub`, `tenant_id` (omitted, not empty, for platform staff), `role`,
@@ -483,10 +484,13 @@ built to match. Do not port `synap-tweaks.jsx` / `tweaks-panel.jsx` — those
 are prototype-only demo theming; real theme settings belong in a proper
 Settings/Admin screen.
 
-**Customer App:** zero frontend exists today — this is a clean greenfield
-build. Frontend stack, routing, and state approach get decided as part of
-that roadmap task, but UI still starts as a Claude Design draft before code,
-same as platform-app.
+**Customer App:** "Hearth" — see `customer-app/design_handoff/CLAUDE.md` for
+the full design source of truth (screen inventory, tokens, build order).
+Stack: Vite + React 18 + TypeScript, same Aurora design system as platform-app
+(sibling product, not a distinct brand — decision on record 2026-09-17).
+Login + 6-digit MFA verify are built; the rest of the screens follow the
+reference prototype's `BUILD_PLAN.md`, one roadmap task at a time, same
+Claude-Design-first discipline as platform-app.
 
 **One screen/feature at a time.** Build exactly what the current roadmap
 task specifies, verify it in a browser against the design draft, then stop —

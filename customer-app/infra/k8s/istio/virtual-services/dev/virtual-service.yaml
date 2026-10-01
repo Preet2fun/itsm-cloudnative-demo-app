@@ -4,11 +4,24 @@
 # collides with itsm-routing's `hosts: ["*"]` + catch-all-to-frontend.
 #
 # Route map:
-#   /api/v1/restaurants*   -> catalog-service   (includes nested menu-items)
-#   /api/v1/orders*        -> order-service
-#   /api/v1/deliveries*    -> delivery-service
-#   /api/v1/payments*      -> payment-service
-#   (no catch-all - no frontend yet; unmatched paths get Istio's 404)
+#   /api/v1/auth/*          -> user-service (itsm-dev)  — login/MFA, no JWT required
+#   /api/v1/.well-known/*   -> user-service (itsm-dev)  — JWKS endpoint, no JWT required
+#   /api/v1/restaurants*    -> catalog-service   (includes nested menu-items)
+#   /api/v1/orders*         -> order-service
+#   /api/v1/deliveries*     -> delivery-service
+#   /api/v1/payments*       -> payment-service
+#   /* (catch-all)          -> frontend (Hearth — static SPA, nginx:alpine)
+#
+# The auth routes exist here because this VirtualService claims the exact
+# host "customer-app.dev.local" — once claimed, Istio routes every request
+# carrying that Host header through this VS exclusively, never falling
+# through to platform-app's itsm-routing (hosts: ["*"]) even for paths only
+# it used to define. Hearth's frontend is served under this same host, so
+# its relative fetch("/api/v1/auth/login") calls need a real match here, not
+# a redirect to the bare node IP (see customer-app/docs/
+# phase-03-istio-ingress-guide.md's routing note — that workaround was for
+# curl-based E2E scripts with no frontend to worry about; a real browser SPA
+# needs same-origin auth, hence these two routes).
 
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -21,6 +34,19 @@ spec:
   gateways:
     - itsm-dev/itsm-gateway
   http:
+    # Auth + JWKS (platform-app's user-service, cross-namespace) — must come
+    # before any other match since both are prefix matches off /api/v1/
+    - match:
+        - uri:
+            prefix: /api/v1/auth/
+        - uri:
+            prefix: /api/v1/.well-known/
+      route:
+        - destination:
+            host: user-service.itsm-dev.svc.cluster.local
+            port:
+              number: 80
+
     - match:
         - uri:
             prefix: /api/v1/restaurants
@@ -54,5 +80,12 @@ spec:
       route:
         - destination:
             host: payment-service
+            port:
+              number: 80
+
+    # Frontend — catch-all: Hearth's static SPA + /healthz
+    - route:
+        - destination:
+            host: frontend
             port:
               number: 80

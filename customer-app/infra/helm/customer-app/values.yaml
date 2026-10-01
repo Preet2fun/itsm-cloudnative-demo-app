@@ -2,7 +2,7 @@
 # Override with values-qa.yaml for ENV=qa.
 # Secrets (DATABASE_URL, REDIS_URL) are NEVER stored here — inject via K8s Secret.
 #
-# All 4 services' hpa.maxReplicas are capped at 1 (not the usual 2) —
+# All 5 services' hpa.maxReplicas are capped at 1 (not the usual 2) —
 # confirmed live 2026-09-25 that real free memory on the two worker nodes
 # has dropped to ~3.7GiB (from ~5GiB on 2026-09-01) since ArgoCD + the
 # observability stack landed, and the control-plane node itself is down to
@@ -21,6 +21,42 @@ global:
   # (confirmed live 2026-09-10). Plaintext http (not https) because the
   # collector listens without TLS in-cluster.
   otelCollectorEndpoint: "http://otel-collector.itsm-dev:4317"
+# ── Frontend (Hearth — Vite/React, nginx:alpine) ────────────────────────────
+frontend:
+  enabled: true
+  name: frontend
+  image:
+    repository: frontend          # full image = preet2fun/frontend:<tag>
+    tag: "v0.1.0"                 # Login + 6-digit MFA verify (issue #45)
+    pullPolicy: IfNotPresent
+  port: 8080                      # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
+  replicas: 1
+  # No env vars needed — nginx serves static files; Istio VirtualService
+  # (customer-app-routing) handles routing /api/v1/* to backend services,
+  # including the cross-namespace /api/v1/auth/* -> user-service route.
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+  hpa:
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 70
+
+  readinessProbe:
+    path: /healthz
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  livenessProbe:
+    path: /healthz
+    initialDelaySeconds: 10
+    periodSeconds: 20
 # ── Order Service (Go) ──────────────────────────────────────────────────────
 orderService:
   enabled: true
