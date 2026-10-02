@@ -362,7 +362,7 @@ they're added — keep the two namespaces as separate as the span names are.
 | catalog-service | Python 3.12+ | FastAPI 0.111+ | SQLAlchemy 2.x async, asyncpg |
 | delivery-service | Java | Spring Boot | — |
 | payment-service | Java | Spring Boot | — |
-| Frontend ("Hearth") | TypeScript | Vite + React 18 | React Router, TanStack Query, Zustand, CSS Modules — Aurora design system (same as platform-app's Synap UI). Login + 6-digit MFA verify built (issue #45); App Shell, Dashboard, Orders, Menu, Deliveries, Payments specced in `customer-app/design_handoff/design_handoff_hearth/BUILD_PLAN.md`, not yet built — each is its own future roadmap task per §11 |
+| Frontend ("Hearth") | TypeScript | Vite + React 18 | React Router, TanStack Query, Zustand, CSS Modules, `lucide-react` — Aurora design system (same as platform-app's Synap UI). Login + 6-digit MFA verify (issue #45) and App Shell + Dashboard + AI Copilot (issue #54) are built, both 100% mocked for the Copilot's conversation data; Orders, Menu, Deliveries, Payments specced in `customer-app/design_handoff/design_handoff_hearth/BUILD_PLAN.md`, not yet built — each is its own future roadmap task per §11 |
 
 ### JWT (RS256 — one issuer for both apps)
 Claims: `sub`, `tenant_id` (omitted, not empty, for platform staff), `role`,

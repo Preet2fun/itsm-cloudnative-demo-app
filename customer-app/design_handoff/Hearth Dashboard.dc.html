@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/colors.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/typography.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/motion.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/tokens/base.css">
+<link rel="stylesheet" href="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/styles.css">
+<script src="_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/_ds_bundle.js"></script>
+<style>
+  html, body { margin:0; background:#050810; }
+  a { color:#2AA5F5; text-decoration:none; }
+  a:hover { color:#22E06B; }
+</style>
+</helmet>
+
+<div data-theme="dark" data-screen-label="03 Dashboard + Copilot" style="height:100vh; display:flex; flex-direction:column; overflow:hidden; background:var(--bg-canvas); color:var(--text-primary); font-family:var(--font-ui); font-size:var(--text-body-md-size); line-height:var(--text-body-md-lh);">
+
+  <x-import component-from-global-scope="DesignSystem_f13b19.TopBar" product="Hearth" environment="{{ locationName }}" environments="{{ locationNames }}" on-environment-change="{{ pickLocation }}" right="{{ topBarRight }}" hint-size="100%,56px"></x-import>
+
+  <div style="flex:1; min-height:0; display:flex;">
+    <x-import component-from-global-scope="DesignSystem_f13b19.Sidebar" sections="{{ navSections }}" active-id="dashboard" footer="{{ sidebarFooter }}" hint-size="240px,100%"></x-import>
+
+    <main style="flex:1; min-width:0; overflow-y:auto;">
+      <div style="padding:var(--space-6); max-width:var(--max-app); box-sizing:border-box; display:flex; flex-direction:column; gap:var(--space-5);">
+
+        <div style="display:flex; align-items:flex-end; gap:var(--space-4); flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:var(--space-1);">
+            <div style="font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary);">Thursday, 1 October</div>
+            <div style="font-family:var(--font-display); font-size:var(--text-display-md-size); line-height:var(--text-display-md-lh); font-weight:var(--weight-semibold); letter-spacing:var(--text-display-md-track);">Good afternoon, Rosa</div>
+            <div style="color:var(--text-secondary); font-size:var(--text-body-lg-size); line-height:var(--text-body-lg-lh);">Here's how {{ locationName }} is doing today.</div>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:var(--space-2);">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" hint-size="72px,32px">Today</x-import>
+            <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="primary" hint-size="160px,32px">Pause online orders</x-import>
+          </div>
+        </div>
+
+        <sc-if value="{{ showBrief }}" hint-placeholder-val="{{ true }}">
+          <x-import component-from-global-scope="DesignSystem_f13b19.Card" eyebrow="AI business brief" title="Business is performing well today" action="{{ briefMeta }}" hint-size="100%,300px">
+            <div style="display:flex; flex-direction:column; gap:var(--space-5);">
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(220px,100%),1fr)); gap:var(--space-3);">
+                <div style="display:flex; flex-direction:column; gap:var(--space-2); padding:var(--space-4); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-canvas);">
+                  <div style="display:flex; align-items:center; gap:var(--space-2); color:var(--success); font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase;">
+                    <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="trending-up" size="{{ 14 }}" hint-size="14px,14px"></x-import>
+                    <span>Sales</span>
+                  </div>
+                  <div style="font-family:var(--font-display); font-size:var(--text-heading-md-size); line-height:var(--text-heading-md-lh); font-weight:var(--weight-semibold); font-variant-numeric:tabular-nums;">$6,420</div>
+                  <div style="color:var(--text-secondary); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">+8.1% vs last Thursday</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:var(--space-2); padding:var(--space-4); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-canvas);">
+                  <div style="display:flex; align-items:center; gap:var(--space-2); color:var(--warning); font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase;">
+                    <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="triangle-alert" size="{{ 14 }}" hint-size="14px,14px"></x-import>
+                    <span>Needs attention</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:var(--space-1); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                    <div>2 deliveries are past ETA</div>
+                    <div>3 payments ($142) need review</div>
+                  </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:var(--space-2); padding:var(--space-4); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-canvas);">
+                  <div style="display:flex; align-items:center; gap:var(--space-2); color:var(--info); font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase;">
+                    <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="lightbulb" size="{{ 14 }}" hint-size="14px,14px"></x-import>
+                    <span>Insight</span>
+                  </div>
+                  <div style="font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh); text-wrap:pretty;">Lunch orders rose 12%, but average delivery time grew 7 minutes during the lunch peak.</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:var(--space-2); flex-wrap:wrap;">
+                <span style="font-size:var(--text-label-size); line-height:var(--text-label-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary); margin-right:var(--space-2);">Suggested</span>
+                <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" size="sm" on-click="{{ askDelivery }}" hint-size="190px,28px">Investigate delivery delays</x-import>
+                <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" size="sm" on-click="{{ askPayments }}" hint-size="170px,28px">Review failed payments</x-import>
+                <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" size="sm" on-click="{{ askMenu }}" hint-size="200px,28px">Analyze today's best sellers</x-import>
+              </div>
+            </div>
+          </x-import>
+        </sc-if>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(236px,100%),1fr)); gap:var(--space-4);">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <x-import component-from-global-scope="DesignSystem_f13b19.KpiTile" label="{{ k.label }}" value="{{ k.value }}" delta="{{ k.delta }}" delta-tone="{{ k.tone }}" trend="{{ k.trend }}" hint-size="100%,132px"></x-import>
+          </sc-for>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(340px,100%),1fr)); gap:var(--space-4); align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:var(--space-3); min-width:0;">
+            <div style="display:flex; align-items:center; gap:var(--space-3);">
+              <div style="font-family:var(--font-display); font-size:var(--text-heading-sm-size); line-height:var(--text-heading-sm-lh); font-weight:var(--weight-semibold);">Orders in progress</div>
+              <a href="#" style="margin-left:auto; font-size:var(--text-body-sm-size);">All orders</a>
+            </div>
+            <x-import component-from-global-scope="DesignSystem_f13b19.Table" columns="{{ orderColumns }}" rows="{{ orderRows }}" density="comfortable" hint-size="100%,280px"></x-import>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:var(--space-4); min-width:0;">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Card" title="Deliveries in flight" hint-size="100%,220px">
+              <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                <sc-for list="{{ deliveries }}" as="d" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-canvas);">
+                    <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--space-1);">
+                      <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ d.courier }}</div>
+                      <div style="font-family:var(--font-mono); font-size:var(--text-mono-sm-size); color:var(--text-tertiary);">{{ d.meta }}</div>
+                    </div>
+                    <x-import component-from-global-scope="DesignSystem_f13b19.StatusBadge" tone="{{ d.tone }}" dot="{{ true }}" hint-size="auto,20px">{{ d.status }}</x-import>
+                  </div>
+                </sc-for>
+              </div>
+            </x-import>
+            <x-import component-from-global-scope="DesignSystem_f13b19.Card" title="Top items today" hint-size="100%,220px">
+              <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                <sc-for list="{{ topItems }}" as="t" hint-placeholder-count="5">
+                  <div style="display:flex; flex-direction:column; gap:var(--space-1);">
+                    <div style="display:flex; justify-content:space-between; gap:var(--space-3); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                      <span>{{ t.label }}</span>
+                      <span style="font-variant-numeric:tabular-nums; color:var(--text-secondary);">{{ t.value }}</span>
+                    </div>
+                    <div style="height:4px; border-radius:var(--radius-full); background:var(--bg-elevated);">
+                      <div style="{{ t.barStyle }}"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </x-import>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <sc-if value="{{ copilotOpen }}" hint-placeholder-val="{{ true }}">
+      <aside data-screen-label="Copilot" style="width:clamp(320px, 30vw, 400px); flex:0 0 clamp(320px, 30vw, 400px); display:flex; flex-direction:column; min-height:0; border-left:1px solid var(--border-default); background:var(--bg-surface);">
+        <div style="display:flex; flex-direction:column; gap:var(--space-3); padding:var(--space-4); border-bottom:1px solid var(--border-default);">
+          <div style="display:flex; align-items:center; gap:var(--space-2);">
+            <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="sparkles" size="{{ 16 }}" hint-size="16px,16px"></x-import>
+            <div style="font-family:var(--font-display); font-size:var(--text-heading-sm-size); line-height:var(--text-heading-sm-lh); font-weight:var(--weight-semibold);">Copilot</div>
+            <div style="margin-left:auto; display:flex; gap:var(--space-1);">
+              <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="ghost" size="sm" on-click="{{ newThread }}" hint-size="56px,28px">New</x-import>
+              <x-import component-from-global-scope="DesignSystem_f13b19.IconButton" label="Close Copilot" variant="ghost" size="sm" on-click="{{ toggleCopilot }}" hint-size="28px,28px">
+                <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="panel-right-close" size="{{ 16 }}" hint-size="16px,16px"></x-import>
+              </x-import>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ threadRef }}" style="flex:1; min-height:0; overflow-y:auto; padding:var(--space-4); display:flex; flex-direction:column; gap:var(--space-5);">
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:var(--space-4);">
+              <div style="color:var(--text-secondary); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh); text-wrap:pretty;">I read today's orders, menu, deliveries, and payments for {{ locationName }}. Ask what's happening, why, and what to do next.</div>
+              <div style="display:flex; flex-direction:column; border:1px solid var(--border-default); border-radius:var(--radius-md); overflow:hidden;">
+                <sc-for list="{{ prompts }}" as="p" hint-placeholder-count="10">
+                  <button onClick="{{ p.ask }}" style="display:flex; align-items:flex-start; gap:var(--space-3); width:100%; padding:var(--space-3); border:0; border-bottom:1px solid var(--border-subtle); background:transparent; color:var(--text-primary); font:inherit; text-align:left; cursor:pointer;" style-hover="background:var(--bg-elevated)">
+                    <span style="color:var(--text-tertiary); padding-top:2px;">
+                      <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="{{ p.icon }}" size="{{ 16 }}" hint-size="16px,16px"></x-import>
+                    </span>
+                    <span style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+                      <span style="font-size:var(--text-caption-size); line-height:var(--text-caption-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary);">{{ p.area }}</span>
+                      <span style="font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">{{ p.q }}</span>
+                    </span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-for list="{{ thread }}" as="m" hint-placeholder-count="1">
+            <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+              <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+                <div style="align-self:flex-end; max-width:85%; padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); background:var(--bg-elevated); border:1px solid var(--border-default); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">{{ m.text }}</div>
+              </sc-if>
+
+              <sc-if value="{{ m.isPending }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; align-items:center; gap:var(--space-2); color:var(--text-tertiary); font-size:var(--text-body-sm-size);">
+                  <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="loader" size="{{ 14 }}" hint-size="14px,14px"></x-import>
+                  <span>{{ m.text }}</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ m.isCopilot }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                  <div style="display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-caption-size); line-height:var(--text-caption-lh); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary);">
+                    <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="sparkles" size="{{ 14 }}" hint-size="14px,14px"></x-import>
+                    <span>Copilot</span>
+                  </div>
+                  <sc-for list="{{ m.paragraphs }}" as="para" hint-placeholder-count="2">
+                    <div style="font-size:var(--text-body-md-size); line-height:var(--text-body-md-lh); text-wrap:pretty;">{{ para.t }}</div>
+                  </sc-for>
+
+                  <sc-for list="{{ m.blocks }}" as="b" hint-placeholder-count="1">
+                    <div style="display:flex; flex-direction:column; gap:var(--space-2); padding:var(--space-3); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--bg-canvas);">
+                      <sc-if value="{{ b.hasTitle }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:var(--text-caption-size); line-height:var(--text-caption-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-label-track); text-transform:uppercase; color:var(--text-tertiary);">{{ b.title }}</div>
+                      </sc-if>
+                      <sc-if value="{{ b.isCompare }}" hint-placeholder-val="{{ false }}">
+                        <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="2">
+                          <div style="display:flex; align-items:center; gap:var(--space-3); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                            <span style="flex:1; color:var(--text-secondary);">{{ r.label }}</span>
+                            <span style="font-variant-numeric:tabular-nums; color:var(--text-tertiary);">{{ r.from }}</span>
+                            <span style="color:var(--text-tertiary);">→</span>
+                            <span style="{{ r.toStyle }}">{{ r.to }}</span>
+                          </div>
+                        </sc-for>
+                      </sc-if>
+                      <sc-if value="{{ b.isBars }}" hint-placeholder-val="{{ false }}">
+                        <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex; flex-direction:column; gap:var(--space-1);">
+                            <div style="display:flex; justify-content:space-between; gap:var(--space-3); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                              <span>{{ r.label }}</span>
+                              <span style="font-variant-numeric:tabular-nums; color:var(--text-secondary);">{{ r.value }}</span>
+                            </div>
+                            <div style="height:4px; border-radius:var(--radius-full); background:var(--bg-elevated);">
+                              <div style="{{ r.barStyle }}"></div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </sc-if>
+                      <sc-if value="{{ b.isSpark }}" hint-placeholder-val="{{ false }}">
+                        <x-import component-from-global-scope="DesignSystem_f13b19.Sparkline" values="{{ b.values }}" width="{{ 330 }}" height="{{ 56 }}" hint-size="330px,56px"></x-import>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-2);">
+                          <sc-for list="{{ b.stats }}" as="st" hint-placeholder-count="3">
+                            <div style="display:flex; flex-direction:column; gap:2px;">
+                              <span style="font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--text-tertiary);">{{ st.label }}</span>
+                              <span style="font-size:var(--text-body-sm-size); font-variant-numeric:tabular-nums;">{{ st.value }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ b.isList }}" hint-placeholder-val="{{ false }}">
+                        <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex; gap:var(--space-2); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                            <span style="{{ r.markStyle }}">{{ r.mark }}</span>
+                            <span style="text-wrap:pretty;">{{ r.label }}</span>
+                          </div>
+                        </sc-for>
+                      </sc-if>
+                      <sc-if value="{{ b.isApproval }}" hint-placeholder-val="{{ false }}">
+                        <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="2">
+                          <div style="display:flex; gap:var(--space-2); font-size:var(--text-body-sm-size); line-height:var(--text-body-sm-lh);">
+                            <span style="color:var(--text-tertiary); font-family:var(--font-mono);">{{ r.mark }}</span>
+                            <span style="text-wrap:pretty;">{{ r.label }}</span>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{ b.pending }}" hint-placeholder-val="{{ true }}">
+                          <div style="display:flex; gap:var(--space-2); padding-top:var(--space-1);">
+                            <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="primary" size="sm" on-click="{{ b.approve }}" hint-size="140px,28px">Approve changes</x-import>
+                            <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="ghost" size="sm" on-click="{{ b.dismiss }}" hint-size="80px,28px">Not now</x-import>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ b.resolved }}" hint-placeholder-val="{{ false }}">
+                          <div style="display:flex; align-items:center; gap:var(--space-2);">
+                            <x-import component-from-global-scope="DesignSystem_f13b19.StatusBadge" tone="{{ b.resolvedTone }}" dot="{{ true }}" hint-size="auto,20px">{{ b.resolvedLabel }}</x-import>
+                          </div>
+                        </sc-if>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ m.hasP2 }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:var(--text-body-md-size); line-height:var(--text-body-md-lh); text-wrap:pretty;">{{ m.p2 }}</div>
+                  </sc-if>
+
+                  <sc-if value="{{ m.hasActions }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+                      <sc-for list="{{ m.actions }}" as="a" hint-placeholder-count="2">
+                        <x-import component-from-global-scope="DesignSystem_f13b19.Button" variant="secondary" size="sm" on-click="{{ a.run }}" hint-size="auto,28px">{{ a.label }}</x-import>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ m.hasReplies }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+                      <sc-for list="{{ m.replies }}" as="rp" hint-placeholder-count="2">
+                        <x-import component-from-global-scope="DesignSystem_f13b19.FilterChip" on-click="{{ rp.run }}" style="{{ chipStyle }}" hint-size="auto,24px">{{ rp.label }}</x-import>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:var(--space-3) var(--space-4) var(--space-4); border-top:1px solid var(--border-default); display:flex; flex-direction:column; gap:var(--space-2);">
+          <div style="display:flex; gap:var(--space-2);">
+            <div style="flex:1; min-width:0;">
+              <x-import component-from-global-scope="DesignSystem_f13b19.Input" value="{{ draft }}" on-change="{{ onDraft }}" on-key-down="{{ onDraftKey }}" placeholder="Ask about sales, orders, menu, deliveries…" size="lg" aria-label="Ask Copilot" hint-size="100%,40px"></x-import>
+            </div>
+            <x-import component-from-global-scope="DesignSystem_f13b19.IconButton" label="Send" variant="primary" size="lg" disabled="{{ cannotSend }}" on-click="{{ sendDraft }}" hint-size="40px,40px">
+              <x-import component-from-global-scope="DesignSystem_f13b19.Icon" name="arrow-up" size="{{ 16 }}" hint-size="16px,16px"></x-import>
+            </x-import>
+          </div>
+          <div style="font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--text-tertiary);">Reads {{ locationName }} data only. Changes always ask for your approval.</div>
+        </div>
+      </aside>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1600,&quot;height&quot;:960},&quot;startConversation&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Delivery deep-dive&quot;,&quot;Empty&quot;],&quot;default&quot;:&quot;Delivery deep-dive&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;copilotDefaultOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showBrief&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const PROMPTS = [
+  ['performance', 'Business performance', 'How is my business performing today?', 'activity'],
+  ['revenue', 'Revenue', 'Why are sales lower than last Thursday?', 'banknote'],
+  ['orders', 'Orders', 'Why did order volume drop during lunch?', 'receipt-text'],
+  ['payments', 'Payments', 'Why have failed payments increased today?', 'credit-card'],
+  ['delivery', 'Delivery', 'Why are deliveries taking longer today?', 'truck'],
+  ['menu', 'Menu performance', 'Which menu items generate the most revenue?', 'book-open'],
+  ['trends', 'Trends', 'Show me the sales trend for the last 30 days.', 'line-chart'],
+  ['anomalies', 'Anomalies', 'Anything unusual happening today?', 'search'],
+  ['focus', 'Recommendations', 'What should I focus on today?', 'lightbulb'],
+  ['forecast', 'Forecasting', 'What order volume should I expect this weekend?', 'calendar-clock']
+];
+
+const SPARK_30 = [5120, 4890, 5300, 5610, 6980, 8420, 6110, 3410, 4720, 5050, 5480, 5900, 7210, 8940, 6400, 3720, 4980, 5160, 5390, 6020, 7350, 8610, 6230, 3890, 5010, 5310, 5640, 5939, 7480, 6420];
+
+const SCRIPT = {
+  performance: {
+    stage: 'Understand',
+    p: ['Business is performing well today. Sales and order volume are both ahead of last Thursday; the two weak spots are lunch delivery times and three failed payments.'],
+    blocks: [{ type: 'compare', title: 'Today vs last Thursday', rows: [
+      ['Net sales', '$5,939', '$6,420', 'up'], ['Orders', '204', '218', 'up'],
+      ['Avg basket', '$29.11', '$29.45', 'up'], ['Avg delivery time', '31 min', '38 min', 'down']
+    ] }],
+    replies: [['Why are deliveries slower?', 'delivery'], ['What should I focus on?', 'focus']]
+  },
+  revenue: {
+    stage: 'Explain',
+    p: ['Sales aren\'t lower — they\'re 8.1% higher than last Thursday ($6,420 vs $5,939).', 'The one soft window was 3:00–5:00 PM, down 18%, which matches last Thursday\'s pattern after the lunch rush. Dinner pre-orders are already 11% ahead.'],
+    blocks: [{ type: 'compare', title: 'By daypart', rows: [
+      ['Lunch 11:30–2:30', '$2,310', '$2,590', 'up'], ['Afternoon 3:00–5:00', '$640', '$525', 'down'], ['Dinner so far', '$2,989', '$3,305', 'up']
+    ] }],
+    replies: [['Show the 30-day trend', 'trends'], ['Which items drove it?', 'menu']]
+  },
+  orders: {
+    stage: 'Explain',
+    p: ['Lunch volume didn\'t drop overall — it rose 12%. There was a 25-minute dip from 11:45 to 12:10 when online orders fell to 2.', 'That window lines up with Margherita being marked unavailable at Eastgate Counter, which pushed its online menu below the 3-item minimum and hid the store from delivery apps.'],
+    blocks: [{ type: 'list', title: 'Timeline', rows: [
+      ['11:44', 'Margherita marked unavailable at Eastgate Counter'], ['11:45', 'Online orders paused automatically'], ['12:10', 'Margherita restored, orders resumed']
+    ] }],
+    replies: [['How do I stop that happening?', 'focus']]
+  },
+  payments: {
+    stage: 'Explain',
+    p: ['3 payments failed today for $142 in total — about 3× your usual Thursday rate. Two have the same cause.'],
+    blocks: [{ type: 'list', title: 'Failed payments', rows: [
+      ['$57.50', '#ORD-4819 · processor timeout at 12:41 · safe to retry'], ['$66.50', '#ORD-4806 · card declined · Visa ···3302'], ['$18.00', '#ORD-4817 · same Visa ···3302 · order cancelled']
+    ] }],
+    actions: [['Retry #ORD-4819 capture', 'payments_act'], ['View all payments', null]],
+    replies: [['Why the same card twice?', 'payments_card']]
+  },
+  payments_card: {
+    stage: 'Explain',
+    p: ['Visa ···3302 belongs to a returning customer with 14 past orders. Both declines returned "insufficient funds", so this is the card, not your setup.', 'I wouldn\'t block the card. Asking the customer to update their payment method usually recovers it.'],
+    replies: [['Retry the timeout payment', 'payments_act']]
+  },
+  payments_act: {
+    stage: 'Act',
+    p: ['I can retry the capture for #ORD-4819. The processor timeout means the customer was never charged, so a retry won\'t double-bill.'],
+    blocks: [{ type: 'approval', title: 'Proposed change', rows: [['1', 'Retry capture of $57.50 for #ORD-4819 (Mastercard ···1180)']] }]
+  },
+  delivery: {
+    stage: 'Explain',
+    p: ['Most delays happened between 12:30 and 1:30 PM.', '17 orders were placed in that hour, 32% above your normal Thursday lunch volume. The largest contributor was preparation time, not courier travel.'],
+    blocks: [{ type: 'compare', title: '12:30–1:30 PM vs usual', rows: [
+      ['Orders placed', '13', '17', 'down'], ['Prep time', '14 min', '21 min', 'down'], ['Courier travel', '15 min', '16 min', 'neutral']
+    ] }],
+    p2: 'Want me to identify which menu items contributed most to the longer prep time?',
+    replies: [['Yes', 'delivery_items'], ['No, thanks', 'ack']]
+  },
+  delivery_items: {
+    stage: 'Explain',
+    p: ['Margherita and Lasagne accounted for 61% of delayed orders. Lasagne had the largest prep-time increase: 18 min → 27 min, because it\'s baked to order once the morning tray runs out.'],
+    blocks: [{ type: 'bars', title: 'Share of delayed orders', rows: [['Margherita', '34%', 34], ['Lasagne', '27%', 27], ['Carbonara', '14%', 14], ['Other', '25%', 25]] }],
+    actions: [['View affected orders', null], ['Analyze kitchen performance', 'kitchen']],
+    replies: [['What should I do about it?', 'delivery_recommend']]
+  },
+  kitchen: {
+    stage: 'Understand',
+    p: ['Your oven station hit capacity at 12:40 — 9 pizzas and 4 lasagne trays were queued at once. Prep and pass stations stayed under 70% load.'],
+    blocks: [{ type: 'compare', title: 'Peak station load', rows: [['Oven', '78%', '100%', 'down'], ['Prep', '55%', '64%', 'neutral'], ['Pass', '48%', '61%', 'neutral']] }],
+    replies: [['What should I do about it?', 'delivery_recommend']]
+  },
+  delivery_recommend: {
+    stage: 'Recommend',
+    p: ['Two changes would have recovered most of today\'s delay:'],
+    blocks: [{ type: 'list', rows: [
+      ['1', 'Bake a second lasagne tray at 11:30 on weekdays. It frees the oven for pizzas at peak and would have saved about 9 minutes per delayed order.'],
+      ['2', 'Quote 38 min for delivery between 12:15 and 1:45 PM instead of 30 min, so customers aren\'t told an ETA you can\'t hit.']
+    ] }],
+    p2: 'Estimated effect: on-time deliveries at lunch from 71% to 90%.',
+    replies: [['Go ahead and make those changes', 'delivery_act'], ['Just the first one', 'delivery_act_one']]
+  },
+  delivery_act: {
+    stage: 'Act',
+    p: ['Here\'s exactly what I\'ll change. Nothing is applied until you approve.'],
+    blocks: [{ type: 'approval', title: 'Proposed changes', rows: [
+      ['1', 'Add "Lasagne tray #2 — 11:30" to the weekday prep list'], ['2', 'Set lunch delivery quote to 38 min, 12:15–1:45 PM, Mon–Fri']
+    ] }]
+  },
+  delivery_act_one: {
+    stage: 'Act',
+    p: ['Just the prep change, then. Nothing is applied until you approve.'],
+    blocks: [{ type: 'approval', title: 'Proposed change', rows: [['1', 'Add "Lasagne tray #2 — 11:30" to the weekday prep list']] }]
+  },
+  menu: {
+    stage: 'Understand',
+    p: ['Margherita is your top earner today at $1,148, followed by Lasagne. Together they\'re 32% of today\'s sales.', 'Tiramisu is worth a look: it\'s in only 6% of orders but attaches to 1 in 3 pasta orders when it\'s offered at checkout.'],
+    blocks: [{ type: 'bars', title: 'Revenue today', rows: [['Margherita', '$1,148', 100], ['Lasagne', '$912', 79], ['Carbonara', '$703', 61], ['Calzone', '$495', 43], ['Tiramisu', '$288', 25]] }],
+    replies: [['How do I sell more tiramisu?', 'focus']]
+  },
+  trends: {
+    stage: 'Understand',
+    p: ['Sales are up 6% over the last 30 days. Your week has a steady shape: Saturdays peak, Mondays are your quietest day.'],
+    blocks: [{ type: 'spark', title: 'Net sales · last 30 days', values: SPARK_30, stats: [['Daily avg', '$5,880'], ['Best day', '$8,940 Sat'], ['Quietest', '$3,410 Mon']] }],
+    replies: [['What about this weekend?', 'forecast']]
+  },
+  anomalies: {
+    stage: 'Understand',
+    p: ['Three things are outside your normal range today:'],
+    blocks: [{ type: 'list', rows: [
+      ['!', 'Lunch prep time ran 7 minutes above your Thursday average.'],
+      ['!', 'Failed payments are 3× your usual rate — 2 of 3 from one card.'],
+      ['!', 'Eastgate Counter received 4 online orders while marked closed.']
+    ] }],
+    replies: [['Why did Eastgate get orders?', 'eastgate'], ['Explain the prep delay', 'delivery']]
+  },
+  eastgate: {
+    stage: 'Explain',
+    p: ['Eastgate Counter\'s hours were updated to closed on Thursdays, but the delivery-app listing still shows the old hours. The 4 orders were auto-rejected and refunded, so no customer was charged.'],
+    actions: [['Review Eastgate hours', null]]
+  },
+  focus: {
+    stage: 'Recommend',
+    p: ['Three things, in order of impact:'],
+    blocks: [{ type: 'list', rows: [
+      ['1', 'Fix lunch prep — a second lasagne tray at 11:30 addresses most of today\'s late deliveries.'],
+      ['2', 'Retry the $57.50 timeout payment on #ORD-4819. It\'s recoverable today.'],
+      ['3', 'Offer tiramisu at checkout on pasta orders. Likely +$180 a day.']
+    ] }],
+    replies: [['Start with the prep change', 'delivery_recommend'], ['Retry the payment', 'payments_act']]
+  },
+  forecast: {
+    stage: 'Recommend',
+    p: ['Expect about 820 orders across the weekend, 7% above last weekend, with Saturday the busiest day. Saturday dinner is where you\'re most likely to run short.'],
+    blocks: [{ type: 'bars', title: 'Forecast orders', rows: [['Friday', '262 (240–285)', 82], ['Saturday', '318 (290–345)', 100], ['Sunday', '241 (220–265)', 76]] }],
+    p2: 'I\'d add one courier for Saturday 6:00–9:00 PM.',
+    replies: [['How confident is that?', 'forecast_conf']]
+  },
+  forecast_conf: {
+    stage: 'Explain',
+    p: ['Reasonably. It\'s based on your last 12 weekends, current pre-orders, and the local weather forecast. Over the past 8 weekends the forecast landed within ±9% each time.']
+  },
+  ack: { stage: 'Understand', p: ['No problem. I\'ll flag it if lunch delays continue tomorrow.'] }
+};
+
+class Component extends DCLogic {
+  state = { messages: [], draft: '', locationIdx: 0, copilotOpen: null, approvals: {}, dsReady: !!window.DesignSystem_f13b19 };
+  threadRef = React.createRef();
+  seq = 0;
+
+  componentDidMount() {
+    if (!window.DesignSystem_f13b19) {
+      this.poll = setInterval(() => {
+        if (window.DesignSystem_f13b19) { clearInterval(this.poll); this.setState({ dsReady: true }); }
+      }, 60);
+    }
+    if ((this.props.startConversation ?? 'Delivery deep-dive') === 'Delivery deep-dive') {
+      this.setState({ messages: [
+        { id: ++this.seq, role: 'user', text: 'Why are deliveries delayed?' },
+        { id: ++this.seq, role: 'copilot', key: 'delivery' },
+        { id: ++this.seq, role: 'user', text: 'Yes' },
+        { id: ++this.seq, role: 'copilot', key: 'delivery_items' }
+      ] });
+    }
+  }
+  componentWillUnmount() { clearInterval(this.poll); clearTimeout(this.t); }
+  componentDidUpdate() {
+    if (this._lastMsgs !== this.state.messages) {
+      this._lastMsgs = this.state.messages;
+      const el = this.threadRef.current;
+      if (el) requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+    }
+  }
+
+  push(...msgs) { this.setState(s => ({ messages: s.messages.concat(msgs.map(m => ({ id: ++this.seq, ...m }))) })); }
+
+  respond(key, userText) {
+    if (userText) this.push({ role: 'user', text: userText });
+    const pendingId = this.seq + 1;
+    this.push({ role: 'pending', text: key === 'delivery_act' || key === 'payments_act' ? 'Preparing changes…' : 'Reading orders, menu, and payments…' });
+    clearTimeout(this.t);
+    this.t = setTimeout(() => {
+      this.setState(s => ({ messages: s.messages.filter(m => m.id !== pendingId).concat({ id: ++this.seq, role: 'copilot', key }) }));
+    }, 900);
+  }
+
+  async freeform(text) {
+    this.push({ role: 'user', text });
+    const pendingId = ++this.seq;
+    this.setState(s => ({ messages: s.messages.concat({ id: pendingId, role: 'pending', text: 'Thinking…' }) }));
+    let answer = '';
+    try {
+      if (window.claude && window.claude.complete) {
+        answer = await window.claude.complete(
+          'You are Copilot inside Hearth, a back-office console for restaurant owners. You act as a calm business operations analyst. ' +
+          'Location: Northside Trattoria. Today (Thursday): net sales $6,420 (+8.1% vs last Thursday $5,939), 218 orders (+14), avg basket $29.45, ' +
+          'avg delivery time 38 min vs usual 31, 2 deliveries past ETA, 3 failed payments totalling $142 (one processor timeout $57.50 retryable on #ORD-4819, two declines on Visa 3302). ' +
+          'Lunch orders +12%; 12:30-1:30 PM had 17 orders (32% above normal), prep time 14 -> 21 min, Lasagne prep 18 -> 27 min. ' +
+          'Top items today: Margherita $1,148, Lasagne $912, Carbonara $703, Calzone $495, Tiramisu $288. 30-day sales up 6%, daily avg $5,880. ' +
+          'Weekend forecast: Fri 262, Sat 318, Sun 241 orders. ' +
+          'Answer in under 80 words, plain text, no markdown, no emoji, sentence case, numbers as numerals. Lead with the answer, then the why, then one suggested next step. ' +
+          'If the data above cannot answer it, say what you would need. Question: ' + text
+        );
+      }
+    } catch (e) { answer = ''; }
+    if (!answer) answer = "I couldn't reach the analysis service just now. Try one of the suggested questions, which run on today's data directly.";
+    this.setState(s => ({ messages: s.messages.filter(m => m.id !== pendingId).concat({ id: ++this.seq, role: 'copilot', custom: { stage: 'Explain', p: answer.split(/\n\s*\n/).filter(Boolean) } }) }));
+  }
+
+  send(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    this.setState({ draft: '' });
+    const hit = PROMPTS.find(p => p[2].toLowerCase() === t.toLowerCase());
+    if (hit) this.respond(hit[0], t); else this.freeform(t);
+  }
+
+  resolveApproval(msgId, key, decision) {
+    this.setState(s => ({ approvals: { ...s.approvals, [msgId]: decision } }));
+    if (decision === 'approved') {
+      const done = key === 'payments_act'
+        ? ['Done. Capture retried and succeeded — $57.50 received for #ORD-4819. Failed payments today are now 2 ($84.50).']
+        : key === 'delivery_act_one'
+          ? ['Done. "Lasagne tray #2 — 11:30" is on the weekday prep list starting tomorrow. I\'ll report back on lunch delivery times after tomorrow\'s service.']
+          : ['Done. Lasagne tray #2 is on the weekday prep list from tomorrow, and the lunch delivery quote is now 38 min between 12:15 and 1:45 PM.', 'I\'ll report back on lunch delivery times after tomorrow\'s service.'];
+      this.push({ role: 'copilot', custom: { stage: 'Act', p: done, actions: [['Undo', null]] } });
+    }
+  }
+
+  renderVals() {
+    const DS = window.DesignSystem_f13b19 || {};
+    const el = React.createElement;
+    const icon = (name, size) => (DS.Icon ? el(DS.Icon, { name, size: size || 16 }) : null);
+    const narrow = typeof window !== 'undefined' && window.innerWidth < 1200;
+    const copilotOpen = this.state.copilotOpen ?? (narrow ? false : (this.props.copilotDefaultOpen ?? true));
+    const locations = ['Northside Trattoria', 'Harbourline Kitchen', 'Eastgate Counter'];
+    const toneColor = { up: 'var(--success)', down: 'var(--warning)', neutral: 'var(--text-primary)' };
+
+    const msgs = this.state.messages;
+    const lastCopilot = [...msgs].reverse().find(m => m.role === 'copilot');
+    const lastStage = lastCopilot ? (lastCopilot.custom ? lastCopilot.custom.stage : SCRIPT[lastCopilot.key].stage) : 'Ask';
+    const stageOrder = ['Ask', 'Understand', 'Explain', 'Recommend', 'Act'];
+    const activeIdx = stageOrder.indexOf(lastStage);
+
+    const thread = msgs.map((m, i) => {
+      if (m.role === 'user') return { isUser: true, text: m.text };
+      if (m.role === 'pending') return { isPending: true, text: m.text };
+      const src = m.custom || SCRIPT[m.key];
+      const isLast = i === msgs.length - 1;
+      const paragraphs = src.p.map(t => ({ t }));
+      const blocks = (src.blocks || []).map(b => {
+        const out = { title: b.title || '', hasTitle: !!b.title, isCompare: b.type === 'compare', isBars: b.type === 'bars', isSpark: b.type === 'spark', isList: b.type === 'list', isApproval: b.type === 'approval' };
+        if (b.type === 'compare') out.rows = b.rows.map(([label, from, to, tone]) => ({ label, from, to, toStyle: 'font-variant-numeric:tabular-nums; font-weight:var(--weight-medium); color:' + toneColor[tone] + ';' }));
+        if (b.type === 'bars') out.rows = b.rows.map(([label, value, pct]) => ({ label, value, barStyle: 'height:4px; border-radius:var(--radius-full); background:var(--viz-1); width:' + pct + '%;' }));
+        if (b.type === 'spark') { out.values = b.values; out.stats = b.stats.map(([label, value]) => ({ label, value })); }
+        if (b.type === 'list') out.rows = b.rows.map(([mark, label]) => ({ mark, label, markStyle: 'flex:0 0 16px; font-family:var(--font-mono); color:' + (mark === '!' ? 'var(--warning)' : 'var(--text-tertiary)') + ';' }));
+        if (b.type === 'approval') {
+          const d = this.state.approvals[m.id];
+          out.rows = b.rows.map(([mark, label]) => ({ mark, label }));
+          out.pending = !d; out.resolved = !!d;
+          out.resolvedTone = d === 'approved' ? 'success' : 'neutral';
+          out.resolvedLabel = d === 'approved' ? 'Approved by Rosa · just now' : 'Dismissed';
+          out.approve = () => this.resolveApproval(m.id, m.key, 'approved');
+          out.dismiss = () => this.resolveApproval(m.id, m.key, 'dismissed');
+        }
+        return out;
+      });
+      const actions = (src.actions || []).map(([label, next]) => ({ label, run: () => { if (next) this.respond(next, label); } }));
+      const replies = isLast ? (src.replies || []).map(([label, next]) => ({ label, run: () => this.respond(next, label) })) : [];
+      return { isCopilot: true, stage: src.stage, p2: src.p2 || '', hasP2: !!src.p2, paragraphs, blocks, actions, hasActions: actions.length > 0, replies, hasReplies: replies.length > 0 };
+    });
+
+    const ask = key => () => {
+      const p = PROMPTS.find(x => x[0] === key);
+      this.setState({ copilotOpen: true });
+      this.respond(key, p ? p[2] : '');
+    };
+
+    return {
+      locationName: locations[this.state.locationIdx],
+      locationNames: locations,
+      pickLocation: name => this.setState({ locationIdx: Math.max(0, locations.indexOf(name)) }),
+      topBarRight: el('div', { style: { display: 'flex', alignItems: 'center', gap: 'var(--space-3)' } },
+        DS.Button ? el(DS.Button, { variant: copilotOpen ? 'secondary' : 'primary', size: 'sm', onClick: () => this.setState({ copilotOpen: !copilotOpen }) },
+          el('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' } }, icon('sparkles', 14), copilotOpen ? 'Hide Copilot' : 'Ask Copilot')) : null,
+        el('span', { style: { fontSize: 'var(--text-body-sm-size)', color: 'var(--text-secondary)' } }, 'Rosa Medina'),
+        DS.IconButton ? el(DS.IconButton, { label: 'Sign out', variant: 'secondary' }, icon('power', 16)) : null
+      ),
+      navSections: [{ label: 'Operate', items: [
+        ['dashboard', 'Dashboard', 'gauge'], ['orders', 'Orders', 'receipt-text'], ['menu', 'Menu', 'book-open'],
+        ['deliveries', 'Deliveries', 'truck'], ['payments', 'Payments', 'credit-card']
+      ].map(([id, label, g]) => ({ id, label, icon: icon(g, 16) })) }],
+      sidebarFooter: el('div', { style: { display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-2)' } },
+        el('div', { style: { width: 'var(--control-md)', height: 'var(--control-md)', flex: '0 0 var(--control-md)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--text-mono-sm-size)', fontWeight: 'var(--weight-semibold)' } }, 'RM'),
+        el('div', null,
+          el('div', { style: { fontSize: 'var(--text-body-sm-size)', lineHeight: 'var(--text-body-sm-lh)' } }, 'Rosa Medina'),
+          el('div', { style: { fontSize: 'var(--text-caption-size)', lineHeight: 'var(--text-caption-lh)', color: 'var(--text-tertiary)' } }, 'Admin'))
+      ),
+
+      showBrief: this.props.showBrief ?? true,
+      briefMeta: el('span', { style: { fontSize: 'var(--text-caption-size)', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' } }, 'UPDATED 2M AGO'),
+      askDelivery: ask('delivery'),
+      askPayments: ask('payments'),
+      askMenu: ask('menu'),
+
+      kpis: [
+        { label: 'Orders today', value: '218', delta: '+14', tone: 'up', trend: [168, 182, 175, 204, 196, 211, 218] },
+        { label: 'Net sales', value: '$6,420', delta: '+8.1%', tone: 'up', trend: [5120, 5480, 5300, 5939, 5760, 6100, 6420] },
+        { label: 'Avg delivery', value: '38m', delta: '+7m', tone: 'down', trend: [30, 31, 29, 31, 32, 34, 38] },
+        { label: 'Failed payments', value: '3', delta: '$142', tone: 'down', trend: [1, 0, 1, 1, 0, 1, 3] }
+      ],
+      orderColumns: [
+        { key: 'id', label: 'Order', mono: true, muted: true },
+        { key: 'items', label: 'Items' },
+        { key: 'total', label: 'Total', numeric: true },
+        { key: 'status', label: 'Status', render: r => (DS.StatusBadge ? el(DS.StatusBadge, { tone: r.tone, dot: true }, r.status) : r.status) },
+        { key: 'placed', label: 'Placed', muted: true }
+      ],
+      orderRows: [
+        ['#ORD-4821', '2 × Margherita, Garlic knots', '$34.20', 'Preparing', 'info', '2m ago'],
+        ['#ORD-4820', 'Carbonara, House red', '$41.00', 'Out for delivery', 'warning', '9m ago'],
+        ['#ORD-4819', 'Lasagne ×3', '$57.50', 'Received', 'neutral', '11m ago'],
+        ['#ORD-4818', 'Calzone, Tiramisu', '$28.75', 'Delivered', 'success', '24m ago'],
+        ['#ORD-4817', 'Focaccia board', '$18.00', 'Cancelled', 'danger', '38m ago']
+      ].map(([id, items, total, status, tone, placed]) => ({ id, items, total, status, tone, placed })),
+      deliveries: [
+        { courier: 'Dani Okafor', meta: '#ORD-4820 · ETA 12 min', status: 'On route', tone: 'info' },
+        { courier: 'Sam Whitfield', meta: '#ORD-4814 · 6 min late', status: 'Delayed', tone: 'warning' },
+        { courier: 'Lee Brandt', meta: '#ORD-4812 · 3 min late', status: 'Delayed', tone: 'warning' }
+      ],
+      topItems: [['Margherita', '$1,148', 100], ['Lasagne', '$912', 79], ['Carbonara', '$703', 61], ['Calzone', '$495', 43], ['Tiramisu', '$288', 25]]
+        .map(([label, value, pct]) => ({ label, value, barStyle: 'height:4px; border-radius:var(--radius-full); background:var(--viz-1); width:' + pct + '%;' })),
+
+      copilotOpen,
+      toggleCopilot: () => this.setState({ copilotOpen: !copilotOpen }),
+      newThread: () => { clearTimeout(this.t); this.setState({ messages: [], approvals: {} }); },
+      stages: stageOrder.map((label, i) => ({
+        label,
+        style: 'flex:1; text-align:center; padding:var(--space-1) 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); letter-spacing:var(--text-label-track); text-transform:uppercase; border-bottom:2px solid ' +
+          (i === activeIdx ? '#22E06B' : i < activeIdx ? 'var(--border-strong)' : 'var(--border-subtle)') + '; color:' +
+          (i === activeIdx ? 'var(--text-primary)' : i < activeIdx ? 'var(--text-secondary)' : 'var(--text-tertiary)') + ';'
+      })),
+      threadRef: this.threadRef,
+      isEmpty: msgs.length === 0,
+      prompts: PROMPTS.map(([key, area, q, ic]) => ({ area, q, icon: ic, ask: ask(key) })),
+      thread,
+      chipStyle: { height: 28, padding: '0 var(--space-3)' },
+      draft: this.state.draft,
+      onDraft: e => this.setState({ draft: e.target.value }),
+      onDraftKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.send(this.state.draft); } },
+      sendDraft: () => this.send(this.state.draft),
+      cannotSend: !this.state.draft.trim()
+    };
+  }
+}
+</script>
+</body>
+</html>

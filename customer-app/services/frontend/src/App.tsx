@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from '@/pages/Login'
 import LoginVerify from '@/pages/LoginVerify'
-import Welcome from '@/pages/Welcome'
+import Dashboard from '@/pages/Dashboard'
+import AppShellLayout from '@/layout/AppShellLayout'
 import { useSessionStore } from '@/lib/session-store'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -17,13 +18,15 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/login/verify" element={<LoginVerify />} />
         <Route
-          path="/"
           element={
             <RequireAuth>
-              <Welcome />
+              <AppShellLayout />
             </RequireAuth>
           }
-        />
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         {/* Later phases add Orders, Menu, Deliveries, Payments routes here,
             one at a time — see customer-app/design_handoff/CLAUDE.md */}
         <Route path="*" element={<Navigate to="/login" replace />} />

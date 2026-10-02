@@ -13,6 +13,11 @@ The folder `design_handoff/` contains the design handoff:
 - `design_handoff_hearth/README.md` — product overview, screen inventory,
   design tokens, interactions, state shape, auth contract, mock-data
   contract.
+- `design_handoff_hearth/DASHBOARD_COPILOT.md` — the Dashboard + AI Copilot
+  screen's behavior spec (layout, Copilot answer-block types, the reference
+  conversation). Source of truth for screen 4, alongside `Hearth
+  Dashboard.dc.html`'s `SCRIPT` object (the full mocked conversation
+  content).
 - `design_handoff_hearth/BUILD_PLAN.md` — the iteration-by-iteration build
   order with a concrete prompt per iteration. Iterations 1-4 are built;
   5-8 are specced.
@@ -79,11 +84,16 @@ stroke, 24px grid) or use `lucide-react` directly.
   is decided.
 
 ## Screens in this bundle (see `BUILD_PLAN.md` for the rest)
-1. Foundations + primitives — built
-2. Login + 6-digit verify — built; **customer-app Phase 5/6 priority
-   (issue #45)**
-3. App shell (sidebar, location switcher, top bar) — built
-4. Dashboard — built
+1. Foundations + primitives — built (design-handoff prototype only)
+2. Login + 6-digit verify — built in the real stack (`customer-app/services/
+   frontend`), issue #45, closed
+3. App shell (sidebar, location switcher, top bar) — built in the real
+   stack as part of issue #54 (shipped alongside Dashboard, since Dashboard's
+   own layout requires it)
+4. Dashboard + AI Copilot — see `design_handoff_hearth/DASHBOARD_COPILOT.md`
+   (supersedes the plain "Dashboard" entry and `Hearth.dc.html`'s dashboard —
+   current source of truth is `Hearth Dashboard.dc.html`). Built in the real
+   stack, issue #54.
 5. Orders, 6. Menu management, 7. Deliveries, 8. Payments — specced only in
    `BUILD_PLAN.md`; build each as its own roadmap task, one at a time, per
    root `CLAUDE.md` §11.

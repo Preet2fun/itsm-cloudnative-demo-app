@@ -8,7 +8,9 @@ Everything the dev team needs, in one archive.
    (literal hex + OKLCH), interactions, state shape, mock-data contract.
 2. `design_handoff_hearth/BUILD_PLAN.md` — eight iterations in build order, with a concrete
    prompt for each. Iterations 1–4 are built; 5–8 are specced.
-3. `design_handoff_hearth/reference/index.html` — open directly in a browser (no build step)
+3. `design_handoff_hearth/DASHBOARD_COPILOT.md` — **the post-login landing screen**:
+   dashboard, AI business brief, and the Copilot panel. Its prototype is `Hearth Dashboard.dc.html`.
+4. `design_handoff_hearth/reference/index.html` — open directly in a browser (no build step)
    to click through login → 6-digit verify → dashboard, switch locations, and see the
    iteration stubs. Needs a network connection: React, Babel, and webfonts load from CDN.
 
@@ -18,6 +20,7 @@ Everything the dev team needs, in one archive.
 | --- | --- |
 | `design_handoff_hearth/` | The handoff bundle — docs plus the framework-agnostic prototype |
 | `design_handoff_hearth/reference/` | One file per screen, a token layer, mock data, inline SVG icons |
+| `Hearth Dashboard.dc.html` | Landing dashboard + Copilot prototype (supersedes the dashboard in `Hearth.dc.html`). Needs `_ds/` beside it |
 | `Hearth.dc.html` | The reviewable prototype used for design review. Composes the bound design system's own components; needs `_ds/` beside it to render |
 | `_ds/design-system-f13b1973-4aad-41f0-b2b7-d87df36276fc/` | The Aurora design system — token CSS files and the component bundle |
 | `github.md` | Association with `Preet2fun/itsm-cloudnative-demo-app` (the sibling ITSM platform, Synap) and a screen → source map |

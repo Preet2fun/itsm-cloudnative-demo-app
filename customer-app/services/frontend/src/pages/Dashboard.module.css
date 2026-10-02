@@ -1,0 +1,111 @@
+.page {
+  padding: var(--space-6);
+  max-width: var(--max-app);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.headerRow { display: flex; align-items: flex-end; gap: var(--space-4); flex-wrap: wrap; }
+.headerText { display: flex; flex-direction: column; gap: var(--space-1); }
+.date {
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-lh);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--text-label-track);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.greeting {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-md-size);
+  line-height: var(--text-display-md-lh);
+  font-weight: var(--weight-semibold);
+}
+.subtitle { margin: 0; color: var(--text-secondary); font-size: var(--text-body-lg-size); line-height: var(--text-body-lg-lh); }
+.headerActions { margin-left: auto; display: flex; gap: var(--space-2); }
+
+.briefMeta { font-size: var(--text-caption-size); color: var(--text-tertiary); font-family: var(--font-mono); }
+.briefGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: var(--space-3); }
+.briefTile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+}
+.briefTileLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-lh);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--text-label-track);
+  text-transform: uppercase;
+}
+.good { color: var(--success); }
+.warn { color: var(--warning); }
+.info { color: var(--info); }
+.briefTileValue {
+  font-family: var(--font-display);
+  font-size: var(--text-heading-md-size);
+  line-height: var(--text-heading-md-lh);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.briefTileNote { color: var(--text-secondary); font-size: var(--text-body-sm-size); line-height: var(--text-body-sm-lh); }
+.suggestedRow { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.suggestedLabel {
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-lh);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--text-label-track);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-right: var(--space-2);
+}
+
+.kpiGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(236px, 100%), 1fr)); gap: var(--space-4); }
+
+.lowerGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: var(--space-4); align-items: start; }
+.ordersCol { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.sectionHeader { display: flex; align-items: center; gap: var(--space-3); }
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-heading-sm-size);
+  line-height: var(--text-heading-sm-lh);
+  font-weight: var(--weight-semibold);
+}
+.sectionLink { margin-left: auto; font-size: var(--text-body-sm-size); }
+.sideCol { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+
+.deliveryList { display: flex; flex-direction: column; gap: var(--space-3); }
+.deliveryRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+}
+.deliveryInfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.deliveryCourier { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deliveryMeta { font-family: var(--font-mono); font-size: var(--text-mono-sm-size); color: var(--text-tertiary); }
+
+.topItemsList { display: flex; flex-direction: column; gap: var(--space-3); }
+.topItemRow { display: flex; flex-direction: column; gap: var(--space-1); }
+.topItemLabelRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-body-sm-size);
+  line-height: var(--text-body-sm-lh);
+}
+.topItemValue { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.topItemBarTrack { height: 4px; border-radius: var(--radius-full); background: var(--bg-elevated); }
+.topItemBarFill { height: 4px; border-radius: var(--radius-full); background: var(--info); }

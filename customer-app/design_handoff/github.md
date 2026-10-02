@@ -17,8 +17,11 @@ date: 2026-09-17T00:00:00Z
 | Hearth 01 Login + verify | docs/platform/03_Multi_Tenancy.md (tenant resolution, roles) |
 | Hearth 02 App shell (location switcher) | docs/platform/03_Multi_Tenancy.md |
 | Hearth 00 Foundations | none — Aurora design system tokens |
-| Hearth 03 Dashboard | none — new surface, no repo counterpart |
+| Hearth 03/04 Dashboard + Copilot | none — new surface, no repo counterpart; built in `customer-app/services/frontend/src/pages/Dashboard.tsx` + `src/copilot/`, issue #54 |
 | Hearth 04-07 (Orders, Menu, Deliveries, Payments) | specced only; see design_handoff_hearth/BUILD_PLAN.md |
 
 ## Sync history
+- 2026-10-01T00:00:00Z — added `DASHBOARD_COPILOT.md` and `Hearth
+  Dashboard.dc.html` (supersedes the dashboard in `Hearth.dc.html`); built
+  in the real stack as issue #54, alongside the App Shell it requires.
 - 2026-08-26T11:58:11Z — read multi-tenancy and data-model docs; built Synap/ITSM scaffolding (since replaced by Hearth).

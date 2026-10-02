@@ -27,7 +27,7 @@ Same design system, same multi-tenant backend conventions, different audience an
 | 00 | Foundations + primitives | **Built** | Colors, type scale, buttons, inputs, badges, cards, empty state |
 | 01 | Login + 6-digit verify | **Built** | Email/password -> MFA code -> authenticated |
 | 02 | App shell | **Built** | Sidebar nav, location switcher, account block, sign-out |
-| 03 | Dashboard | **Built** | Today's orders, deliveries in flight, payments snapshot, recent activity |
+| 03 | Dashboard + AI Copilot | **Built — see DASHBOARD_COPILOT.md** | Today's orders, deliveries in flight, payments snapshot, recent activity |
 | 04 | Orders | Specced only | List (filter by status) + detail with line items, linked delivery and payment |
 | 05 | Menu management | Specced only | Per-location item list, inline price edit, availability toggle |
 | 06 | Deliveries | Specced only | List + detail, courier assignment, status tracking |
