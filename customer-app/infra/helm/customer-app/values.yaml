@@ -26,10 +26,10 @@ frontend:
   enabled: true
   name: frontend
   image:
-    repository: frontend          # full image = preet2fun/frontend:<tag>
-    tag: "v0.1.0"                 # Login + 6-digit MFA verify (issue #45)
+    repository: frontend # full image = preet2fun/frontend:<tag>
+    tag: "sha-3ed68e83" # Login + 6-digit MFA verify (issue #45)
     pullPolicy: IfNotPresent
-  port: 8080                      # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
+  port: 8080 # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
   replicas: 1
   # No env vars needed — nginx serves static files; Istio VirtualService
   # (customer-app-routing) handles routing /api/v1/* to backend services,
@@ -42,17 +42,14 @@ frontend:
     limits:
       cpu: 200m
       memory: 128Mi
-
   hpa:
     minReplicas: 1
     maxReplicas: 1
     targetCPUUtilizationPercentage: 70
-
   readinessProbe:
     path: /healthz
     initialDelaySeconds: 5
     periodSeconds: 10
-
   livenessProbe:
     path: /healthz
     initialDelaySeconds: 10
@@ -63,7 +60,7 @@ orderService:
   name: order-service
   image:
     repository: order-service
-    tag: "sha-5cf02a10"
+    tag: "sha-3ed68e83"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -96,7 +93,7 @@ catalogService:
   name: catalog-service
   image:
     repository: catalog-service
-    tag: "sha-5cf02a10"
+    tag: "sha-3ed68e83"
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
@@ -129,7 +126,7 @@ deliveryService:
   name: delivery-service
   image:
     repository: delivery-service
-    tag: "sha-5cf02a10"
+    tag: "sha-3ed68e83"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -181,7 +178,7 @@ paymentService:
   name: payment-service
   image:
     repository: payment-service
-    tag: "sha-5cf02a10"
+    tag: "sha-3ed68e83"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
