@@ -27,7 +27,7 @@ frontend:
   name: frontend
   image:
     repository: frontend # full image = preet2fun/frontend:<tag>
-    tag: "sha-3ed68e83" # Login + 6-digit MFA verify (issue #45)
+    tag: "sha-14722591" # Login + 6-digit MFA verify (issue #45)
     pullPolicy: IfNotPresent
   port: 8080 # nginx:alpine listens on 8080 — unprivileged port, container runs fully non-root (runAsUser 65532)
   replicas: 1
@@ -60,7 +60,7 @@ orderService:
   name: order-service
   image:
     repository: order-service
-    tag: "sha-3ed68e83"
+    tag: "sha-14722591"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -93,7 +93,7 @@ catalogService:
   name: catalog-service
   image:
     repository: catalog-service
-    tag: "sha-3ed68e83"
+    tag: "sha-14722591"
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
@@ -126,7 +126,7 @@ deliveryService:
   name: delivery-service
   image:
     repository: delivery-service
-    tag: "sha-3ed68e83"
+    tag: "sha-14722591"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
@@ -178,7 +178,7 @@ paymentService:
   name: payment-service
   image:
     repository: payment-service
-    tag: "sha-3ed68e83"
+    tag: "sha-14722591"
     pullPolicy: IfNotPresent
   port: 8080
   replicas: 1
